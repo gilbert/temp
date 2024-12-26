@@ -182,7 +182,7 @@ function animate(dom) {
   )
 }
 
-function link(dom, route) {
+function link(dom, attrs, route) {
   dom.addEventListener('click', e => {
     if (
       !e.defaultPrevented &&
@@ -192,7 +192,7 @@ function link(dom, route) {
     ) {
       e.preventDefault()
       const state = dom[$attr].state
-      route(dom.getAttribute('href'), { state })
+      route(dom.getAttribute('href'), { state, redraw: attrs.redraw, replace: attrs.replace })
     }
   })
 }
@@ -988,7 +988,7 @@ function attributes(dom, view, context) {
     updateAttribute(dom, view.attrs, 'href', prev && prev.href, value, create)
     if (value && internal) {
       view.attrs.href = s.route.prefix + value
-      link(dom, context.route)
+      link(dom, view.attrs, context.route)
     }
   }
 

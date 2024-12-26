@@ -65,7 +65,7 @@ export default function router(s, root, rootContext, parent) {
     )
   }
 
-  function reroute(path, { state, replace = false, scroll = true } = {}) {
+  async function reroute(path, { state, replace = false, redraw=true, scroll = true } = {}) {
     if (path === getPath(location) + location.search)
       return
 
@@ -77,11 +77,11 @@ export default function router(s, root, rootContext, parent) {
     routeState[path] = state
     path.indexOf(location.search) > -1 && rootContext.query(location.search)
 
-    return s.redraw().then(() => {
-      s.is.server || scroll === false || s.route.scroll === false
-        ? s.route.scroll = undefined
-        : scrollRestore()
-    })
+    redraw && await s.redraw()
+
+    s.is.server || scroll === false || s.route.scroll === false
+      ? s.route.scroll = undefined
+      : scrollRestore()
   }
 
   function popstate({ state = {} } = {}) {

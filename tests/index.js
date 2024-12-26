@@ -1,3 +1,4 @@
+// @ts-nocheck
 import s from 'sin'
 import t from 'sin/test'
 
@@ -520,5 +521,42 @@ t`Routing`(
       s.redraw.force()
       t.is(x, w.x?.textContent)
     }
+  }),
+
+  t`Prevent redraw when clicking anchor`(async () => {
+    let redraws = 0
+    s.mount(() => {
+      return () => {
+        redraws++
+        return s`a`({ href: '/wat', redraw: false }, 'Wat')
+      }
+    })
+    const anchor = document.querySelector('a[href="/wat"]')
+    t.is(1, redraws)
+    await s.sleep(1)
+    let redrawsSnapshot = redraws
+    anchor.click()
+    await s.sleep(1)
+    t.is(redrawsSnapshot, redraws)
+  }),
+
+  t`Prevent redraw when calling s.route`(async () => {
+    let redraws = 0
+    s.mount(() => {
+      return () => {
+        redraws++
+        return s`button`({ 
+          onclick: () => s.route('/route', { redraw: false }) 
+        }, 'Wat')
+      }
+    })
+    const anchor = document.querySelector('button')
+    t.is(1, redraws)
+    await s.sleep(1)
+    let redrawsSnapshot = redraws
+    anchor.click()
+    await s.sleep(1)
+    t.is(redrawsSnapshot, redraws)
   })
+
 )
