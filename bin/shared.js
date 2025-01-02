@@ -50,7 +50,7 @@ export function canRead(x) {
 
 export function getTSConfigRaw(x, config) {
   const xs = config.tsconfig && fs.existsSync(config.tsconfig)
-    ? JSON.parse(esbuild().transformSync('export default ' + fs.readFileSync(config.tsconfig), { minify: true }).code.slice(14, -2).replace(/:/g, '":').replace(/([{,])/g, '$1"').replace(/!0/g, 'true').replace(/!1/g, 'false').replace(/""/g, '"'))
+    ? JSON.parse(esbuild().transformSync('export default ' + fs.readFileSync(config.tsconfig), { minifyWhitespace: true }).code.slice(14, -2))
     : {}
 
   return {
