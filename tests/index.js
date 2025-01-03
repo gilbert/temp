@@ -542,20 +542,13 @@ t`Routing`(
 
   t`Prevent redraw when calling s.route`(async () => {
     let redraws = 0
-    s.mount(() => {
-      return () => {
-        redraws++
-        return s`button`({ 
-          onclick: () => s.route('/route', { redraw: false }) 
-        }, 'Wat')
-      }
-    })
+    s.mount(() => redraws++)
     const anchor = document.querySelector('button')
     t.is(1, redraws)
-    await s.sleep(1)
+    await new Promise(requestAnimationFrame)
     let redrawsSnapshot = redraws
-    anchor.click()
-    await s.sleep(1)
+    s.route('/route' + Date.now(), { redraw: false })
+    await new Promise(requestAnimationFrame)
     t.is(redrawsSnapshot, redraws)
   })
 
