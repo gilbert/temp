@@ -178,7 +178,7 @@ function animate(dom) {
   requestAnimationFrame(() => dom.removeAttribute('animate'))
   return (deferrable) => deferrable && (
     dom.setAttribute('animate', 'exit'),
-    Promise.all(dom.getAnimations()).map(x => x instanceof CSSTransition && x.finished)
+    Promise.allSettled(dom.getAnimations().map(x => x instanceof CSSTransition && x.finished))
   )
 }
 
