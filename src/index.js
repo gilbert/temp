@@ -175,19 +175,10 @@ function on(target, event, fn, options) {
 function animate(dom) {
   dom.setAttribute('animate', 'entry')
   requestAnimationFrame(() => dom.removeAttribute('animate'))
-  return (deferrable) => deferrable && new Promise(r => {
-    let running = false
-    dom.addEventListener('transitionrun', () => (running = true, end(r)), { once: true, passive: true })
-    dom.setAttribute('animate', 'exit')
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => running || r())))
-  })
-
-  function end(r) {
-    dom.addEventListener('transitionend', r, { once: true, passive: true })
-    dom.addEventListener('transitioncancel', r, { once: true, passive: true })
-  }
+  return (deferrable) => deferrable && (
+    dom.setAttribute('animate', 'exit'),
+    Promise.all(dom.getAnimations()).map(x => x instanceof CSSTransition && x.finished)
+  )
 }
 
 function link(dom, route) {
