@@ -103,6 +103,7 @@ async function run() {
   failed.map(x => p.error('💥 ' + x.path.join(' > ') + ' > ' + x.name + ': ' + (x.error.message || x.error)))
   failed.length && p.error('🚨', failed.length, 'test' + (failed.length === 1 ? '' : 's'), 'failed')
   if (globalThis.sindev) {
+    await new Promise(r => setTimeout(r, 300))
     globalThis.sindev.tested = ignored || failed.length ? 1 : 0
     globalThis.sindev.api?.tested(globalThis.sindev.exit_code)
   }
