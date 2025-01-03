@@ -19,6 +19,7 @@ Object.assign(window, {
   XMLHttpRequest,
   scrollTo: noop,
   requestAnimationFrame: noop,
+  cancelAnimationFrame: noop,
   addEventListener: noop,
   location: asLocation(new URL('', 'http://localhost')),
   history: {

@@ -190,6 +190,22 @@ t`CSS`(
 
 t`Rendering`(
 
+  t`Force redraw works`(() => {
+    let redraws = 0
+    s.mount(() => redraws++)
+    s.redraw.force()
+    return [2, redraws]
+  }),
+
+  t`Redraw does not leak`(async () => {
+    let redraws = 0
+    s.mount(() => redraws++)
+    s.redraw()
+    s.redraw.force()
+    await new Promise(requestAnimationFrame)
+    return [2, redraws]
+  }),
+
   t`Mounts and makes correct element tag`(() => {
     s.mount(() => s`h1`)
     return [

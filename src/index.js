@@ -53,6 +53,7 @@ const removing = new WeakSet()
 let afterUpdate = []
   , redrawer
   , redrawed
+  , rafid
 
 export default function s(...x) {
   const type = typeof x[0]
@@ -315,7 +316,7 @@ function shouldHydrate(dom) {
 
 function redraw() {
   if (!redrawer) {
-    window.requestAnimationFrame(globalRedraw)
+    rafid = window.requestAnimationFrame(globalRedraw)
     redrawer = s.is.server
       ? resolved
       : new Promise(r => redrawed = r)
@@ -325,7 +326,9 @@ function redraw() {
 
 function force() {
   return new Promise(r => {
-    redrawed = r
+    const current = redrawed
+    redrawed = current ? () => (r(), current()) : r
+    window.cancelAnimationFrame(rafid)
     globalRedraw()
   })
 }
