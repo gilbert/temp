@@ -16,7 +16,7 @@ if (config._.length) {
       throw new Error(name + ' not found - did you link it?')
     const path = Path.join('node_modules', '.sin', safeId({ name: name, version: 'link:' + name }), 'node_modules', name)
     await symlink(target, path)
-    await symlink(path.slice(13), Path.join('node_modules', name))
+    await symlink(Path.join(name[0] === '@' ? '..' : '', path.slice(13)), Path.join('node_modules', name))
     p('🔥 Linked ' + name)
     name in (pkg.devDependencies || {})
       ? pkg.devDependencies[name] = 'link:' + name
