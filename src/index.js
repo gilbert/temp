@@ -253,6 +253,7 @@ function mount(dom, view, attrs = {}, context = {}) {
     lang: s.live(document.documentElement.lang, x => document.documentElement.lang = x),
     title: s.live(document.title, x => document.title = x),
     status: noop,
+    doctype: noop,
     headers: noop
   }
 

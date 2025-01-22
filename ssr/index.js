@@ -111,6 +111,7 @@ export default function(mount, serverAttrs = {}, serverContext = {}) {
       headers,
       links,
       status: context.doc.status(),
+      doctype: context.doc.doctype(),
       title: context.doc.title() || s.title,
       lang: context.doc.lang(),
       css, // perhaps remove classes according to names in html

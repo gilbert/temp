@@ -42,6 +42,7 @@ export function wrap({
   html = '',
   css = '',
   title = '',
+  doctype = 'html',
   head = '',
   lang = ''
 }, {
@@ -50,7 +51,7 @@ export function wrap({
 } = {}) {
   return html.slice(0, 15).toLowerCase() === '<!doctype html>'
       ? html.replace('</head>', head + css + '</head>').replace('</body>', body + '</body>')
-      : `<!doctype html><html${ lang ? ' lang="' + lang + '"' : '' }><head><meta charset="utf8"><title>${
+      : `<!doctype ${doctype}><html${ lang ? ' lang="' + lang + '"' : '' }><head><meta charset="utf8"><title>${
           title
         }</title><meta name="viewport" content="width=device-width, initial-scale=1">${
           serverHead + head + css
