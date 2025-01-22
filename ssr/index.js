@@ -62,7 +62,7 @@ export default function(mount, serverAttrs = {}, serverContext = {}) {
   serverContext.location = window.location = asLocation(
     typeof serverContext.location === 'string'
       ? new URL(serverContext.location, 'http://localhost/')
-      : serverContext.location
+      : serverContext.location || 'http://localhost/'
   )
 
   serverContext.View = s.View
@@ -90,8 +90,8 @@ export default function(mount, serverAttrs = {}, serverContext = {}) {
   attrs = { ...attrs, ...serverAttrs }
   context = {
     ...context,
-    ...serverContext,
     noscript,
+    ...serverContext,
     doc,
     [$uid]: 1,
     onremove: noop,
