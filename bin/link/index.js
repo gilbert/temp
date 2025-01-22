@@ -6,7 +6,7 @@ import config from '../config.js'
 import { safeId } from '../shared.js'
 
 const p = console.log // eslint-disable-line
-const sinx = process.platform === 'win32' && Path.join(import.meta.dirname, 'sinx.exe')
+const sinx = process.platform === 'win32' && Path.join(import.meta.dirname, '..', 'install', 'sinx.exe')
 
 if (config._.length) {
   const pkg = JSON.parse(await fs.readFile('package.json'))
