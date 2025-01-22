@@ -44,7 +44,7 @@ if (config._.length) {
     if (sinx) {
       await fs.mkdir(config.binDir, { recursive: true })
       await fs.writeFile(path, 'node "' + target + '"')
-      await fs.copyFile(sinx, Path.join(config.binDir, name + '.exe'))
+      await symlink(sinx, Path.join(config.binDir, name + '.exe'))
     } else {
       await symlink(target, path)
       await fs.chmod(target, 0o766)
