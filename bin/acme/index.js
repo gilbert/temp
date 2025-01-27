@@ -55,7 +55,7 @@ function list() {
 async function renew() {
   const xs = config._.length > 0
     ? getSelected()
-    : getCerts().filter(x => Date.now() - new Date(x.expires).getTime < 30 * 24 * 60 * 60 * 1000)
+    : getCerts().filter(x => new Date(x.expires).getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000)
 
   xs.length
     ? (log('\n  Renew', xs.length, 'certificate(s)'), printList(xs))
