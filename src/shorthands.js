@@ -47,6 +47,7 @@ export default {
   tt: 'text-transform',
   ts: 'text-shadow',
   us: 'user-select',
+  va: 'vertical-align',
   ws: 'white-space',
   w: 'width',
   zi: 'z-index'

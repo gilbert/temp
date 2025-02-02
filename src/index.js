@@ -1317,7 +1317,7 @@ function reset(x = [], ...xs) {
 
   // These are more rare
   s.css`
-    img,video{background-repeat no-repeat;background-size cover;object-size cover;shape-margin 0.75rem}
+    img,video{background-repeat no-repeat;background-size cover;object-fit cover;shape-margin 0.75rem}
     button,[type='button'],[type='reset'],[type='submit']{-webkit-appearance button;bc transparent;bi none}
     button,input,optgroup,select,textarea{c inherit}
     :target{scroll-margin-block 5ex}
