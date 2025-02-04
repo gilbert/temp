@@ -107,6 +107,7 @@ async function start() {
   startPerf = performance.now()
   let resolve
     , reject
+    , closeTimer
 
   const promise = new Promise((r, e) => (resolve = r, reject = e))
 
