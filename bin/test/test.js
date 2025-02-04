@@ -85,7 +85,10 @@ async function run() {
         ])
       }
 
-      Array.isArray(x) && is(...x)
+      if (Array.isArray(x)) {
+        hasPromise(x) && (x = await Promise.all(x))
+        is(...x)
+      }
 
       p('✅ ', test.name)
       success.push(test)
@@ -112,4 +115,8 @@ async function run() {
 function is(expected, got) {
   if (expected !== got)
     throw new Error('expected `' + expected + '` but got `' + got + '`')
+}
+
+function hasPromise(xs) {
+  return xs.some(x => x && typeof x.then === 'function')
 }
