@@ -135,7 +135,7 @@ async function start() {
     x.includes('Debugger listening on ws://127.0.0.1:' + config.nodePort)
       ? ws = connect(x.slice(22).split('\n')[0].trim())
       : x.includes('Waiting for the debugger to disconnect...')
-      ? ws && setTimeout(() => ws.close(), 200)
+      ? ws && (closeTimer = setTimeout(() => ws.close(), 200))
       : x.trim() !== 'Debugger attached.'
       ? api.log({ from: 'node', type: 'stderr', args: x })
       : null
@@ -149,6 +149,7 @@ async function start() {
 
   node.on('close', async(code, signal) => {
     ws && ws.close()
+    clearTimeout(closeTimer)
     ws = node = null
 
     prexit.exiting || api.log({
@@ -184,6 +185,7 @@ async function start() {
     ws.onopen = onopen
     ws.onmessage = onmessage
     ws.request = request
+    ws.onclose = () => clearTimeout(closeTimer)
 
     return ws
 
