@@ -761,7 +761,7 @@ class Stack {
       afterUpdates()
     }
 
-    const redraw = e => update(e, false, true, true)
+    const redraw = e => update(e, false, false)
     const reload = e => {
       instance.onremoves && (instance.onremoves.forEach(x => x()), instance.onremoves = undefined)
       update(e, true)
@@ -873,11 +873,11 @@ function updateComponent(
   if (hydratingAsync) {
     instance.next = bounds(dom)
   } else {
-    let view = catchInstance(create, instance, component)
+    let view = catchInstance(create, instance, optimistic ? instance.view : component)
     view && hasOwn.call(view, $s) && (view = view(component.attrs, component.children, instance.context))
     instance.next = update(
       dom,
-      !instance.caught && !instance.promise && view instanceof View
+      (!instance.caught && !instance.promise && view instanceof View) || optimistic
         ? mergeTag(view, component)
         : view,
       instance.context,
