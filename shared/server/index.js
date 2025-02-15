@@ -1,5 +1,3 @@
-import uWS from './uws.js'
-
 import { symbols as $, hasOwn, isPromise } from './shared.js'
 import fs from 'node:fs'
 import Request from './request.js'
@@ -11,6 +9,8 @@ export default function Server({
   methods = ['head', 'get', 'put', 'post', 'delete', 'patch', 'options', 'trace', 'all'],
   ...o
 } = {}) {
+  'node' in o || (o.node = process.env.HTTP_SERVER === 'node')
+
   let uws
     , handle
     , wrapper
@@ -112,10 +112,15 @@ export default function Server({
   }
 
   function listen(defaultOptions) {
-    return (port, address, options) => {
+    return async(port, address, options = {}) => {
+      const backend = options.node || (options.node !== false && defaultOptions.node)
+        ? await import('./node.js').then(x => x.default)
+        : await import('./uws.js').then(x => x.default)
+
       return new Promise((resolve, reject) => {
         typeof address === 'object' && (options = address, address = null)
         const o = {
+          backend,
           ...defaultOptions,
           ...(options || {})
         }
@@ -126,8 +131,8 @@ export default function Server({
         port = parseInt(port)
         wrapper = wrap
         uws = o.cert
-          ? uWS.SSLApp({ cert_file_name: o.cert, key_file_name: o.key, ...o })
-          : uWS.App(o)
+          ? backend.SSLApp({ cert_file_name: o.cert, key_file_name: o.key, ...o })
+          : backend.App(o)
         asn.forEach(xs => addServerName(...xs))
         rsn.forEach(xs => removeServerName(...xs))
         msn.forEach(xs => uws.missingServerName(...xs))
@@ -142,6 +147,7 @@ export default function Server({
             }
           )
         )
+
         uws.any('/*', wrap)
 
         address
@@ -153,11 +159,11 @@ export default function Server({
             return reject(new Error('Could not listen on', port))
 
           handle = x
-          resolve({ port: uWS.us_socket_local_port(handle), handle, unlisten })
+          resolve({ port: backend.us_socket_local_port(handle), handle, unlisten })
         }
 
         function unlisten() {
-          handle && uWS.us_listen_socket_close(handle)
+          handle && backend.us_listen_socket_close(handle)
         }
 
         function wrap(res, req) {
@@ -177,8 +183,8 @@ export default function Server({
         message: catcher('message', handlers, message),
         subscription: catcher('subscription', handlers),
         drain: catcher('drain', handlers),
-        ping: catcher('ping', handlers),
-        pong: catcher('pong', handlers),
+        ping: catcher('ping', handlers, message),
+        pong: catcher('pong', handlers, message),
         close: catcher('close', handlers, close)
       }
     ])
@@ -186,7 +192,7 @@ export default function Server({
 
   function close(fn, ws, code, data) {
     ws[$.ws].open = false
-    fn && fn(ws[$.ws], code, new Message(data, true))
+    fn && fn(ws[$.ws], code, new Message(data, false))
   }
 
   function open(fn, ws) {

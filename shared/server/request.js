@@ -1,5 +1,3 @@
-import uWS from './uws.js'
-
 import fsp                      from 'node:fs/promises'
 import zlib                     from 'node:zlib'
 import { promisify }            from 'node:util'
@@ -36,6 +34,7 @@ const caches = {
   identity: new Map()
 }
 
+const noBody = (r, s = r[$.status]) => r.method === 'head' || (s >= 100 && s < 100) || s === 204 || s === 205 || s === 304
 export default class Request {
   constructor(res, req, options) {
     this.options = options
@@ -113,7 +112,7 @@ export default class Request {
         : type === 'text'
         ? full.toString()
         : type === 'multipart'
-        ? uWS.getParts(full, contentType)
+        ? this.options.backend.getParts(full, contentType)
         : full
     })
   }
@@ -282,7 +281,7 @@ export default class Request {
 
     return this.cork(() => {
       handled(this)
-      if (this.method === 'head') {
+      if (noBody(this)) {
         if (x && this[$.length] === null)
           this[$.res].writeHeader('Content-Length', '' + Buffer.byteLength(x))
         else if (this[$.length] !== null)
@@ -410,7 +409,7 @@ export default class Request {
 
     try {
       return this.cork(() => {
-        if (this.method === 'head') {
+        if (noBody(this)) {
           ended(this)
           this[$.res].endWithoutBody(total)
           return [true, true]
@@ -427,12 +426,12 @@ export default class Request {
   }
 
   write(x) {
-    if (this.ended)
+    if (this.ended || noBody(this))
       return true
 
     handled(this)
     return this.cork(() =>
-      this.method === 'head'
+      noBody(this)
         ? this.end()
         : this[$.res].write(x)
     )
@@ -546,7 +545,7 @@ function stream(r, type, { handle, stat, compressor }, options) {
     ETag: createEtag(mtime, size, compressor)
   })
 
-  if (r.method === 'head') {
+  if (noBody(r)) {
     compressor
       ? r.header('Transfer-Encoding', 'chunked')
       : r.header('Content-Length', size)
@@ -574,6 +573,9 @@ async function streamRaw(r, handle, highWaterMark, total, start) {
     ok || await new Promise(resolve => {
       aborted = resolve
       r.onWritable(offset => {
+        if (offset - lastOffset === bytesRead)
+          return (resolve(), true)
+
         const [ok] = r.tryEnd(buffer.subarray(offset - lastOffset, bytesRead), total)
         ok && resolve()
         return ok
