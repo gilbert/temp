@@ -394,9 +394,16 @@ function handleValue(i) {
     ? cssVar = -1
     : afterValue(i)
 
-  if (char === 40) // (
-    fn.push(prev === 36 ? (valueStart++, value += 'calc') : x.slice(Math.max(lastSpace, valueStart), i)) // $
-  else if (char === 41) // )
+  if (char === 40) { // (
+    if (prev === 36) { // $
+      value += x.slice(valueStart, i - 1) + 'calc('
+      fn.push('calc')
+      valueStart = i + 1
+    } else {
+      fn.push(x.slice(Math.max(lastSpace, valueStart), i))
+    }
+    lastSpace = i + 1
+  } else if (char === 41) // )
     fn.pop()
   else if (char === 9 || char === 32) // \t ws
     lastSpace = i + 1
