@@ -36,7 +36,7 @@ export function rewrite(x, file) {
     x => {
       x = tryImportMap(x, file) || x
       isModule(x) || isScript(x) || (x = extensionless(x, dir) || x)
-      const entry = isModule(x) && resolveEntry(x)
+      const entry = isModule(x) && resolveEntry(fs.realpathSync(file), x)
       return entry
         ? '/' + entry
         : x
@@ -54,7 +54,7 @@ function tryImportMap(x, file) {
     dir = next
   }
   const importPath = pkg && pkg.imports && firstString(pkg.imports, x, 'default')
-  return importPath && path.relative(config.cwd, dir) + '/' + removeRelativePrefix(importPath)
+  return importPath && ('/' + path.relative(config.cwd, dir) + '/' + removeRelativePrefix(importPath))
 }
 
 function readPkgJson(x) {
@@ -65,21 +65,26 @@ function readPkgJson(x) {
   }
 }
 
-export function resolveEntry(n, force = false) {
-  if (force + n in resolveCache)
-    return resolveCache[force + n]
-
+export function resolveEntry(from, n, force = false) {
+  const root = path.join(config.cwd, 'node_modules')
+  const linked = (from.match(/^(.*)[/\\]node_modules[/\\]/) || [])[0]
   const { name, version, pathname, query } = parsePackage(n)
 
-  const urlPath = 'node_modules/' + name
-  const modulePath = path.join(config.cwd, 'node_modules', ...name.split('/'))
+  let modulePath = path.join(root, ...name.split('/'))
+  if (linked && !fs.existsSync(modulePath))
+    modulePath = path.join(linked, ...name.split('/'))
+
+  if (modulePath + force + n in resolveCache)
+    return resolveCache[modulePath + force + n]
+
+  const urlPath = path.relative(process.cwd(), modulePath).replaceAll(path.sep, path.posix.sep)
   const fullPath = path.join(modulePath, ...pathname.split('/'))
   const pkgPath = path.join(modulePath, 'package.json')
   const entry = canRead(fullPath)
     ? urlPath + pathname
     : pkgLookup(name, version, pathname, pkgPath, urlPath, force)
 
-  return entry && (resolveCache[force + n] = entry + query)
+  return entry && (resolveCache[modulePath + force + n] = entry + query)
 }
 
 function removeRelativePrefix(x) {
@@ -95,7 +100,7 @@ function pkgLookup(name, version, pathname, pkgPath, urlPath, force) {
   if (!pkg)
     return
 
-  const entry = resolveExports(pkg, '.' + pathname) || resolveLegacy(pkg)
+  const entry = resolveExports(pkg, '.' + pathname) || resolveLegacy(pkg, urlPath)
 
   if (!entry)
     return urlPath

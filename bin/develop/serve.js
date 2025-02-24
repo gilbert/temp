@@ -45,7 +45,7 @@ async function serve() {
 
   router.get(r => {
     r.header('Cache-Control', 'no-store')
-    if (r.url.indexOf('/.') !== -1) // Don't serve hidden paths or dir up hacks
+    if (!r.url.startsWith('/node_modules/') && r.url.indexOf('/.') !== -1) // Don't serve hidden paths or dir up hacks
       return r.statusEnd(403)
   })
 
@@ -86,7 +86,7 @@ async function build(r) {
   if (r.headers.accept !== '*/*' || (r.url.endsWith('.js') && r.url.match(/\//g).length > 2))
     return r.file(path.join(config.cwd, r.url), hijack)
 
-  const entry = resolveEntry(r.url.slice(14), true)
+  const entry = resolveEntry('', r.url.slice(14), true)
   let source = await esbuild.build({
     entryPoints: [entry],
     bundle: true,
