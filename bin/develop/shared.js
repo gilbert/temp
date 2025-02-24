@@ -108,14 +108,19 @@ function resolveExports(x, subPath) {
       || firstString(x, 'exports', subPath, 'import', 'default')
 }
 
-function resolveLegacy(pkg) {
-  return pkg.browser
+function resolveLegacy(pkg, urlPath) {
+  let x = pkg.browser
     ? typeof pkg.browser === 'string'
       ? pkg.browser.includes('umd.')
         ? pkg.module || pkg.main
         : pkg.browser
       : pkg.browser[pkg.module || pkg.main]
-    : pkg.module || pkg.main
+    : pkg.module || pkg.main || (fs.existsSync(path.join(urlPath, 'index.js')) && 'index.js')
+
+  if (x && !x.endsWith('.js'))
+    x = x + '.js'
+
+  return x
 }
 
 function firstString(x, ...props) {
