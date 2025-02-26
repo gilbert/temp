@@ -36,7 +36,7 @@ export function rewrite(x, file) {
     x => {
       x = tryImportMap(x, file) || x
       isModule(x) || isScript(x) || (x = extensionless(x, dir) || x)
-      const entry = isModule(x) && resolveEntry(fs.realpathSync(file), x)
+      const entry = isModule(x) && resolveEntry(x.match(/^sin([/?].*|$)/) ? '' : fs.realpathSync(file), x)
       return entry
         ? '/' + entry
         : x
