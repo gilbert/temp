@@ -93,7 +93,7 @@ function removeRelativePrefix(x) {
 
 function pkgLookup(name, version, pathname, pkgPath, urlPath, force) {
   if (!force && config.bundleNodeModules && name !== 'sin') // never bundle sin
-    return urlPath
+    return urlPath + pathname
 
   const pkg = readPkgJson(pkgPath) || (name === 'sin' && readPkgJson(path.join(config.local, 'package.json')))
 
