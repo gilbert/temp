@@ -60,7 +60,7 @@ export function asCssVar(x) {
 
 export function ignoredAttr(x) {
   return x === 'dom' || x === 'type' || x === 'value' || x === 'key' || x === 'href' || x === 'class' ||
-         x === 'className' || x === 'style' || x === 'deferrable' || x === 'is' || x === 'handleEvent'
+         x === 'className' || x === 'data' || x === 'style' || x === 'deferrable' || x === 'is' || x === 'handleEvent'
 }
 
 export function getName(x) {

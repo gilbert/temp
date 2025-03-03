@@ -1004,6 +1004,7 @@ function attributes(dom, view, context) {
     }
   }
 
+  updateData(dom, view.attrs.data, prev && prev.data)
   const reapply = updateStyle(dom, view.attrs.style, prev && prev.style)
 
   if (tag) {
@@ -1062,6 +1063,19 @@ function updateStyle(dom, style, old) {
   }
 
   return true
+}
+
+function updateData(dom, data, old) {
+  for (const x in data) {
+    let value = data[x]
+    if (value != null && (!old || (value = (value + '')) !== (old[x] + '')))
+      dom.dataset[x] = value
+  }
+
+  for (const x in old) {
+    if (old[x] != null && data[x] == null)
+      delete dom.dataset[x]
+  }
 }
 
 function observe(dom, x, fn) {
