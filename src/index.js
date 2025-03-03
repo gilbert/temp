@@ -1014,8 +1014,14 @@ function attributes(dom, view, context) {
       setVars(dom, tag.vars, tag.args, create || context.hydrating, reapply)
   }
 
-  if ((create || context.hydrating) && view.attrs.dom)
-    giveLife(dom, view.attrs, view.children, context, view.attrs.dom)
+  if (view.attrs.dom) {
+    if (create || context.hydrating)
+      giveLife(dom, dom[$attrs] = proxy(view.attrs), dom[$children] = proxy(view.children), context, view.attrs.dom)
+    else {
+      dom[$attrs][$source] = view.attrs
+      dom[$children][$source] = view.children
+    }
+  }
 
   // dev-stack
 
@@ -1336,4 +1342,11 @@ function reset(x = [], ...xs) {
   `
 
   return s.css(x, ...xs)
+}
+
+export function proxy(x) {
+  return new Proxy(x, {
+    get: (_, prop) => x[prop],
+    set: (_, prop, value) => prop === $source && x !== value ? x = value : true
+  })
 }
