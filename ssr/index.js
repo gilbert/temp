@@ -5,7 +5,7 @@ import window from './window.js'
 import s from 'sin'
 import query from '../src/query.js'
 import router from '../src/router.js'
-import { asLocation, wrap } from './shared.js'
+import { asLocation, wrap, voidTags } from './shared.js'
 import { formatValue, cssRules } from '../src/style.js'
 import {
   cleanHref,
@@ -36,22 +36,6 @@ const noscript = process.env.SIN_NOSCRIPT
 const ignoredServerAttr = x => x !== 'href' && x !== 'type' && x !== 'style' && ignoredAttr(x)
 const $uid = Symbol('uid')
 const defaultTimeout = 1000 * 60 * 2
-const voidTags = new Set([
-  'area',
-  'base',
-  'br',
-  'col',
-  'embed',
-  'hr',
-  'img',
-  'input',
-  'link',
-  'meta',
-  'param',
-  'source',
-  'track',
-  'wbr'
-])
 
 export { wrap }
 export default function(mount, serverAttrs = {}, serverContext = {}) {
@@ -123,7 +107,6 @@ export default function(mount, serverAttrs = {}, serverContext = {}) {
 
   return tryPromise(result, x => {
     const css = '<style class=sin>' + cssRules().join('') + '</style>'
-
     return {
       headers,
       links,
@@ -320,34 +303,4 @@ function escapeAttrValue(x = '') {
     c === 38 && (s += x.slice(l + 1, l = i) + '&amp;') // &
   }
   return s || x
-}
-
-function rootNodeCount(x) {
-  let char = -1
-    , last = -1
-    , start = -1
-    , end = -1
-    , count = 0
-    , depth = 0
-
-  for (let i = 0; i < x.length; i++) {
-    char = x.charCodeAt(i)
-    if (char === 60) { // <
-      start = i + 1
-    } else if (char === 62) { // >
-      if (end >= 0) {
-        --depth || count++
-        end = -1
-      } else if (start >= 0) {
-        last === 47 || voidTags.has(x.slice(start, i).toLowerCase()) // /
-          ? depth === 0 && count++
-          : depth++
-        start = -1
-      }
-    } else if (char === 47) { // /
-      start === i && (start = -1, end = i + 1)
-    }
-    last = char
-  }
-  return count
 }
