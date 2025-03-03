@@ -31,17 +31,17 @@ export function rewrite(x, file) {
   if (file.endsWith('/sin/src/index.js'))
     x = x.replace('// dev-stack', 'hasOwn.call(view, stackTrace) && (dom[stackTrace] = view[stackTrace])')
 
-  return config.unsafe + rewriter(
-    modify(x, file, config),
-    x => {
-      x = tryImportMap(x, file) || x
-      isModule(x) || isScript(x) || (x = extensionless(x, dir) || x)
-      const entry = isModule(x) && resolveEntry(x.match(/^sin([/?].*|$)/) ? '' : fs.realpathSync(file), x)
-      return entry
-        ? '/' + entry
-        : x
-    }
-  )
+  return 'import.meta.dev=true;' + config.unsafe + rewriter(
+        modify(x, file, config),
+        x => {
+          x = tryImportMap(x, file) || x
+          isModule(x) || isScript(x) || (x = extensionless(x, dir) || x)
+          const entry = isModule(x) && resolveEntry(x.match(/^sin([/?].*|$)/) ? '' : fs.realpathSync(file), x)
+          return entry
+            ? '/' + entry
+            : x
+        }
+      )
 }
 
 function tryImportMap(x, file) {
