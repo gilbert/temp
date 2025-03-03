@@ -45,6 +45,9 @@ const removing = new WeakSet()
     , $size = Symbol('size')
     , $life = Symbol('life')
     , $attr = Symbol('attr')
+    , $attrs = Symbol('attrs')
+    , $source = Symbol('source')
+    , $children = Symbol('children')
     , $keyIndex = Symbol('keyIndex')
     , $keys = Symbol('keys')
     , $key = Symbol('key')
@@ -690,7 +693,7 @@ function createElement(view, context) {
 }
 
 class Instance {
-  constructor(init, view, error, loading, hydrating) {
+  constructor(init, view, error, loading, hydrating, attrs, children) {
     this.init = init
     this.key = undefined
     this.view = view
@@ -705,8 +708,8 @@ class Instance {
     this.ignore = false
     this.context = undefined
     this.recreate = false
-    this.attrs = null
-    this.children = null
+    this.attrs = proxy(attrs)
+    this.children = proxy(children)
   }
 }
 
@@ -732,25 +735,30 @@ class Stack {
   add(view, context, optimistic) {
     const index = this.i
     const [init, options] = view.component
+
+    if (optimistic && this.xs[this.i]) {
+      view.attrs = this.xs[this.i].attrs
+      view.children = this.xs[this.i].children
+    }
     let instance = new Instance(
       view.inline ? false : init,
       init,
       options && options.error || context.error,
       options && options.loading || context.loading,
-      context.hydrating
+      context.hydrating,
+      view.attrs,
+      view.children
     )
 
     const update = (e, recreate, optimistic) => {
       if (this.xs.indexOf(instance) === -1)
-          return
+        return
 
       beforeUpdates()
       e instanceof Event && (e.redraw = false)
       const keys = this.dom.first[$keys]
       const keyIndex = this.dom.first[$keyIndex]
       this.i = this.bottom = index
-      instance.attrs !== null && (view.attrs = instance.attrs)
-      instance.children !== null && (view.children = instance.children)
       updateComponent(this.dom.first, view, context, this.dom.first.parentNode, this, recreate, optimistic, true)
       hasOwn.call(this.dom.first, $keys) || (
         this.dom.first[$keys] = keys,
@@ -780,7 +788,9 @@ class Stack {
       reload: { value: reload }
     })
 
-    const next = catchInstance(true, instance, view)
+    instance.attrs[$source] = view.attrs
+    instance.children[$source] = view.children
+    const next = catchInstance(true, instance, view, instance.attrs, instance.children)
 
     isObservable(view.attrs.reload) && onremoves(instance, view.attrs.reload.observe(reload))
     isObservable(view.attrs.redraw) && onremoves(instance, view.attrs.redraw.observe(redraw))
@@ -794,8 +804,8 @@ class Stack {
   }
   next(component) {
     const instance = this.i < this.xs.length && this.xs[this.top = this.i++]
-    instance.attrs = component.attrs
-    instance.children = component.children
+    instance.attrs[$source] = component.attrs
+    instance.children[$source] = component.children
     return instance
   }
   pop() {
@@ -874,7 +884,7 @@ function updateComponent(
   if (hydratingAsync) {
     instance.next = bounds(dom)
   } else {
-    let view = catchInstance(create, instance, optimistic ? instance.view : component)
+    let view = catchInstance(create, instance, optimistic ? instance.view : component, instance.attrs, instance.children)
     view && hasOwn.call(view, $s) && (view = view(component.attrs, component.children, instance.context))
     instance.next = update(
       dom,
@@ -920,13 +930,13 @@ function updateComponent(
   return instance.next
 }
 
-function catchInstance(create, instance, view) {
+function catchInstance(create, instance, view, attrs, children) {
   try {
     return instance.stateful || create
       ? isFunction(instance.view) && !instance.view[$s]
-        ? instance.view(view.attrs, view.children, instance.context)
+        ? instance.view(attrs, children, instance.context)
         : instance.view
-      : view.component[0](view.attrs, view.children, instance.context)
+      : view.component[0](attrs, children, instance.context)
   } catch (error) {
     return resolveError(instance, view, error)
   }
