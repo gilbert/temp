@@ -732,7 +732,7 @@ class Stack {
   add(view, context, optimistic) {
     const index = this.i
     const [init, options] = view.component
-    const instance = new Instance(
+    let instance = new Instance(
       view.inline ? false : init,
       init,
       options && options.error || context.error,
@@ -769,6 +769,7 @@ class Stack {
     const refresh = e => {
       instance.onremoves && (instance.onremoves.forEach(x => x()), instance.onremoves = undefined)
       update(e, true, true)
+      instance = this.xs[index]
     }
     instance.context = Object.create(context, {
       hydrating: { value: context.hydrating, writable: true },
