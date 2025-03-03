@@ -76,7 +76,7 @@ async function fromArgs() {
       globalDir   : (x, xs) => mkdir(x || path.join(xs.home, 'global')),
       projectsDir : getProjects,
       port        : getPort,
-      unsafe      : getUnsafe,
+      unsafeEnv   : getUnsafeEnv,
       sucrase     : getSucrase,
       chromePath  : getChromePath,
       domain      : null,
@@ -259,9 +259,11 @@ async function getChallenge(challenge, config, read) {
   return challenge
 }
 
-function getUnsafe() {
-  const x = Object.entries(env).reduce((acc, [k, v]) => (k.startsWith('UNSAFE_') && (acc[k.slice(7)] = v), acc), {})
-  return x ? 'import.meta.env=' + JSON.stringify(x) + ';' : ''
+function getUnsafeEnv(_, xs) {
+  const unsafe = {}
+  for (let x in env)
+    x.startsWith('UNSAFE_') && (unsafe[x] = env[x])
+  return unsafe
 }
 
 function getProjects(x, xs) {

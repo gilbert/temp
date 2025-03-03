@@ -31,7 +31,9 @@ export function rewrite(x, file) {
   if (file.endsWith('/sin/src/index.js'))
     x = x.replace('// dev-stack', 'hasOwn.call(view, stackTrace) && (dom[stackTrace] = view[stackTrace])')
 
-  return 'import.meta.dev=true;' + config.unsafe + rewriter(
+  return 'import.meta.dev=true;'
+      + (config.unsafeEnv ? 'import.meta.env=' + JSON.stringify(config.unsafeEnv) + ';' : '')
+      + rewriter(
         modify(x, file, config),
         x => {
           x = tryImportMap(x, file) || x

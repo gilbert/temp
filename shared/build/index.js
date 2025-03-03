@@ -27,7 +27,10 @@ export default async function(x = {}) {
     ...esbuild,
     define: {
       ...esbuild.define,
-      'import.meta.env': config.unsafe.slice(16, -1)
+      ...Object.entries(config.unsafeEnv || {}).reduce(
+        (acc, [key, value]) => (acc['import.meta.env.' + key] = value, acc),
+        {}
+      )
     },
     plugins: [
       {
