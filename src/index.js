@@ -1033,14 +1033,11 @@ function getAttributes(dom) {
 }
 
 function updateStyle(dom, style, old) {
-  if (old === style)
-    return
-
   if (style == null)
-    return (dom.style.cssText = '', true)
+    return style !== old && (dom.style.cssText = '', true)
 
   if (typeof style !== 'object')
-    return (dom.style.cssText = style, true)
+    return style !== old && (dom.style.cssText = style, true)
 
   if (old == null || typeof old !== 'object') {
     dom.style.cssText = ''
@@ -1053,7 +1050,7 @@ function updateStyle(dom, style, old) {
 
   for (const x in style) {
     let value = style[x]
-    if (value != null && (value = (value + '')) !== (old[x] + ''))
+    if (value != null && (!old || (value = (value + '')) !== (old[x] + '')))
       dom.style.setProperty(styleProp(x), value)
   }
 
