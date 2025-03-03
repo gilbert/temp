@@ -1303,7 +1303,7 @@ function remove(dom, parent, root = true, promises = [], deferrable = false) {
       ? removeChild(parent, dom)
       : (
         removing.add(dom),
-        Promise.allSettled(promises).then(() => removeChild(parent, dom))
+        Promise.all(promises.map(x => x.catch(console.error))).then(() => removeChild(parent, dom))
       )
     )
     : removeCall(dom)
