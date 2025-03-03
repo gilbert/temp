@@ -903,7 +903,7 @@ function updateComponent(
       .then(() => hasOwn.call(instance.next.first, $component) && stack.xs[i] === instance && (
         hydratingAsync && (stack.dom = hydrate(dom)),
         context.hydrating = false,
-        instance.recreate = true,
+        instance.recreate = !optimistic,
         instance.promise = false,
         instance.context.redraw(),
         context[$async](-1)
