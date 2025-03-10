@@ -345,10 +345,10 @@ function globalRedraw() {
 function draw(m, dom) {
   beforeUpdates()
   try {
-    m.doms = updates(dom, asArray(m.view(m.attrs)), m.context, m.doms && m.doms.dom.previousSibling, m.doms && m.doms.last)
+    m.doms = updates(dom, asArray(m.view(m.attrs)), m.context, m.doms && getPrevious(m.doms.dom), m.doms && m.doms.last)
   } catch (error) {
     m.attrs.error = error
-    m.doms = updates(dom, asArray(m.context.error(error, m.attrs, [], m.context)), m.context, m.doms && m.doms.dom.previousSibling, m.doms && m.doms.last)
+    m.doms = updates(dom, asArray(m.context.error(error, m.attrs, [], m.context)), m.context, m.doms && getPrevious(m.doms.dom), m.doms && m.doms.last)
   } finally {
     afterUpdates()
   }
@@ -366,24 +366,32 @@ function afterUpdates() {
 
 function updates(parent, next, context, before, last = parent.lastChild) {
   const keys = next[0] && next[0].key !== undefined && new Array(next.length)
-      , ref = getNext(before, parent)
+      , ref = getNext(before, parent.firstChild)
       , tracked = ref && hasOwn.call(ref, $keys)
-      , after = last ? last.nextSibling : null
+      , after = getNext(last, null)
 
   keys && (keys.rev = new Map()) && tracked
     ? keyed(parent, context, ref[$keys], next, keys, after, ref)
     : nonKeyed(parent, context, next, keys, ref, after)
 
-  const first = getNext(before, parent)
+  const first = getNext(before, parent.firstChild)
   keys && (first[$keys] = keys) // could be unnecessary since set in keyed and nonKeyed (do tests)
 
-  return Ret(first, after && after.previousSibling || parent.lastChild)
+  return Ret(first, after && getPrevious(after) || parent.lastChild)
 }
 
-function getNext(before, parent) {
-  let dom = before ? before.nextSibling : parent.firstChild
+function getNext(x, fallback) {
+  let dom = x ? x.nextSibling : fallback
   while (removing.has(dom))
     dom = dom.nextSibling
+
+  return dom
+}
+
+function getPrevious(x, fallback) {
+  let dom = x ? x.previousSibling : fallback
+  while (removing.has(dom))
+    dom = dom.previousSibling
 
   return dom
 }
@@ -412,7 +420,7 @@ function nonKeyed(parent, context, next, keys, dom, after = null) {
       i++
     }
     if (dom !== null)
-      dom = dom.nextSibling
+      dom = getNext(dom)
   }
 
   while (dom && dom !== after)
@@ -500,7 +508,7 @@ function insertBefore(parent, { first, last }, before) {
 
   do {
     dom = temp
-    temp = dom.nextSibling
+    temp = getNext(dom)
   } while (parent.insertBefore(dom, before) !== last)
 }
 
@@ -564,8 +572,7 @@ function fromComment(dom) {
   let l = parseInt(dom.data.slice(1))
   let last = dom
   let char
-  while (l && last.nextSibling) {
-    last = last.nextSibling
+  while (l && (last = getNext(last))) {
     if (last.nodeType === 8) {
       char = last.data.charCodeAt(0)
       l += char === 91 ? parseInt(last.data.slice(1)) - 1 // [
@@ -595,10 +602,10 @@ function updateArray(dom, view, context, parent, create, component) {
   if (dom !== comment.dom)
     last = comment.last
   if (parent) {
-    const after = last ? last.nextSibling : null
+    const after = getNext(last, null)
     updates(parent, view, context, comment.first, last)
 
-    const nextLast = after ? after.previousSibling : parent.lastChild
+    const nextLast = getPrevious(after, parent.lastChild)
     last !== nextLast && markArray(comment.first, nextLast)
     return Ret(comment.dom, comment.first, nextLast)
   }
@@ -831,12 +838,12 @@ function onremoves(instance, x) {
 
 function hydrate(dom) {
   const id = '/' + dom.data
-  let last = dom.nextSibling
+  let last = getNext(dom)
   while (last && (last.nodeType !== 8 || last.data !== id))
-    last = last.nextSibling
+    last = getPrevious(last)
 
-  const x = Ret(dom.nextSibling, dom.nextSibling, last.previousSibling)
-  hasOwn.call(last, $arrayStart) && markArray(last[$arrayStart], last.previousSibling)
+  const x = Ret(getNext(dom), getNext(dom), getPrevious(last))
+  hasOwn.call(last, $arrayStart) && markArray(last[$arrayStart], getPrevious(last))
   hasOwn.call(dom, $component) && (x.first[$component] = dom[$component])
   if (hasOwn.call(dom, $keys)) {
     const keys = dom[$keys]
@@ -852,9 +859,9 @@ function hydrate(dom) {
 
 function bounds(dom) {
   const id = '/' + dom.data
-  let last = dom.nextSibling
+  let last = getNext(dom)
   while (last && (last.nodeType !== 8 || last.data !== id))
-    last = last.nextSibling
+    last = getNext(last)
   return Ret(dom, dom, last)
 }
 
@@ -1245,15 +1252,16 @@ function removeArray(dom, parent, root, promises, deferrable) {
   const last = getArray(dom)
 
   if (!last)
-    return dom.nextSibling
+    return getNext(dom)
 
   if (dom === last)
-    return dom.nextSibling
+    return getNext(dom)
 
-  const after = last.nextSibling
-  dom = dom.nextSibling
+  const after = getNext(last)
+  dom = getNext(dom)
   if (!dom)
     return after
+
   do
     dom = remove(dom, parent, root, promises, deferrable)
   while (dom && dom !== after)
@@ -1278,12 +1286,12 @@ function remove(dom, parent, root = true, promises = [], deferrable = false) {
 
   if (dom.nodeType === 8) {
     if (dom.data.charCodeAt(0) === 97) { // a
-      after = dom.nextSibling
+      after = getNext(dom)
       removeChild(parent, dom)
       if (!after)
         return after
       dom = after
-      after = dom.nextSibling
+      after = getNext(dom)
     } else if (dom.data.charCodeAt(0) === 91) { // [
       after = removeArray(dom, parent, root, promises, deferrable)
     }
@@ -1312,7 +1320,7 @@ function remove(dom, parent, root = true, promises = [], deferrable = false) {
   let child = dom.firstChild
   while (child) {
     remove(child, dom, false, promises, deferrable)
-    child = child.nextSibling
+    child = getNext(child)
   }
 
   root
