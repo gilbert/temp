@@ -516,7 +516,7 @@ function update(dom, view, context, parent, stack, create, component) {
   return isObservable(view)
     ? updateLive(dom, view, context, parent, stack, create)
     : isFunction(view)
-      ? update(dom, view(), context, parent, stack, create)
+      ? update(dom, view(), context, parent, stack, create, component)
       : view instanceof View
         ? updateView(dom, view, context, parent, stack, create)
         : view instanceof Promise
@@ -806,7 +806,8 @@ class Stack {
     instance.promise = next && isFunction(next.then) && next
     instance.stateful = instance.promise || (isFunction(next) && !next[$s])
     instance.view = instance.promise ? optimistic ? this.xs[this.i].view : instance.loading : next
-    this.xs.length = this.top = this.i
+    optimistic || (this.xs.length = this.i)
+    this.top = this.i
     return this.xs[this.i++] = instance
   }
   next(component) {
@@ -908,8 +909,8 @@ function updateComponent(
     instance.recreate && (instance.recreate = false)
   }
 
-  let i = stack.i - 1
   if (create && instance.promise) {
+    let i = stack.i - 1
     context[$async](1)
     instance.promise
       .then(view => instance.view = view && hasOwn.call(view, 'default') ? view.default : view)
