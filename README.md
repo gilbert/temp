@@ -198,6 +198,10 @@ s.mount(() => wonderAsyncButton)
 
 # Routing
 
+All routes that don't match a route on your server automatically serve your Sin-bundled frontend.
+
+You can then use `s.route` to match against the current url to render content conditionally.
+
 ### `s.route`
 
 Sin includes the most `get out of your way` router possible. There is always a scoped router available in context which let's you implement routing (as nested as you like) — not being concerned about the mount point. Using `href` is highly encouraged and the default way of telling Sin to route away. Every sin `route` instance even has a sweet .toString method, so you can simply do `href: route + 'sub-page'`. You can also use `route.has()` if you want to highlight which route is active, and if that's too boring Sin sets an `[active]` attribute for you to use for styling.
@@ -226,6 +230,12 @@ s.mount(({ route }) => [
   )
 ])
 ```
+
+### `target`
+
+For any `<a href="/my/route">...</a>` tag, Sin will automatically hook it into `history.pushState` routing.
+
+However, if you don't want this behavior (e.g to hit your `/oauth/github` backend route), just add a `target="_self"` attribute to your anchor tag.
 
 ## Simplifying and improving common tasks
 
