@@ -56,7 +56,8 @@ function tryImportMap(x, file) {
     dir = next
   }
   const importPath = pkg && pkg.imports && firstString(pkg.imports, x, 'default')
-  return importPath && ('/' + path.relative(config.cwd, dir) + '/' + removeRelativePrefix(importPath))
+  const relative = path.relative(config.cwd, dir)
+  return importPath && ((relative ? '/' + relative : '') + '/' + removeRelativePrefix(importPath))
 }
 
 function readPkgJson(x) {
