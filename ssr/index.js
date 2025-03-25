@@ -33,7 +33,7 @@ let lastWasText = false
   , wasText = false
 
 const noscript = process.env.SIN_NOSCRIPT
-const ignoredServerAttr = x => x !== 'href' && x !== 'type' && x !== 'style' && ignoredAttr(x)
+const ignoredServerAttr = x => x !== 'value' && x !== 'href' && x !== 'type' && x !== 'style' && ignoredAttr(x)
 const $uid = Symbol('uid')
 const defaultTimeout = 1000 * 60 * 2
 
