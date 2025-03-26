@@ -841,7 +841,7 @@ function hydrate(dom) {
   const id = '/' + dom.data
   let last = getNext(dom)
   while (last && (last.nodeType !== 8 || last.data !== id))
-    last = getPrevious(last)
+    last = getNext(last)
 
   const x = Ret(getNext(dom), getNext(dom), getPrevious(last))
   hasOwn.call(last, $arrayStart) && markArray(last[$arrayStart], getPrevious(last))
