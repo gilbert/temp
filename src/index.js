@@ -651,14 +651,18 @@ function updateElement(
   create = dom === null || tagChanged(dom, view, context)
 ) {
   const previousNS = context.NS
-  if (view.attrs.xmlns || NS[getName(view.tag)])
-    context.NS = view.attrs.xmlns || NS[getName(view.tag)]
+  const tagName = getName(view.tag)
+  if (view.attrs.xmlns || NS[tagName])
+    context.NS = view.attrs.xmlns || NS[tagName]
 
   create && replace(
     dom,
-    dom = createElement(view, context),
+    dom = createElement(view, context, tagName),
     parent
   )
+
+  if (tagName === 'foreignObject')
+    context.NS = 'http://www.w3.org/1999/xhtml'
 
   const size = view.children && view.children.length
   attributes(dom, view, context, create)
@@ -688,15 +692,15 @@ function tagChanged(dom, view, context) {
        )
 }
 
-function createElement(view, context) {
+function createElement(view, context, tagName) {
   const is = view.attrs.is
-  return context.NS
+  return context.NS && context.NS !== 'http://www.w3.org/1999/xhtml'
     ? is
-      ? document.createElementNS(context.NS, getName(view.tag) || 'div', { is })
-      : document.createElementNS(context.NS, getName(view.tag) || 'div')
+      ? document.createElementNS(context.NS, tagName, { is })
+      : document.createElementNS(context.NS, tagName)
     : is
-      ? document.createElement(getName(view.tag) || 'div', { is })
-      : document.createElement(getName(view.tag) || 'div')
+      ? document.createElement(tagName || 'div', { is })
+      : document.createElement(tagName || 'div')
 }
 
 class Instance {
