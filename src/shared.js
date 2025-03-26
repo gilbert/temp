@@ -115,10 +115,10 @@ function classes(x) {
 }
 
 function classObject(x) {
-  let c = ''
-  for (const k in x)
-    c += (c ? ' ' : '') + (x[k] || '')
-  return c
+  let c
+  for (const cls in x)
+    if (x[cls]) c = c == null ? cls : [c, cls].join(' ')
+  return c || ''
 }
 
 export function scrollSize(w, h) {

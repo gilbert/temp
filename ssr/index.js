@@ -185,6 +185,7 @@ function getStyle(view) {
   const a = view.tag.args
   for (const [k, v] of Object.entries(view.tag.vars))
     style += (style ? ';' : '') + k + ':' + formatValue(a[v.index], v)
+
   const s = view.attrs.style
   if (typeof s === 'string') {
     style += (style ? ';' : '') + s
@@ -192,6 +193,7 @@ function getStyle(view) {
     for (const [k, v] of Object.entries(s))
       style += (style ? ';' : '') + styleProp(k) + ':' + v
   }
+
   return style && (' style="' + escapeAttrValue(style) + '"')
 }
 
