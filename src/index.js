@@ -692,8 +692,8 @@ function createElement(view, context) {
   const is = view.attrs.is
   return context.NS
     ? is
-      ? document.createElementNS(context.NS, getName(view.tag), { is })
-      : document.createElementNS(context.NS, getName(view.tag))
+      ? document.createElementNS(context.NS, getName(view.tag) || 'div', { is })
+      : document.createElementNS(context.NS, getName(view.tag) || 'div')
     : is
       ? document.createElement(getName(view.tag) || 'div', { is })
       : document.createElement(getName(view.tag) || 'div')
