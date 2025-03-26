@@ -233,9 +233,9 @@ s.mount(({ route }) => [
 
 ### `target`
 
-For any `<a href="/my/route">...</a>` tag, Sin will automatically hook it into `history.pushState` routing.
+For any ``s`a`({ href: "/my/route" }, ...)`` tag, Sin will automatically hook it into `history.pushState` routing.
 
-However, if you don't want this behavior (e.g to hit your `/oauth/github` backend route), just add a `target="_self"` attribute to your anchor tag.
+However, if you don't want this behavior (e.g to hit your `/oauth/github` backend route), just add a `target: '_self'` attribute to your anchor tag.
 
 ## Simplifying and improving common tasks
 
