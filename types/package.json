@@ -1,0 +1,25 @@
+{
+  "name": "@sin/types",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsup --dts-only --format esm"
+  },
+  "author": {
+    "name": "Νίκος Σαβίδης",
+    "email": "n.savvidis@gmx.com"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0"
+  },
+  "tsup": {
+    "entry": {
+      "sin": "index.ts"
+    },
+    "outDir": "../",
+    "clean": false,
+    "keepNames": true,
+    "platform": "browser"
+  }
+}

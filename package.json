@@ -3,6 +3,7 @@
   "version": "1.0.0-rc.1",
   "description": "sin",
   "type": "module",
+  "types": "sin.d.ts",
   "main": "src/index.js",
   "scripts": {
     "postinstall": "node shared/server/uws.js",

@@ -23,7 +23,8 @@ import {
   asArray,
   hasOwn,
   getId,
-  noop
+  noop,
+  tags
 } from './shared.js'
 
 const document = window.document
@@ -125,6 +126,14 @@ s.error = s((error) => {
   ))
 })
 s.jsx = s((_, xs) => xs.slice(1))
+
+// tagged properties, e.g: s.div, s.ul etc
+tags.forEach(tag => Object.defineProperty(s, tag, {
+  value: (...x) => s(tag, ...x),
+  writable: false,
+  configurable: false,
+  enumerable: false
+}));
 
 const trusted = s(({ strings, values = [] }) => {
   const div = document.createElement('div')

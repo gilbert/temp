@@ -8,6 +8,8 @@ export const resolved = Promise.resolve()
 
 export const hasOwn = {}.hasOwnProperty
 
+export const tags = 'a,div,span,p,img,h1,ul,li,table,form,abbr,acronym,address,area,article,aside,audio,b,base,bdi,bdo,big,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,dl,dt,em,embed,fieldset,figcaption,figure,footer,h2,h3,h4,h5,h6,head,header,hr,html,i,iframe,ins,kbd,label,legend,link,main,map,mark,meta,meter,nav,noscript,object,ol,optgroup,option,output,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,small,source,strong,style,sub,summary,sup,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,var,video,wbr'.split(',');
+
 export function cleanSlash(x) {
   return x && String(x).replace(/\/+/g, '/').replace(/(.)\/\*?$/, '$1')
 }
