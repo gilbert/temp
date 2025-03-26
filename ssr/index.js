@@ -302,5 +302,5 @@ function escapeAttrValue(x = '') {
     c === 62 ? s += x.slice(l + 1, l = i) + '&gt;' :   // >
     c === 38 && (s += x.slice(l + 1, l = i) + '&amp;') // &
   }
-  return s || x
+  return l === -1 ? x : s + x.slice(l + 1)
 }
