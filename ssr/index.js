@@ -33,7 +33,7 @@ let lastWasText = false
   , wasText = false
 
 const noscript = process.env.SIN_NOSCRIPT
-const ignoredServerAttr = x => x !== 'value' && x !== 'href' && x !== 'type' && x !== 'style' && ignoredAttr(x)
+const ignoredServerAttr = x => x !== 'value' && x !== 'href' && x !== 'type' && ignoredAttr(x)
 const $uid = Symbol('uid')
 const defaultTimeout = 1000 * 60 * 2
 
@@ -185,15 +185,13 @@ function getStyle(view) {
   const a = view.tag.args
   for (const [k, v] of Object.entries(view.tag.vars))
     style += (style ? ';' : '') + k + ':' + formatValue(a[v.index], v)
-
   const s = view.attrs.style
   if (typeof s === 'string') {
     style += (style ? ';' : '') + s
   } else if (s !== null && typeof s === 'object') {
-    for (const [k, v] of Object.entries(view.tag.vars))
-      style += (style ? ';' : '') + styleProp(k) + ':' + formatValue(a[v.index], v)
+    for (const [k, v] of Object.entries(s))
+      style += (style ? ';' : '') + styleProp(k) + ':' + v
   }
-
   return style && (' style="' + escapeAttrValue(style) + '"')
 }
 

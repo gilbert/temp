@@ -6,8 +6,9 @@
   "main": "src/index.js",
   "scripts": {
     "postinstall": "node shared/server/uws.js",
-    "start": "sin start",
-    "test": "sin test --headless --ci",
+    "start": "node ./bin/index start",
+    "test": "node ./bin/index test --headless --ci",
+    "test:ssr": "node ./tests/ssr.js",
     "lint": "eslint . --ignore-pattern dist.js",
     "build": "sin run build:eyedropper && sin run build:dev",
     "build:min": "esbuild src/index.js --minify --format=esm --bundle --outfile=sin.min.js",
