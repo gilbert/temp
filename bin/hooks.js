@@ -8,6 +8,7 @@ const pkg = JSON.parse(fs.readFileSync(path.join(process.env.SIN_LOCAL, 'package
 const cwd = process.cwd()
 
 const config = {
+  nojail: true, // TEMP
   debug: process.env.SIN_DEBUG === 'true',
   nojail: process.env.SIN_NOJAIL === 'true',
   sucrase: await getSucrase(null, { pkgs: getPkgs(cwd) }),
