@@ -1137,7 +1137,7 @@ function setVars(dom, vars, args, init, reapply) {
 
 function setVar(dom, id, value, cssVar, init, reapply, after) {
   if (isObservable(value)) {
-    init && value.observe(x => dom.style.setProperty(id, formatValue(x, cssVar)))
+    init && value.observe(x => setProperty(dom, id, x, cssVar))
     if (init || reapply)
       setVar(dom, id, value(), cssVar, init, init)
     return
@@ -1146,8 +1146,16 @@ function setVar(dom, id, value, cssVar, init, reapply, after) {
   if (isFunction(value))
     return resolved.then(() => setVar(dom, id, value(dom), cssVar, init, reapply, after))
 
-  dom.style.setProperty(id, formatValue(value, cssVar))
-  after && afterUpdate.push(() => dom.style.setProperty(id, formatValue(value, cssVar)))
+  setProperty(dom, id, value, cssVar)
+  after && afterUpdate.push(() => setProperty(dom, id, value, cssVar))
+}
+
+function setProperty(dom, name, value, cssVar) {
+  hasOwn.call(cssVar, 'property')
+    ? dom.style.setProperty(name, formatValue(value, cssVar))
+    : value
+      ? dom.setAttribute(name, '')
+      : dom.removeAttribute(name)
 }
 
 function giveLife(dom, attrs, children, context, life) {

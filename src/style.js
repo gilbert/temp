@@ -190,6 +190,10 @@ export function parse([xs, ...args], parent, nesting = 0, root = false) {
         vars[varName = '--' + temp + j] = { property: prop, fns: fn.slice(-1), unit: getUnit(prop, last(fn)), index: j, transform: cssVarAlpha !== -1 && getOpacityArg }
         value += before + 'var(' + varName + ')' + (cssVarAlpha === -1 ? '' : (cssVarAlpha = -1, ')'))
         valueStart = 0
+      } else if (xs[j + 1].trim().charCodeAt(0) === 123) {
+        temp = prefix + Math.abs(hash).toString(31)
+        vars[varName = temp + j] = { index: j }
+        selectors.push('[' + varName + ']')
       } else {
         const x = before + arg + getUnit(prop, last(fn))
         value += x
