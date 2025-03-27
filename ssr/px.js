@@ -8,6 +8,7 @@ export default {
   'border-right': 'px',
   'border-bottom': 'px',
   '@media': 'px',
+  '@container': 'px',
   'accent-color': '',
   'additive-symbols': '',
   'align-content': '',

@@ -34,7 +34,8 @@ const pxCache = {
   'border-right': 'px',
   'border-bottom': 'px',
   'text-shadow': 'px',
-  '@media': 'px'
+  '@media': 'px',
+  '@container': 'px'
 }
 
 const properties = Array.from(
@@ -59,7 +60,7 @@ const cache = new Map()
     , hashed = new Set()
     , cssVars = window.CSS && window.CSS.supports('color', 'var(--support-test)')
     , pxFunctions = ['perspective', 'blur', 'drop-shadow', 'inset', 'polygon', 'minmax']
-    , nested = ['@media', '@supports', '@document', '@layer']
+    , nested = ['@media', '@container', '@supports', '@document', '@layer']
     , isNested = x => nested.some(n => x.indexOf(n) === 0)
     , isPx = (prop, x) => prop === 'translate' || (x.indexOf('translate') === 0 || pxFunctions.indexOf(x) > -1)
     , isDeg = (prop, x) => prop === 'rotate' || x.indexOf('rotate') === 0 || x.indexOf('skew') === 0
