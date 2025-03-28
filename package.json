@@ -23,7 +23,8 @@
     ".": {
       "node": "./ssr/sin.js",
       "import": "./src/index.js",
-      "default": "./src/index.js"
+      "default": "./src/index.js",
+      "types": "./sin.d.ts"
     },
     "./bin/color": "./bin/color.js",
     "./env": "./bin/env.js",
