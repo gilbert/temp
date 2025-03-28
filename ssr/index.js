@@ -255,6 +255,7 @@ function updateComponent(view, context) {
     const asyncId = wasPromise && ('<!--a' + context[$uid]++ + '-->') || ''
     x && hasOwn.call(x, 'default') && (x = x.default) // we might be able to move check above
     isFunction(x) && (x = x(view.attrs, view.children, context))
+    mergeTag(x, view)
     return tryPromise(update(x, context), x => (
       context.noscript ? '' : asyncId)
       + x
