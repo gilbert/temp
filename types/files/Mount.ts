@@ -16,8 +16,9 @@ type MountDOM<Attrs = {}> = (dom: DOM, attrs: Attrs, children: View[] | [], cont
 * s.mount((dom, component, context) => [])
 */
 export interface Mount {
-  <Attrs = {}>(dom: HTMLElement | Element | {}, sin: MountDOM<Attrs>): Views;
-  <Attrs = {}>(fn: (attrs: Attrs, children: View[] | [], context: Context) => Children): Views;
-  <Attrs = {}>(fn: (children: View[] | [], context: Context) => Children): Views;
-  <Attrs = {}>(fn: (children: View[] | [], context: Context) => Children): Views;
+  <Attrs = {}>(dom: HTMLElement | Element | {}, sin: MountDOM<Attrs>): Views<Attrs>;
+  <Attrs = {}>(fn: (attrs: Attrs, children: View[] | [], context: Context) => Children): Views<Attrs>;
+  <Attrs = {}>(fn: (children: View[] | [], context: Context) => Children): Views<Attrs>;
+  <Attrs = {}>(fn: (children: View[] | [], context: Context) => Children): Views<Attrs>;
 }
+

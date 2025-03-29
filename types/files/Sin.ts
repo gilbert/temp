@@ -8,10 +8,6 @@ import type { Children, Redraw, View } from "./View";
 
 export declare class Sin {
   /**
-   * Sin View (Internal Usage)
-   */
-  private static View: View;
-  /**
    * Global Window Object
    */
   static readonly window: Window & typeof globalThis;

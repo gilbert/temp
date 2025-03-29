@@ -92,24 +92,11 @@ export type SinElement<T> = (
   T extends HTMLUListElement ? Attributes<T> : never
 )
 
-export type Factory<A> = (
-  /**
-   * Attrs Reference
-   */
-  attrs?: A,
-  /**
-   * Children
-   *
-   * @default []
-   */
-  children?: Children<A>,
-
-) => unknown;
-
 export interface Component {
   (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
-  <T extends HTMLElement>(attrs: SinElement<T>, children?: Children, context?: Context): View<T>;
-  <T extends HTMLElement>(...children: Children): View<T>
+  <T extends HTMLElement>(attrs: SinElement<T>, children?: Children): View<T>;
+  <T extends HTMLElement>(...children: Children): View<T>;
+  <T extends HTMLElement>(fn: (attrs: any, children: Children, context: Context) => Children): View<T>;
 }
 
 export interface Static<T> {
@@ -119,10 +106,9 @@ export interface Static<T> {
    * s`h1`('Sinnner!');
    * s`ul`({ onclick: () => {}}, ['s','i','n'].map(x => s`li`(x) ));
    */
-  <Attrs = {}>(attrs: SinElement<T>, children: Children<Attrs>, context: Context): View<T>;
+  <Attrs = {}>(attrs: SinElement<T>, children: Children<Attrs>): View<T>;
   <Attrs = {}>(attrs: SinElement<T>, children: Children<Attrs>): View<T>;
   <Attrs = {}>(attrs: SinElement<T>, ...children: Children<Attrs>): View<T>;
-  <Attrs = {}>(...children: Children<Attrs>): View<T>;
 }
 
 

@@ -17,7 +17,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`a`({ href: '/apostasy' }, 'Renouncing faith')
    */
-  a?: {
+  a: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLAnchorElement>
     (attrs: SinElement<HTMLAnchorElement>, children?: Children, context?: Context): View
   }
@@ -31,7 +31,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`abbr`({ title: 'absolution' }, 'Forgiveness of sins')
    */
-  abbr?: {
+  abbr: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -45,7 +45,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`acronym`({ title: 'atonement' }, 'Reconciliation with God')
    */
-  acronym?: {
+  acronym: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -59,7 +59,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`address`({ class: 'blasphemy' }, 'Disrespecting the divine')
    */
-  address?: {
+  address: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -73,7 +73,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`area`({ href: '/baptism' }, 'Rite of initiation')
    */
-  area?: {
+  area: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLAreaElement>
     (attrs: SinElement<HTMLAreaElement>, children?: Children, context?: Context): View
   }
@@ -87,7 +87,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`article`({ id: 'confession' }, 'Admitting sins')
    */
-  article?: {
+  article: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -101,7 +101,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`aside`({ class: 'covetousness' }, 'Greedy desire')
    */
-  aside?: {
+  aside: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -115,7 +115,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`audio`({ src: '/depravity.mp3' }, 'Moral corruption')
    */
-  audio?: {
+  audio: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLAudioElement>
     (attrs: SinElement<HTMLAudioElement>, children?: Children, context?: Context): View
   }
@@ -128,7 +128,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`b`({ class: 'envy' }, 'Resenting blessings')
    */
-  b?: {
+  b: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -141,7 +141,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`base`({ href: '/fornication' }, 'Sexual immorality')
    */
-  base?: {
+  base: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLBaseElement>
     (attrs: SinElement<HTMLBaseElement>, children?: Children, context?: Context): View
   }
@@ -154,7 +154,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`bdi`({ id: 'gluttony' }, 'Excessive indulgence')
    */
-  bdi?: {
+  bdi: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -167,7 +167,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`bdo`({ dir: 'rtl', id: 'heresy' }, 'False doctrine')
    */
-  bdo?: {
+  bdo: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -180,7 +180,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`big`({ class: 'iniquity' }, 'Deep wickedness')
    */
-  big?: {
+  big: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -193,7 +193,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`blockquote`({ cite: '/jealousy' }, 'Envious longing')
    */
-  blockquote?: {
+  blockquote: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLQuoteElement>
     (attrs: SinElement<HTMLQuoteElement>, children?: Children, context?: Context): View
   }
@@ -206,7 +206,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`body`({ id: 'knavery' }, 'Dishonest trickery')
    */
-  body?: {
+  body: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLBodyElement>
     (attrs: SinElement<HTMLBodyElement>, children?: Children, context?: Context): View
   }
@@ -219,7 +219,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`br`({ class: 'lust' }, 'Uncontrolled desire')
    */
-  br?: {
+  br: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLBRElement>
     (attrs: SinElement<HTMLBRElement>, children?: Children, context?: Context): View
   }
@@ -232,7 +232,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`button`({ onclick: 'handleMalice()' }, 'Intent to harm')
    */
-  button?: {
+  button: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLButtonElement>
     (attrs: SinElement<HTMLButtonElement>, children?: Children, context?: Context): View
   }
@@ -245,7 +245,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`canvas`({ id: 'neglect' }, 'Failing duties')
    */
-  canvas?: {
+  canvas: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLCanvasElement>
     (attrs: SinElement<HTMLCanvasElement>, children?: Children, context?: Context): View
   }
@@ -258,7 +258,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`caption`({ class: 'offense' }, 'Moral wrongdoing')
    */
-  caption?: {
+  caption: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableCaptionElement>
     (attrs: SinElement<HTMLTableCaptionElement>, children?: Children, context?: Context): View
   }
@@ -271,7 +271,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`cite`({ title: 'pride' }, 'Excessive self-regard')
    */
-  cite?: {
+  cite: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -284,7 +284,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`code`({ class: 'quarrel' }, 'Sinful strife')
    */
-  code?: {
+  code: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -297,7 +297,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`col`({ span: '1', class: 'rebellion' }, 'Defying authority')
    */
-  col?: {
+  col: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableColElement>
     (attrs: SinElement<HTMLTableColElement>, children?: Children, context?: Context): View
   }
@@ -310,7 +310,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`colgroup`({ span: '2', id: 'sin' }, 'General wrongdoing')
    */
-  colgroup?: {
+  colgroup: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableColElement>
     (attrs: SinElement<HTMLTableColElement>, children?: Children, context?: Context): View
   }
@@ -323,7 +323,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`data`({ value: 'transgression' }, 'Breaking laws')
    */
-  data?: {
+  data: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLDataElement>
     (attrs: SinElement<HTMLDataElement>, children?: Children, context?: Context): View
   }
@@ -336,7 +336,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`datalist`({ id: 'unrighteousness' }, 'State of injustice')
    */
-  datalist?: {
+  datalist: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLDataListElement>
     (attrs: SinElement<HTMLDataListElement>, children?: Children, context?: Context): View
   }
@@ -349,7 +349,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`dd`({ class: 'vice' }, 'Moral flaw')
    */
-  dd?: {
+  dd: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -362,7 +362,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`del`({ cite: '/wrath' }, 'Uncontrolled anger')
    */
-  del?: {
+  del: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLModElement>
     (attrs: SinElement<HTMLModElement>, children?: Children, context?: Context): View
   }
@@ -375,7 +375,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`details`({ id: 'x-rated' }, 'Explicit immorality')
    */
-  details?: {
+  details: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLDetailsElement>
     (attrs: SinElement<HTMLDetailsElement>, children?: Children, context?: Context): View
   }
@@ -388,7 +388,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`dfn`({ title: 'yearning' }, 'Sinful longing')
    */
-  dfn?: {
+  dfn: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -401,7 +401,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`dialog`({ id: 'zealotry' }, 'Excessive zeal')
    */
-  dialog?: {
+  dialog: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLDialogElement>
     (attrs: SinElement<HTMLDialogElement>, children?: Children, context?: Context): View
   }
@@ -414,7 +414,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`div`({ id: 'penance' }, 'Acts of repentance')
    */
-  div?: {
+  div: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLDivElement>
     (attrs: SinElement<HTMLDivElement>, children?: Children, context?: Context): View
   }
@@ -427,7 +427,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`dl`({ class: 'grace' }, 'Divine favor')
    */
-  dl?: {
+  dl: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLDListElement>
     (attrs: SinElement<HTMLDListElement>, children?: Children, context?: Context): View
   }
@@ -440,7 +440,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`dt`({ id: 'salvation' }, 'Deliverance from sin')
    */
-  dt?: {
+  dt: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -454,7 +454,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`em`({ class: 'sacrament' }, 'Sacred rite')
    */
-  em?: {
+  em: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -468,7 +468,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`embed`({ src: '/repentance' }, 'Turning from sin')
    */
-  embed?: {
+  embed: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLEmbedElement>
     (attrs: SinElement<HTMLEmbedElement>, children?: Children, context?: Context): View
   }
@@ -481,7 +481,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`fieldset`({ id: 'eucharist' }, 'Holy communion')
    */
-  fieldset?: {
+  fieldset: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLFieldSetElement>
     (attrs: SinElement<HTMLFieldSetElement>, children?: Children, context?: Context): View
   }
@@ -494,7 +494,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`figcaption`({ class: 'liturgy' }, 'Worship ritual')
    */
-  figcaption?: {
+  figcaption: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -507,7 +507,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`figure`({ id: 'sanctuary' }, 'Sacred space')
    */
-  figure?: {
+  figure: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -520,7 +520,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`footer`({ class: 'benediction' }, 'Closing blessing')
    */
-  footer?: {
+  footer: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -533,7 +533,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`form`({ action: '/hymnody' }, 'Singing hymns')
    */
-  form?: {
+  form: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLFormElement>
     (attrs: SinElement<HTMLFormElement>, children?: Children, context?: Context): View
   }
@@ -547,7 +547,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`h1`({ id: 'vestments' }, 'Clergy garments')
    */
-  h1?: {
+  h1: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHeadingElement>
     (attrs: SinElement<HTMLHeadingElement>, children?: Children, context?: Context): View
   }
@@ -561,7 +561,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`h2`({ class: 'catechism' }, 'Doctrine teaching')
    */
-  h2?: {
+  h2: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHeadingElement>
     (attrs: SinElement<HTMLHeadingElement>, children?: Children, context?: Context): View
   }
@@ -575,7 +575,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`h3`({ id: 'intercession' }, 'Praying for others')
    */
-  h3?: {
+  h3: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHeadingElement>
     (attrs: SinElement<HTMLHeadingElement>, children?: Children, context?: Context): View
   }
@@ -589,7 +589,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`h4`({ class: 'chalice' }, 'Communion cup')
    */
-  h4?: {
+  h4: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHeadingElement>
     (attrs: SinElement<HTMLHeadingElement>, children?: Children, context?: Context): View
   }
@@ -603,7 +603,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`h5`({ id: 'pulpit' }, 'Preaching platform')
    */
-  h5?: {
+  h5: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHeadingElement>
     (attrs: SinElement<HTMLHeadingElement>, children?: Children, context?: Context): View
   }
@@ -617,7 +617,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`h6`({ class: 'tithe' }, 'Tenth offering')
    */
-  h6?: {
+  h6: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHeadingElement>
     (attrs: SinElement<HTMLHeadingElement>, children?: Children, context?: Context): View
   }
@@ -630,7 +630,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`head`({ id: 'redemption' }, 'Deliverance from sin')
    */
-  head?: {
+  head: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHeadElement>
     (attrs: SinElement<HTMLHeadElement>, children?: Children, context?: Context): View
   }
@@ -643,7 +643,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`header`({ class: 'purgation' }, 'Cleansing from sin')
    */
-  header?: {
+  header: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -657,7 +657,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`hr`({ class: 'mortal-sin' }, 'Grave offense')
    */
-  hr?: {
+  hr: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHRElement>
     (attrs: SinElement<HTMLHRElement>, children?: Children, context?: Context): View
   }
@@ -671,7 +671,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`html`({ lang: 'en', id: 'venial-sin' }, 'Lesser sin')
    */
-  html?: {
+  html: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLHtmlElement>
     (attrs: SinElement<HTMLHtmlElement>, children?: Children, context?: Context): View
   }
@@ -685,7 +685,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`i`({ class: 'temptation' }, 'Urge to sin')
    */
-  i?: {
+  i: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -699,7 +699,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`iframe`({ src: '/concupiscence' }, 'Sinful desire')
    */
-  iframe?: {
+  iframe: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLIFrameElement>
     (attrs: SinElement<HTMLIFrameElement>, children?: Children, context?: Context): View
   }
@@ -713,7 +713,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`img`({ src: '/original-sin.jpg' }, 'Inherited sinfulness')
    */
-  img?: {
+  img: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLImageElement>
     (attrs: SinElement<HTMLImageElement>, children?: Children, context?: Context): View
   }
@@ -727,7 +727,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`ins`({ cite: '/fallen' }, 'Post-sin state')
    */
-  ins?: {
+  ins: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLModElement>
     (attrs: SinElement<HTMLModElement>, children?: Children, context?: Context): View
   }
@@ -740,7 +740,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`kbd`({ class: 'guilt' }, 'Remorse for sin')
    */
-  kbd?: {
+  kbd: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -753,7 +753,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`label`({ for: 'wickedness' }, 'Evil conduct')
    */
-  label?: {
+  label: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLLabelElement>
     (attrs: SinElement<HTMLLabelElement>, children?: Children, context?: Context): View
   }
@@ -766,7 +766,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`legend`({ class: 'mercy' }, 'Divine compassion')
    */
-  legend?: {
+  legend: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLLegendElement>
     (attrs: SinElement<HTMLLegendElement>, children?: Children, context?: Context): View
   }
@@ -779,7 +779,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`li`({ class: 'faith' }, 'Trust in God')
    */
-  li?: {
+  li: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLLIElement>
     (attrs: SinElement<HTMLLIElement>, children?: Children, context?: Context): View
   }
@@ -792,7 +792,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`link`({ href: '/holiness.css' }, 'Divine purity')
    */
-  link?: {
+  link: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLLinkElement>
     (attrs: SinElement<HTMLLinkElement>, children?: Children, context?: Context): View
   }
@@ -805,7 +805,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`main`({ id: 'judgment' }, 'Divine reckoning')
    */
-  main?: {
+  main: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -818,7 +818,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`map`({ name: 'prayer' }, 'Speaking to God')
    */
-  map?: {
+  map: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLMapElement>
     (attrs: SinElement<HTMLMapElement>, children?: Children, context?: Context): View
   }
@@ -831,7 +831,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`mark`({ class: 'damnation' }, 'Eternal punishment')
    */
-  mark?: {
+  mark: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -844,7 +844,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`meta`({ name: 'redemption', content: 'salvation' }, 'Sin deliverance')
    */
-  meta?: {
+  meta: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLMetaElement>
     (attrs: SinElement<HTMLMetaElement>, children?: Children, context?: Context): View
   }
@@ -857,7 +857,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`meter`({ value: '0.5', id: 'penitent' }, 'Repentant state')
    */
-  meter?: {
+  meter: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLMeterElement>
     (attrs: SinElement<HTMLMeterElement>, children?: Children, context?: Context): View
   }
@@ -870,7 +870,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`nav`({ class: 'divinity' }, 'Godly nature')
    */
-  nav?: {
+  nav: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -883,7 +883,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`noscript`({ id: 'scripture' }, 'Holy writings')
    */
-  noscript?: {
+  noscript: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -897,7 +897,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`object`({ data: '/sermon.pdf' }, 'Preached message')
    */
-  object?: {
+  object: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLObjectElement>
     (attrs: SinElement<HTMLObjectElement>, children?: Children, context?: Context): View
   }
@@ -911,7 +911,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`ol`({ id: 'parable' }, 'Moral story')
    */
-  ol?: {
+  ol: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLOListElement>
     (attrs: SinElement<HTMLOListElement>, children?: Children, context?: Context): View
   }
@@ -925,7 +925,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`optgroup`({ label: 'virtue' }, 'Moral excellence')
    */
-  optgroup?: {
+  optgroup: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLOptGroupElement>
     (attrs: SinElement<HTMLOptGroupElement>, children?: Children, context?: Context): View
   }
@@ -939,7 +939,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`option`({ value: 'charity' }, 'Love and giving')
    */
-  option?: {
+  option: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLOptionElement>
     (attrs: SinElement<HTMLOptionElement>, children?: Children, context?: Context): View
   }
@@ -953,7 +953,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`output`({ for: 'hope' }, 'Faithful expectation')
    */
-  output?: {
+  output: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLOutputElement>
     (attrs: SinElement<HTMLOutputElement>, children?: Children, context?: Context): View
   }
@@ -966,7 +966,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`p`({ id: 'peace' }, 'Divine calm')
    */
-  p?: {
+  p: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLParagraphElement>
     (attrs: SinElement<HTMLParagraphElement>, children?: Children, context?: Context): View
   }
@@ -979,7 +979,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`param`({ name: 'eternity', value: 'forever' }, 'Endless time')
    */
-  param?: {
+  param: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLParamElement>
     (attrs: SinElement<HTMLParamElement>, children?: Children, context?: Context): View
   }
@@ -992,7 +992,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`picture`({ id: 'heaven' }, 'Divine realm')
    */
-  picture?: {
+  picture: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLPictureElement>
     (attrs: SinElement<HTMLPictureElement>, children?: Children, context?: Context): View
   }
@@ -1005,7 +1005,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`pre`({ class: 'hell' }, 'Place of torment')
    */
-  pre?: {
+  pre: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLPreElement>
     (attrs: SinElement<HTMLPreElement>, children?: Children, context?: Context): View
   }
@@ -1018,7 +1018,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`progress`({ value: '0.7', id: 'sanctity' }, 'Holiness progress')
    */
-  progress?: {
+  progress: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLProgressElement>
     (attrs: SinElement<HTMLProgressElement>, children?: Children, context?: Context): View
   }
@@ -1031,7 +1031,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`q`({ cite: '/gospel' }, 'Good news')
    */
-  q?: {
+  q: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLQuoteElement>
     (attrs: SinElement<HTMLQuoteElement>, children?: Children, context?: Context): View
   }
@@ -1045,7 +1045,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`rp`({ class: 'disciple' }, 'Follower of faith')
    */
-  rp?: {
+  rp: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1059,7 +1059,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`rt`({ class: 'prophet' }, 'Divine messenger')
    */
-  rt?: {
+  rt: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1072,7 +1072,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`ruby`({ id: 'messiah' }, 'Anointed one')
    */
-  ruby?: {
+  ruby: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1086,7 +1086,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`s`({ class: 'apocalypse' }, 'End times')
    */
-  s?: {
+  s: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1099,7 +1099,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`samp`({ id: 'revelation' }, 'Divine disclosure')
    */
-  samp?: {
+  samp: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1112,7 +1112,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`script`({ src: '/miracle.js' }, 'Divine act')
    */
-  script?: {
+  script: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLScriptElement>
     (attrs: SinElement<HTMLScriptElement>, children?: Children, context?: Context): View
   }
@@ -1125,7 +1125,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`section`({ id: 'trinity' }, 'Three in one')
    */
-  section?: {
+  section: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1138,7 +1138,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`select`({ name: 'creed' }, 'Statement of belief')
    */
-  select?: {
+  select: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLSelectElement>
     (attrs: SinElement<HTMLSelectElement>, children?: Children, context?: Context): View
   }
@@ -1151,7 +1151,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`small`({ class: 'altar' }, 'Sacred table')
    */
-  small?: {
+  small: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1164,7 +1164,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`source`({ src: '/psalm.mp3' }, 'Sacred song')
    */
-  source?: {
+  source: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLSourceElement>
     (attrs: SinElement<HTMLSourceElement>, children?: Children, context?: Context): View
   }
@@ -1177,7 +1177,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`span`({ id: 'deacon' }, 'Church servant')
    */
-  span?: {
+  span: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLSpanElement>
     (attrs: SinElement<HTMLSpanElement>, children?: Children, context?: Context): View
   }
@@ -1190,7 +1190,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`strong`({ class: 'bishop' }, 'Church overseer')
    */
-  strong?: {
+  strong: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1203,7 +1203,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`style`({ type: 'text/css', id: 'clergy' }, 'Religious leaders')
    */
-  style?: {
+  style: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLStyleElement>
     (attrs: SinElement<HTMLStyleElement>, children?: Children, context?: Context): View
   }
@@ -1216,7 +1216,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`sub`({ class: 'monk' }, 'Devoted ascetic')
    */
-  sub?: {
+  sub: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1229,7 +1229,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`summary`({ id: 'nun' }, 'Consecrated woman')
    */
-  summary?: {
+  summary: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1242,7 +1242,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`sup`({ class: 'priest' }, 'Sacred minister')
    */
-  sup?: {
+  sup: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1255,7 +1255,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`table`({ id: 'abbey' }, 'Monastic house')
    */
-  table?: {
+  table: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableElement>
     (attrs: SinElement<HTMLTableElement>, children?: Children, context?: Context): View
   }
@@ -1268,7 +1268,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`tbody`({ class: 'monastery' }, 'Religious community')
    */
-  tbody?: {
+  tbody: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableSectionElement>
     (attrs: SinElement<HTMLTableSectionElement>, children?: Children, context?: Context): View
   }
@@ -1281,7 +1281,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`td`({ id: 'cathedral' }, 'Bishop’s church')
    */
-  td?: {
+  td: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableCellElement>
     (attrs: SinElement<HTMLTableCellElement>, children?: Children, context?: Context): View
   }
@@ -1294,7 +1294,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`template`({ id: 'chapel' }, 'Small sanctuary')
    */
-  template?: {
+  template: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTemplateElement>
     (attrs: SinElement<HTMLTemplateElement>, children?: Children, context?: Context): View
   }
@@ -1307,7 +1307,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`textarea`({ name: 'shrine' }, 'Holy site')
    */
-  textarea?: {
+  textarea: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTextAreaElement>
     (attrs: SinElement<HTMLTextAreaElement>, children?: Children, context?: Context): View
   }
@@ -1320,7 +1320,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`tfoot`({ class: 'temple' }, 'Worship place')
    */
-  tfoot?: {
+  tfoot: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableSectionElement>
     (attrs: SinElement<HTMLTableSectionElement>, children?: Children, context?: Context): View
   }
@@ -1333,7 +1333,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`th`({ id: 'convent' }, 'Nuns’ residence')
    */
-  th?: {
+  th: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableCellElement>
     (attrs: SinElement<HTMLTableCellElement>, children?: Children, context?: Context): View
   }
@@ -1346,7 +1346,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`thead`({ class: 'basilica' }, 'Honored church')
    */
-  thead?: {
+  thead: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableSectionElement>
     (attrs: SinElement<HTMLTableSectionElement>, children?: Children, context?: Context): View
   }
@@ -1359,7 +1359,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`time`({ datetime: '2025-03-26', id: 'vigil' }, 'Watchful prayer')
    */
-  time?: {
+  time: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTimeElement>
     (attrs: SinElement<HTMLTimeElement>, children?: Children, context?: Context): View
   }
@@ -1372,7 +1372,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`title`({ id: 'rite' }, 'Ceremonial act')
    */
-  title?: {
+  title: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTitleElement>
     (attrs: SinElement<HTMLTitleElement>, children?: Children, context?: Context): View
   }
@@ -1385,7 +1385,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`tr`({ class: 'litany' }, 'Prayer series')
    */
-  tr?: {
+  tr: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTableRowElement>
     (attrs: SinElement<HTMLTableRowElement>, children?: Children, context?: Context): View
   }
@@ -1398,7 +1398,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`track`({ src: '/canticle.vtt' }, 'Sacred hymn')
    */
-  track?: {
+  track: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLTrackElement>
     (attrs: SinElement<HTMLTrackElement>, children?: Children, context?: Context): View
   }
@@ -1411,7 +1411,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`u`({ class: 'saint' }, 'Holy person')
    */
-  u?: {
+  u: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1425,7 +1425,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`ul`({ id: 'martyr' }, 'Faithful witness')
    */
-  ul?: {
+  ul: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLUListElement>
     (attrs: SinElement<HTMLUListElement>, children?: Children, context?: Context): View
   }
@@ -1439,7 +1439,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`var`({ class: 'pilgrim' }, 'Spiritual traveler')
    */
-  var?: {
+  var: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }
@@ -1453,7 +1453,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`video`({ src: '/relic.mp4' }, 'Sacred remnant')
    */
-  video?: {
+  video: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLVideoElement>
     (attrs: SinElement<HTMLVideoElement>, children?: Children, context?: Context): View
   }
@@ -1467,7 +1467,7 @@ export interface Tagged {
    * // Equivalent to the literal syntax
    * s`wbr`({ class: 'icon' }, 'Holy image')
    */
-  wbr?: {
+  wbr: {
     (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>; }
     (attrs: SinElement<HTMLElement>, children?: Children, context?: Context): View
   }

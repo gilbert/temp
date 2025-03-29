@@ -803,10 +803,6 @@ export interface AnchorAttrs<T extends HTMLAnchorElement> extends Attributes<T>
   target?: StringUnion<'_self' | '_blank' | '_parent' | '_top'>;
 
   /**
-   * @deprecated
-   */
-  foo?: boolean | 'true' | 'false'
-  /**
    * Indicates that the linked resource should be downloaded instead of navigated to when clicked.
    * The value specifies the suggested filename for the downloaded file. If omitted, the browser
    * navigates to the `href` URL instead of downloading. If the value is an empty string
