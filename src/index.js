@@ -781,7 +781,7 @@ class Stack {
       afterUpdates()
     }
 
-    const redraw = e => update(e, false, false)
+    const redraw = e => s.redrawing ? requestAnimationFrame(redraw) : update(e, false, false)
     const reload = e => {
       instance.onremoves && (instance.onremoves.forEach(x => x()), instance.onremoves = undefined)
       update(e, true)
