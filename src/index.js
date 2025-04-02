@@ -1004,6 +1004,8 @@ function attributes(dom, view, context) {
       updateAttribute(dom, view.attrs, 'value', prev && prev.value, view.attrs.value, create)
     }
   }
+  if (getName(view.tag) === 'option' && !create && hasOwn.call(view.attrs, 'selected') && dom.selected !== view.attrs.selected)
+    updateAttribute(dom, view.attrs, 'selected', dom.selected, view.attrs.selected, create)
 
   if (hasOwn.call(view.attrs, 'href') && (context.hydrating || !prev || prev.href !== view.attrs.href)) {
     value = view.attrs.href
