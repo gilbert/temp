@@ -54,6 +54,7 @@ async function fromArgs() {
       help      : 1,
       purge     : 1,
       remove    : 0,
+      script    : 1,
       start     : { $: true, script: 1, static: 1 },
       version   : 1,
       install   : 0,
@@ -120,6 +121,7 @@ async function fromArgs() {
       saveDev           : false,
       force             : false,
       coverage          : (x, xs) => (xs.nojail = true, x || false),
+      oneoffScript      : (_, xs) => xs.$[0] === 'script',
       script            : (_, xs) => xs.$[1] === 'script',
       static            : (_, xs) => xs.$[1] === 'static'
     },
@@ -150,7 +152,7 @@ async function fromArgs() {
 }
 
 function needsEntry(config) {
-  return !config.static && (env.SIN_BUILD || config.build || config.generate || config.develop || config.start || config.test)
+  return !config.static && (env.SIN_BUILD || config.build || config.generate || config.develop || config.start || config.test || config.oneoffScript)
 }
 
 export function getEntry(x, config) {
