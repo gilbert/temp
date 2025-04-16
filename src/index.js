@@ -782,16 +782,16 @@ class Stack {
       afterUpdates()
     }
 
-    const redraw = e => s.redrawing ? requestAnimationFrame(redraw) : update(e, false, false)
-    const reload = e => {
+    const redraw = s.event(e => s.redrawing ? requestAnimationFrame(redraw) : update(e, false, false))
+    const reload = s.event(e => {
       instance.onremoves && (instance.onremoves.forEach(x => x()), instance.onremoves = undefined)
       update(e, true)
-    }
-    const refresh = e => {
+    })
+    const refresh = s.event(e => {
       instance.onremoves && (instance.onremoves.forEach(x => x()), instance.onremoves = undefined)
       update(e, true, true)
       instance = this.xs[index]
-    }
+    })
     instance.context = Object.create(context, {
       hydrating: { value: context.hydrating, writable: true },
       onremove: { value: fn => { onremoves(instance, fn) } },
