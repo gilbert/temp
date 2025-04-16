@@ -1365,7 +1365,7 @@ function reset(x = [], ...xs) {
     img,video{max-width 100%;h auto}
     ol,ul,li{list-style none}
     body{min-height 100svh}
-    body{-webkit-font-smoothing: antialiased;text-rendering: optimizeLegibility;}
+    body{-webkit-font-smoothing:antialiased;text-rendering: optimizeLegibility;}
   `
 
   // These are more rare
