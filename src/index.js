@@ -649,10 +649,11 @@ function updateElement(
   view,
   context,
   parent,
-  create = dom === null || tagChanged(dom, view, context)
+  forceCreate
 ) {
   const previousNS = context.NS
   const tagName = getName(view.tag)
+  const create = forceCreate === true || dom === null || tagChanged(dom, view, context, tagName)
   if (view.attrs.xmlns || NS[tagName])
     context.NS = view.attrs.xmlns || NS[tagName]
 
@@ -666,7 +667,7 @@ function updateElement(
     context.NS = 'http://www.w3.org/1999/xhtml'
 
   const size = view.children && view.children.length
-  attributes(dom, view, context, create)
+  attributes(dom, view, context, tagName)
 
   size
     ? updates(dom, view.children, context)
@@ -685,11 +686,11 @@ function removeChildren(dom, parent) {
     dom = remove(dom, parent)
 }
 
-function tagChanged(dom, view, context) {
+function tagChanged(dom, view, context, tagName) {
   return (dom[$key] !== view.key && !context.hydrating) // eslint-disable-line
        || (context.NS
-         ? dom.nodeName !== getName(view.tag)
-         : dom.nodeName.toLowerCase() !== (getName(view.tag).toLowerCase() || 'div')
+         ? dom.nodeName !== tagName
+         : dom.nodeName.toLowerCase() !== (tagName.toLowerCase() || 'div')
        )
 }
 
@@ -961,7 +962,7 @@ function resolveError(instance, view, error) {
     : instance.error(error, view.attrs, view.children, instance.context)
 }
 
-function attributes(dom, view, context) {
+function attributes(dom, view, context, tagName) {
   let tag = view.tag
     , value
 
@@ -985,33 +986,33 @@ function attributes(dom, view, context) {
         dom[$deferrable] = view.attrs[attr]
       }
     } else if (!prev || prev[attr] !== view.attrs[attr]) {
-      updateAttribute(dom, view.attrs, attr, prev && prev[attr], view.attrs[attr], create)
+      updateAttribute(dom, view.attrs, attr, prev && prev[attr], view.attrs[attr], create, context)
     }
   }
 
   if (hasOwn.call(view.attrs, 'value')) {
-    if (!prev && getName(tag) === 'input' && dom.value !== '' + view.attrs.value) {
+    if (!prev && tagName === 'input' && dom.value !== '' + view.attrs.value) {
       let start
         , end
       if (dom === document.activeElement) {
         start = dom.selectionStart
         end = dom.selectionEnd
       }
-      updateAttribute(dom, view.attrs, 'value', dom.value, view.attrs.value, create)
+      updateAttribute(dom, view.attrs, 'value', dom.value, view.attrs.value, create, context)
       if (dom === document.activeElement && (dom.selectionStart !== start || dom.selectionEnd !== end))
         dom.setSelectionRange(start, end)
     } else if (!prev || prev.value !== view.attrs.value) {
-      updateAttribute(dom, view.attrs, 'value', prev && prev.value, view.attrs.value, create)
+      updateAttribute(dom, view.attrs, 'value', prev && prev.value, view.attrs.value, create, context)
     }
   }
-  if (getName(view.tag) === 'option' && !create && hasOwn.call(view.attrs, 'selected') && dom.selected !== view.attrs.selected)
-    updateAttribute(dom, view.attrs, 'selected', dom.selected, view.attrs.selected, create)
+  if (tagName === 'option' && !create && hasOwn.call(view.attrs, 'selected') && dom.selected !== view.attrs.selected)
+    updateAttribute(dom, view.attrs, 'selected', dom.selected, view.attrs.selected, create, context)
 
   if (hasOwn.call(view.attrs, 'href') && (context.hydrating || !prev || prev.href !== view.attrs.href)) {
     value = view.attrs.href
     const internal = !String(value).match(/^([a-z]+:|\/\/)/) && !view.attrs.target && !view.attrs.download
     internal && (value = cleanHref(view.attrs.href))
-    updateAttribute(dom, view.attrs, 'href', prev && prev.href, value, create)
+    updateAttribute(dom, view.attrs, 'href', prev && prev.href, value, create, context)
     if (value && internal) {
       view.attrs.href = s.route.prefix + value
       link(dom, view.attrs, context.route)
@@ -1174,7 +1175,7 @@ function giveLife(dom, attrs, children, context, life) {
   })
 }
 
-function updateAttribute(dom, attrs, attr, old, value, create) { // eslint-disable-line
+function updateAttribute(dom, attrs, attr, old, value, create, context) { // eslint-disable-line
   if (old === value)
     return
 
@@ -1184,7 +1185,7 @@ function updateAttribute(dom, attrs, attr, old, value, create) { // eslint-disab
 
   on
     ? value
-      ? addEvent(dom, attrs, attr)
+      ? addEvent(dom, attrs, attr, context)
       : removeEvent(dom, attr)
     : (
       setAttribute(dom, attr, value),
@@ -1222,16 +1223,16 @@ function removeEvent(dom, name) {
   dom.removeEventListener(name.slice(2), dom[$event])
 }
 
-function addEvent(dom, attrs, name) {
+function addEvent(dom, attrs, name, context) {
   dom.addEventListener(
     name.slice(2),
-    dom[$event] || (dom[$event] = handleEvent(dom))
+    dom[$event] || (dom[$event] = handleEvent(dom, attrs, context))
   )
 }
 
-function handleEvent(dom) {
+function handleEvent(dom, ...xs) {
   return {
-    handleEvent: e => callHandler(dom[$attr]['on' + e.type], e, dom)
+    handleEvent: e => callHandler(dom[$attr]['on' + e.type], e, dom, ...xs)
   }
 }
 
