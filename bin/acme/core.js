@@ -105,7 +105,7 @@ async function Acme({
     log('Create', rsa ? 'rsa' + rsa : 'ecdsa', 'order for', domains, 'using', ca)
     const request = await session(root, acmePair.privateKey, kid)
 
-    const { finalize, authorizations } = await request(request.dir.newOrder, {
+    const { finalize, authorizations, identifiers } = await request(request.dir.newOrder, {
       identifiers: domains.map(value => ({ type: 'dns', value }))
     }).then(x => x.json())
 
@@ -115,7 +115,7 @@ async function Acme({
     const dnsAuth = dns && getAuth(dns.auth, options.auth)
 
     for (const [i, auth] of authorizations.entries()) {
-      const domain = domains[i]
+      const domain = identifiers[i].value
       log('Request challenge for', domain)
 
       const challenge = (await request(auth, '').then(x => x.json())).challenges.find(x =>
