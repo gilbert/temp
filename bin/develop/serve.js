@@ -73,7 +73,7 @@ async function serve() {
 
     const html = wrap(x, {
       head,
-      body: config.noscript ? '' : '<script type=module async defer src="/' + src + '"></script>'
+      body: config.noscript ? '' : '<script type=module defer src="/' + src + '"></script>'
     })
 
     r.end(html, x.status || 200, x.headers)

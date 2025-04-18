@@ -1,2 +1,2 @@
-await import('../log.js')
-await import('./main.js')
+import '../log.js'
+import './main.js'

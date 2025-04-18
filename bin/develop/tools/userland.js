@@ -1,10 +1,8 @@
 import api from './api.js'
 
-const sinPath = '/node_modules/sin/src/index.js'
-const s = (await import(sinPath)).default
+import s from 'sin'
 
-const sharePath = '/node_modules/sin/src/shared.js'
-const { stackTrace } = (await import(sharePath))
+import { stackTrace } from '/node_modules/sin/src/shared.js'
 
 export default s
 
