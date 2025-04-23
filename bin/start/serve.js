@@ -103,7 +103,7 @@ function render(r) {
     x => {
       r.end(
         wrap(x, {
-          body: src ? '<script type=module src="/index.js?v=' + modified + '"></script>' : ''
+          body: src ? '<script>window.sinLastModified = "' + modified + '";</script><script type=module src="/index.js?v=' + modified + '"></script>' : ''
         }),
         x.status || 200,
         {
