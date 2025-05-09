@@ -1,9 +1,15 @@
-import type { StringUnion, Identity } from "./Utilities";
+import type { StringUnion } from "./Utilities";
 
 /**
  * HTTP Parameter Options
  */
 export interface Params<T = {}> {
+  /**
+   * Request URL
+   *
+   * @default undefined
+   */
+  url: string | URL
   /**
    * The request method
    *
@@ -42,7 +48,7 @@ export interface Params<T = {}> {
    *
    * @default {}
    */
-  query?: any;
+  query?: Record<string, string | number | boolean> | URLSearchParams;
   /**
    * The data to be serialized into the body (for other types of requests).
    *
@@ -67,12 +73,12 @@ export interface Params<T = {}> {
    *
    * @default {}
    */
-  headers?: { [header: string]: string };
+  headers?: Record<string, string>;
   /**
    * Exposes the underlying XMLHttpRequest object for low-level configuration and optional
    * replacement (by returning a new XHR).
    */
-  config?: (xhr: XMLHttpRequest) => undefined | void | XMLHttpRequest;
+  config?: (xhr: XMLHttpRequest) => void | XMLHttpRequest;
   /**
    * The amount of milliseconds a request can take before automatically being terminated.
    *
@@ -92,7 +98,7 @@ export interface Params<T = {}> {
  *
  * // etc etc
  */
-export declare class Methods {
+export interface Methods {
   /**
    * HTTP GET Request
    *
@@ -100,7 +106,10 @@ export declare class Methods {
    *
    * s.http.get('/api/path', {});
    */
-  static get<T>(url: string, params?: Omit<Params, 'method'>): Promise<T>;
+  get: {
+    <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+    <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+  }
   /**
    * HTTP POST Request
    *
@@ -108,7 +117,10 @@ export declare class Methods {
    *
    * s.http.post('/api/path', {});
    */
-  static post<T>(url: string, params?: Omit<Params, 'method'>): Promise<T>;
+  post: {
+    <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+    <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+  }
   /**
    * HTTP PUT Request
    *
@@ -116,7 +128,10 @@ export declare class Methods {
    *
    * s.http.put('/api/path', {});
    */
-  static put<T>(url: string, params?: Omit<Params, 'method'>): Promise<T>;
+  put: {
+    <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+    <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+  }
   /**
    * HTTP PATCH Request
    *
@@ -124,7 +139,10 @@ export declare class Methods {
    *
    * s.http.put('/api/path', {});
    */
-  static patch<T>(url: string, params?: Omit<Params, 'method'>): Promise<T>;
+  patch: {
+    <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+    <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+  }
   /**
    * HTTP DELETE Request
    *
@@ -132,7 +150,10 @@ export declare class Methods {
    *
    * s.http.delete('/api/path', {});
    */
-  static delete<T>(url: string, params?: Omit<Params, 'method'>): Promise<T>;
+  delete: {
+    <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+    <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+  }
   /**
    * HTTP HEAD Request
    *
@@ -140,16 +161,17 @@ export declare class Methods {
    *
    * s.http.head('/api/path', {});
    */
-  static head<T>(url: string, params?: Omit<Params, 'method'>): Promise<T>;
+  head: {
+    <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+    <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+  }
 }
 
 
 /**
- * #### HTTP Method/s
- *
  * Function type/s for the `s.http` method, including `s.http.get`, `s.http.post` etc.
  */
-export interface Http extends Identity<typeof Methods> {
+export interface Http extends Methods {
   /**
   * HTTP Request
   *
@@ -169,5 +191,6 @@ export interface Http extends Identity<typeof Methods> {
   *  config: (xhr) => {},
   * })
   */
-  <T>(url: string, params?: Params<T>): Promise<T>;
+  <T = any>(url: string, params?: Omit<Params<T>, 'url'>): Promise<T>;
+  <T = any>(params?: Params<T>): Promise<T>;
 }

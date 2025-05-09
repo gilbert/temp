@@ -1,4 +1,4 @@
-import { StringUnion } from "./Utilities";
+import type { StringUnion } from "./Utilities";
 
 export type ARIARole = StringUnion<
   | "alert"

@@ -1,11 +1,11 @@
 import type { View, Children } from "./View";
 import type { Live } from "./Live";
-import type { Route } from "./Route";
+import type { Attrs } from "./Utilities";
 
 /**
  * Sin Doc
  */
-export interface Doc {
+export type Doc = {
   /**
    * Set the documents `<html lang="">` value
    *
@@ -25,7 +25,7 @@ export interface Doc {
    *
    * ]))
    */
-  head: <Attrs = {}>(...nodes: Children<Attrs>) => View[];
+  head: (children: Children) => View;
   /**
    * Sets the document `<title>` value.
    *
@@ -48,7 +48,7 @@ export interface Doc {
    *  'x-request-with': 'sin'
    * })
    */
-  headers: Live<{ [header: string]: string }>
+  headers: Live<Record<string, string>>
   /**
    * Sets the HTTP Response status code
    *

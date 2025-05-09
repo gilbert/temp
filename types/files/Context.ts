@@ -4,7 +4,7 @@ import type { Route } from "./Route";
 /**
  * Sin Component Context
  */
-export interface Context {
+export type Context = {
   /**
    * Sin SSR (last modified date of `sin build`)
    */
@@ -57,7 +57,7 @@ export interface Context {
    */
   refresh: () => void;
   /**
-   * Reinitialize component, similar to updating `key` reference.
+   * Reloads the component, similar to updating `key` reference.
    *
    * > Use `reload()` to crucify and resurrect the component.
    *

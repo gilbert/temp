@@ -1,0 +1,13 @@
+{
+  "include": [
+    "./test/index.js",
+    "./test/defs/*.d.ts"
+  ],
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "typeRoots": [
+      "./test/defs"
+    ]
+  }
+}

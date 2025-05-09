@@ -1,320 +1,454 @@
 /**
- * ### Event Void
- *
+ * Sin `attrs` generic type default
+ */
+type Attrs = {};
+/**
+ * Returns boolean `true` is type is `null` otherwise `false`
+ */
+type isNull<T> = [T] extends [null] ? true : false;
+/**
+ * Returns boolean `true` is type is `never` otherwise `false`
+ */
+type isNever<T> = [T] extends [never] ? true : false;
+/**
+ * Returns boolean `true` is type is `unknown` otherwise `false`
+ */
+type isUnknown<T> = unknown extends T ? isNull<T> extends false ? true : false : false;
+/**
+ * Conditional Utility for checking `unknown` Type
+ */
+type ifUnknown<T, True, False> = isUnknown<T> extends true ? True : False;
+/**
+ * Conditional Utility for checking `unknown` Type
+ */
+type ifNever<T, True, False> = isNever<T> extends true ? True : False;
+/**
+ * Conditional Utility for checking whether `never` or `unknown` Type
+ */
+type isInferred<T, True, False> = ifUnknown<T, True, ifNever<T, True, False>>;
+/**
  * Callback type for element events
  */
-declare type Void = Promise<any> | any;
+type Void = void | Promise<void> | Promise<any> | any;
 /**
- * ### StringUnion
- *
  * Allows literal unions to persist without sacraficing auto-complete
  *
  * @example
  *
  * StringUnion<'devils' | 'advocate'> // default to string
  */
-declare type StringUnion<T> = T | (string & Record<never, never>);
+type StringUnion<T> = T | (string & Record<never, never>);
 /**
- * ### Identity
- *
- * Applies typed sugar casting, for class extended interfaces
- *
- * @example
- *
- * class Sinner {
- *
- *  static who: 'adam' | 'eve';
- *
- * }
- *
- * interface Garden extends Identity<typeof Sinner> { }
+ * Conditional check to see whether `K` exists in `T`
  */
-declare type Identity<T> = T;
+type Has<T, K extends string, True, False> = K extends keyof T ? True : False;
 /**
- * ### Template Literal
- *
  * Sugar assignment of `TemplateStringsArray`
  */
-interface Literal extends ReadonlyArray<string> {
-    readonly raw?: readonly string[];
+interface TagLiteral extends ReadonlyArray<string> {
+    readonly raw: readonly string[];
 }
-
-interface CSS {
-    (...params: any[]): {
-        name: string;
-        classes: string;
-        id: string;
-        args: any[];
-        vars: {};
-        parent: any;
-    };
-    alias: (k: any, v: any) => string | void;
-    reset: (x?: any[], ...xs: any[]) => any;
-    unit: (k: any, fn: any) => void | Map<any, any>;
-}
-interface Units {
-    /**
-     * The value of `name` and the CSS `property`
-     */
-    (name: string, callback: (value: string, property: string) => string): void;
-    (units: {
-        [name: string]: (value: string, property: string) => string;
-    }): void;
-}
-
 /**
- * HTTP Parameter Options
+ * TagLiteral Interpolation
  */
-interface Params$1<T = {}> {
+type Interpolate = any[];
+
+/**
+ * CSS Vars type value exposed on `tag.vars`
+ */
+type Vars = {
     /**
-     * The request method
+     * The CSS property name.
      *
-     * @default 'GET'
+     * > Will represent either the shorthand or native naming
      */
-    method?: StringUnion<'HEAD' | 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH'>;
+    property: string;
     /**
-     * Whether or not to apply redraw upon request resolution.
+     * The CSS applied unit (defaults to `px`)
      *
-     * @default true
+     * > If property name does not expect a numeric value this will be empty string
+     *
+     * @default ''
      */
-    redraw?: boolean;
+    unit: string;
     /**
-     * The XMLHttpRequest property responseType is an enumerated string value
-     * specifying the type of data contained in the response.
-     *
-     * @default ""
+     * The 0-based index occurence within the tagged literal expression
      */
-    responseType?: StringUnion<"" | 'arraybuffer' | 'blob' | 'document' | 'json' | 'text'>;
+    index: number;
     /**
-     * JSON Content
+     * Flags opacity transformation for CSS vars, which defaults to `false`.
+     * Value will be a function if an opacity modifier (e.g, `/50`) is detected.
      *
-     * @deprecated
-     * @default 'application/json'
+     * @default false
      */
-    json?: string;
+    transform: false | ((x: number | string) => string);
     /**
-     * Query Parameters
+     * Array of CSS function names (e.g, `['calc','translateY']` etc) that are
+     * applied to the CSS variable value, sliced from the parsing stack.
      *
-     * @default {}
+     * @default []
      */
-    query?: any;
+    fns: string[];
+};
+type CSS = {
     /**
-     * The data to be serialized into the body (for other types of requests).
+     * CSS Style Sheet - Write classes and define cascade specifics.
      *
-     * @default undefined
+     * @example
+     * // 𓋹 Blessed be the vain and holy aesthetic
+     *
+     * s.css`
+     *  .dark {
+     *    color hotpink
+     *    background black
+     *  }
+     * `
      */
-    body?: T;
+    (css: TagLiteral, ...interpolate: Interpolate): () => View;
+    (css: string): () => View;
     /**
-     * A username for HTTP authorization.
+     * Sets aliases for CSS media queries, feature supports or anything that is blocked scoped.
      *
-     * @default undefined
-     */
-    user?: string;
-    /**
-     * A password for HTTP authorization. This option is provided for XMLHttpRequest compatibility,
-     * but you should avoid using it because it sends the password in plain text over the network.
+     * @example
+     * // 𓋹 Decree the bounds and etch the queries
      *
-     * @default undefined
-     */
-    pass?: string;
-    /**
-     * Request headers
+     * s.css.alias({
+     *  mobile: '@media (max-width: 767px)',
+     *  tablet: '@media (max-width: 1200px)'
+     * });
      *
-     * @default {}
      */
-    headers?: {
-        [header: string]: string;
+    alias: {
+        (id: string, as: string): string;
+        (alias: Record<string, string>): string;
     };
     /**
-     * Exposes the underlying XMLHttpRequest object for low-level configuration and optional
-     * replacement (by returning a new XHR).
-     */
-    config?: (xhr: XMLHttpRequest) => undefined | void | XMLHttpRequest;
-    /**
-     * The amount of milliseconds a request can take before automatically being terminated.
+     * Applies global CSS Resets and/or overwrites.
      *
-     * @default 0
+     * > **PLEASE NOTE**
+     * >
+     * > Sin will apply a subset of normalisation resets
+     * > and merge with the provided cascades.
+     *
+     * @example
+     * // 𓋹 The sinners hand wipes clean the slate
+     *
+     * s.css.reset`
+     *  body {
+     *   ff Arial
+     *   fs 15
+     *  }
+     * `
      */
-    timeout?: number;
+    reset: {
+        (css: TagLiteral, ...interpolate: Interpolate): void;
+        (css: string): void;
+    };
+    /**
+     * CSS custom unit control
+     *
+     * @example
+     *
+     * // Option 1 - key > value
+     * s.css.unit('n', (value, property) => (x * .25) + 'rem' )
+     *
+     * // Option 2 - as object
+     * s.css.unit({ n: (value, property) => (x * .25) + 'rem' })
+     */
+    unit: {
+        (id: string, fn: (value: string, property: string) => string): void;
+        (units: Record<string, (value: string, property: string) => string>): void;
+    };
+};
+
+/**
+ * Child node [Primitive](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
+ */
+type Primitive = string | number | boolean | null | undefined;
+/**
+ * The child node of a component
+ */
+type Child = View | Primitive | Nodes;
+/**
+ * An array of {@link Children}
+ */
+interface Nodes extends Array<Children> {
 }
 /**
- * HTTP request method functions
+ * An array of nodes in a sin component
+ */
+type Children = Child | Nodes | [];
+/**
+ * Children of a component
+ */
+type Redraw = {
+    /**
+     * Asynchronous Redraws
+     */
+    (): void;
+    /**
+     * Force Redraw
+     */
+    force(): void;
+};
+/**
+ * Component view instance `{ tag }` interface
+ */
+type Tag = {
+    /**
+     * The `nodeName` of a DOM element, as per the markup case.
+     *
+     * @example
+     *
+     * const node = s`button`('Vain is the pride of the wicked');
+     *
+     * console.log(node.tag.name) // 'button'
+     */
+    readonly name: string;
+    /**
+     * The elements attribute `id=""` value
+     *
+     * @default
+     * ''
+     *
+     * @example
+     *
+     * const node = s`#sinner`('Seek Atonement');
+     *
+     * console.log(node.tag.id) // 'sinner'
+     */
+    readonly id: string;
+    /**
+     * The elements attribute `class=""` value. This value will
+     * hold reference to the CSS class name passed or sin shorthand
+     * expressions hash values.
+     *
+     * @default
+     * ''
+     *
+     * @example
+     *
+     * const a = s`a.xxx`('Lustful Intent');
+     * const b = s`a bc red`('Immorality');
+     *
+     * console.log(a.tag.classes) // 'xxx'
+     * console.log(b.tag.classes) // 's1n666' (hashed value)
+     */
+    readonly classes: string;
+    /**
+     * The `parent` tag reference.
+     *
+     * @default undefined
+     */
+    readonly parent: undefined | Tag;
+    /**
+     * Holds the raw tag template literal parameters
+     *
+     * > **NOTE**
+     * >
+     * > This is a readonly value that is primarily for internal usage
+     * > and has been derived from the parsing stack.
+     *
+     * @default
+     * [] // empty array when no interpolation
+     *
+     * @example
+     *
+     * const { tag } = s`h1 color ${'red'} h ${666}`('Sinner!');
+     *
+     * console.log(tag.args) // ['red', 666]
+     */
+    readonly args: any[];
+    /**
+     * Corresponding CSS Variables expressed in the tagged literal.
+     *
+     * > **NOTE**
+     * >
+     * > This is a readonly value that is primarily for internal usage
+     * > and has been derived from the parsing stack.
+     *
+     * @default
+     * {} // empty object if no vars
+     */
+    readonly vars: Record<`--${string}`, Vars>;
+};
+/**
+ * Sin components will return a View interface
  *
  * @example
  *
- * s.http.get()
- * s.http.post()
- * s.http.put()
- *
- * // etc etc
+ * s`button`('Hello Sinner!') // => View
  */
-declare class Methods {
+type View<T = any> = {
     /**
-     * HTTP GET Request
-     *
-     * @example
-     *
-     * s.http.get('/api/path', {});
+     * Sin Children (child nodes)
      */
-    static get<T>(url: string, params?: Omit<Params$1, 'method'>): Promise<T>;
+    readonly children?: Children;
     /**
-     * HTTP POST Request
-     *
-     * @example
-     *
-     * s.http.post('/api/path', {});
+     * Tag reference describing the syntactic markup on the node
      */
-    static post<T>(url: string, params?: Omit<Params$1, 'method'>): Promise<T>;
+    readonly tag?: Tag;
     /**
-     * HTTP PUT Request
-     *
-     * @example
-     *
-     * s.http.put('/api/path', {});
+     * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
      */
-    static put<T>(url: string, params?: Omit<Params$1, 'method'>): Promise<T>;
+    attrs: T;
     /**
-     * HTTP PATCH Request
-     *
-     * @example
-     *
-     * s.http.put('/api/path', {});
+     * The value used to map a DOM element to its respective item in an array of data.
      */
-    static patch<T>(url: string, params?: Omit<Params$1, 'method'>): Promise<T>;
-    /**
-     * HTTP DELETE Request
-     *
-     * @example
-     *
-     * s.http.delete('/api/path', {});
-     */
-    static delete<T>(url: string, params?: Omit<Params$1, 'method'>): Promise<T>;
-    /**
-     * HTTP HEAD Request
-     *
-     * @example
-     *
-     * s.http.head('/api/path', {});
-     */
-    static head<T>(url: string, params?: Omit<Params$1, 'method'>): Promise<T>;
-}
-/**
- * #### HTTP Method/s
- *
- * Function type/s for the `s.http` method, including `s.http.get`, `s.http.post` etc.
- */
-interface Http extends Identity<typeof Methods> {
-    /**
-    * HTTP Request
-    *
-    * @example
-    *
-    * s.http('/api/path', {
-    *  method: 'GET',
-    *  redraw: true,
-    *  responseType: 'json',
-    *  json: 'application/json',
-    *  query: {},
-    *  body: {},
-    *  user: '',
-    *  pass: '',
-    *  headers: {},
-    *  timeout: 0,
-    *  config: (xhr) => {},
-    * })
-    */
-    <T>(url: string, params?: Params$1<T>): Promise<T>;
-}
+    key: any;
+};
 
 /**
- * Function type for the `s.live` method,
+ * A reactive stream created by `s.live`, supporting any type.
  */
-interface Live<T = any> {
+interface Live<T> {
     /**
-     * Return the live value stream
+     * Get the current value if called with no arguments, or set a new value and return it.
      *
      * @example
+     * const sin = s.live(0)
+     * sin() // -> 0
+     * sin(1) // -> 1
      *
-     * s.live(10).value // => 10
+     * const name = s.live("loki")
+     * name() // -> "loki"
+     */
+    (value?: T): T;
+    /**
+     * The current value of the live stream.
+     *
+     * @example
+     * s.live(10).value // -> 10
+     * s.live("thor").value // -> "thor"
      */
     readonly value: T;
     /**
-     * ValueOf live stream
+     * Returns the value, enabling coercion in operations (e.g., `live + 1` for numbers).
      *
      * @example
-     *
-     * s.live(10).valueOf() // => 10
+     * const sin = s.live(10)
+     * sin.valueOf() // -> 10
+     * sin + 1 // -> 11 (when T is number)
      */
-    valueOf: <V = T>() => V;
+    valueOf(): T;
     /**
-     * Get and update the live value
+     * Returns the value for JSON serialization.
      *
      * @example
-     *
-     * s.live(10).get(x => x + 1) // => 11
+     * s.live(10).toJSON() // -> 10
      */
-    get: <V>(fn: (x: T) => V) => V;
+    toJSON(): T;
     /**
-     * Set the live value stream
+     * Returns the stringified value.
      *
      * @example
-     *
-     * s.live(10).set(20) // => 20
-     * s.live(10).set(x => x + 10) // => 20
+     * s.live(10).toString() // -> "10"
+     * s.live("loki").toString() // -> "loki"
      */
-    set: (x: T | ((x: T) => T)) => Live<T>;
+    toString(): string;
     /**
-     * Observe live value stream. Callback function will remove observer.
+     * Derive a new live value from a property or function.
      *
      * @example
-     *
-     * const fn = x => x + 1
-     *
-     * s.live.observe(fn)
-     * s.live.observe(fn, true) // observe once
-     * s.live.observe(fn)() // removes observer
+     * const a = s.live(10)
+     * a.get(x => x + 1)() // -> 11
+     * s.live({ name: "loki" }).get("name")() // -> "loki"
      */
-    observe: <V>(fn: (x: T) => V, once?: boolean) => () => boolean;
+    get<U>(x: keyof T | ((value: T) => U)): Live<U>;
     /**
-     * Live stream reducer function
+     * Set the value, either directly or via a function, returning a function that applies it.
      *
      * @example
+     * const sin = s.live(10)
+     * sin.set(20)() // -> sin with value 20
+     * sin.set(x => x + 10)() // -> sin with value 20
      *
-     * s.live.reduce((x, v, i) => x + v, 100);
-     *
+     * const name = s.live("loki")
+     * name.set("thor")() // -> name with value "thor"
      */
-    reduce: <A>(fn: <V = T>(acc: A, value: T, index?: number) => V, initial?: T) => Live<T>;
+    set(x: T | ((...args: any[]) => T)): (...args: any[]) => Live<T>;
     /**
-     * Detach live stream observer
+     * Observe value changes, returning a function to unsubscribe.
      *
      * @example
+     * const sin = s.live(0)
+     * const detach = sin.observe((newVal, oldVal) => console.log(newVal, oldVal))
+     * sin(1) // -> Logs: 1, 0
+     */
+    observe(fn: (newValue: T, oldValue: T, detach: () => void) => void, once?: boolean): () => boolean;
+    /**
+     * Detach observers (no-op if none).
      *
-     * s.live(10).detach();
+     * @example
+     * s.live(10).detach()
      */
     detach(): void;
     /**
-     * Live determination on whether or not value is equal to parameter.
+     * Reduce values into a new Live stream.
      *
      * @example
+     * const sin = s.live(0)
+     * const total = sin.reduce((acc, val) => acc + val, 0)
+     * sin(1) // -> total() becomes 1
      *
-     * const a = s.live(10);
-     * const b = a.set(100)();
-     *
-     * console.log([
-     *  a.if(200)(), // false
-     *  a.if(100)(), // true
-     *  b.if(300)()  // false
-     *  b.if(100)()  // true
-     * ]);
-     *
+     * const text = s.live("")
+     * const concat = text.reduce((acc, val) => acc + val, "prefix")
+     * text("x") // -> concat() becomes "prefixx"
      */
-    if: (...fn: Live<T>[]) => () => boolean;
+    reduce<U>(fn: (acc: U, value: T, index: number) => U, initial?: U): Live<U>;
+    /**
+     * Conditionally return a value based on equality.
+     *
+     * - No extra args: Returns Live<boolean> (true/false).
+     * - One extra arg: Returns Live<U | false>.
+     * - Two extra args: Returns Live<U | V>.
+     *
+     * @example
+     * const a = s.live(666)
+     * a.if(666)() // -> true
+     * a.if(777, 1)() // -> false
+     * a.if(777, 1, 0)() // -> 0
+     *
+     * const name = s.live("loki")
+     * name.if("loki")() // -> true
+     * name.if("thor", "yes", "no")() // -> "no"
+     */
+    if<U = true, V = false>(equals: T, a?: U, b?: V): [U, V] extends [undefined, undefined] ? Live<boolean> : [U] extends [undefined] ? Live<boolean> : Live<U | V>;
+}
+/**
+ * Static Live factory interface for any type, with numeric enhancement.
+ */
+interface LiveStatic {
+    /**
+     * Create a Live instance with an initial value and optional observers.
+     * Returns Live<T> & T when T is a number for arithmetic support.
+     *
+     * @example
+     * const sin = s.live(0)
+     * const name = s.live("loki")
+     */
+    <T>(value: T, ...observers: ((newValue: T, oldValue: T, detach: () => void) => void)[]): T extends number ? Live<T> & T : Live<T>;
+    /**
+     * Create a Live instance from other Live instances and a computation.
+     *
+     * @example
+     * const a = s.live(2)
+     * const b = s.live(3)
+     * const sum = s.live.from(a, b, (x, y) => x + y)
+     * sum() // -> 5
+     *
+     * const x = s.live("x")
+     * const y = s.live("y")
+     * const concat = s.live.from(x, y, (a, b) => a + b)
+     * concat() // -> "xy"
+     */
+    from<U>(...args: [...streams: Live<any>[], fn: (...values: any[]) => U]): U extends number ? Live<U> & U : Live<U>;
 }
 
 /**
  * Sin Doc
  */
-interface Doc {
+type Doc = {
     /**
      * Set the documents `<html lang="">` value
      *
@@ -334,7 +468,7 @@ interface Doc {
      *
      * ]))
      */
-    head: <Attrs = {}>(...nodes: Children<Attrs>) => View[];
+    head: (children: Children) => View;
     /**
      * Sets the document `<title>` value.
      *
@@ -357,9 +491,7 @@ interface Doc {
      *  'x-request-with': 'sin'
      * })
      */
-    headers: Live<{
-        [header: string]: string;
-    }>;
+    headers: Live<Record<string, string>>;
     /**
      * Sets the HTTP Response status code
      *
@@ -370,59 +502,29 @@ interface Doc {
      * s.status(301);
      */
     status: Live<number>;
-}
-
-type AutoCompleteUnion = StringUnion<'additional-name' | 'address-level1' | 'address-level2' | 'address-level3' | 'address-level4' | 'address-line1' | 'address-line2' | 'address-line3' | 'bday' | 'bday-year' | 'bday-day' | 'bday-month' | 'billing' | 'cc-additional-name' | 'cc-csc' | 'cc-exp' | 'cc-exp-month' | 'cc-exp-year' | 'cc-family-name' | 'cc-given-name' | 'cc-name' | 'cc-number' | 'cc-type' | 'country' | 'country-name' | 'current-password' | 'email' | 'family-name' | 'fax' | 'given-name' | 'home' | 'honorific-prefix' | 'honorific-suffix' | 'impp' | 'language' | 'mobile' | 'name' | 'new-password' | 'nickname' | 'off' | 'on' | 'organization' | 'organization-title' | 'pager' | 'photo' | 'postal-code' | 'sex' | 'shipping' | 'street-address' | 'tel-area-code' | 'tel' | 'tel-country-code' | 'tel-extension' | 'tel-local' | 'tel-local-prefix' | 'tel-local-suffix' | 'tel-national' | 'transaction-amount' | 'transaction-currency' | 'url' | 'username' | 'work'>;
+};
 
 /**
- * Extends the {@link View} `attrs` to include sin specific attributes.
- * Called by the {@link Attrs} namespace interface entries.
+ * Extended type reference of {@link HTMLElementTagNameMap} to support unknown keys
  */
-interface SinAttrs<T = HTMLElement> {
-    /**
-     * DOM Element render callback. Dom is a creation lifcycle hook which
-     * will call in the post rendering cycle of a sin view.
-     *
-     * > **TIP**
-     * >
-     * > Attach any third-party libraries or tools for the element via `root`
-     *
-     * @example
-     *
-     * s`button`({
-     *   dom: (root, attrs, children, context) => {
-     *     root.innerText = attrs.name
-     *   }
-     * })
-     */
-    dom?: <Attrs = {}>(
-    /**
-    * The DOM Element
-    */
-    root?: T, 
-    /**
-    * Element attributes
-    */
-    attrs?: Attrs, 
-    /**
-    * Parent Component Views
-    */
-    children?: View<Attrs>[], 
-    /**
-    * Component Context
-    */
-    context?: Context) => Promise<any> | any;
-    /**
-     * Waits for children using deferred removal
-     *
-     * @default false
-     */
-    deferrable?: boolean;
-    /**
-     * The value used to map a DOM element to its respective item in an array of data.
-     */
-    key?: any;
+interface HTMLTagElementMap extends HTMLElementTagNameMap {
+    [tag: string]: HTMLElement;
 }
+/**
+ * Literal union of {@link HTMLElementTagNameMap} keys
+ */
+type Selector = StringUnion<keyof HTMLElementTagNameMap>;
+/**
+ * Suffixed tag name extraction
+ */
+type Suffixed<T> = T extends `${infer Tag}${'.' | '#' | '['}${string}` ? Tag : T;
+/**
+ * Returns a HTML Element from {@link HTMLElementTagNameMap}
+ *
+ * > This will perform string operations and attempt to extract element names from
+ * > selector Hyperscript expressions
+ */
+type HTMLTagElement<T extends string> = Has<HTMLElementTagNameMap, T, HTMLTagElementMap[T], Has<HTMLElementTagNameMap, Suffixed<T>, HTMLTagElementMap[Suffixed<T>], HTMLElement>>;
 
 type ARIARole = StringUnion<"alert" | "alertdialog" | "application" | "article" | "banner" | "button" | "cell" | "checkbox" | "columnheader" | "combobox" | "complementary" | "contentinfo" | "definition" | "dialog" | "directory" | "document" | "figure" | "form" | "grid" | "gridcell" | "group" | "heading" | "img" | "link" | "list" | "listbox" | "listitem" | "main" | "mark" | "math" | "menu" | "menubar" | "menuitem" | "menuitemcheckbox" | "menuitemradio" | "navigation" | "note" | "option" | "presentation" | "progressbar" | "radio" | "radiogroup" | "region" | "row" | "rowgroup" | "rowheader" | "scrollbar" | "search" | "searchbox" | "separator" | "slider" | "spinbutton" | "status" | "suggestion" | "switch" | "tab" | "table" | "tablist" | "tabpanel" | "term" | "textbox" | "timer" | "toolbar" | "tooltip" | "tree" | "treegrid" | "treeitem">;
 /**
@@ -754,7 +856,18 @@ interface BusyARIA {
     ariaBusy?: boolean | "true" | "false";
 }
 
+type SetNonNullable<BaseType, Keys extends keyof BaseType = keyof BaseType> = {
+    [Key in keyof BaseType]: Key extends Keys ? NonNullable<BaseType[Key]> : BaseType[Key];
+};
+type EventHandler<T, E, A = any> = (this: T, event: SetNonNullable<Target<T, E>>, dom: T, attrs: A, children: Children, context: Context) => Void;
+/**
+ * Event DOM Target overrides - Ensures `event.target` returns HTMLElement.
+ */
 type Target<T, E> = E & {
+    /**
+     * Sin redraw control on user-event. - Set to `false` to prevent dom draws.
+     */
+    redraw: boolean;
     /**
      * Returns the `dom` of the attrs event.
      */
@@ -768,441 +881,441 @@ type Target<T, E> = E & {
      */
     readonly srcElement: T;
 };
-type Params<Event, DOM, Attrs> = [] | [event: Target<DOM, Event>] | [event: Target<DOM, Event>, dom: DOM] | [event: Target<DOM, Event>, dom: DOM, attrs: Attrs] | [event: Target<DOM, Event>, dom: DOM, attrs: Attrs, children: Children<DOM>] | [event: Target<DOM, Event>, dom: DOM, attrs: Attrs, children: Children<DOM>, context: Context];
 /**
  * Universal events that apply to all HTML elements
  */
-interface Listener<T extends HTMLElement = HTMLElement> {
-    /**
-     * Fires when the user aborts the download of a resource, such as a media element or fetch request.
-     *
-     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event)
-     */
-    onabort?: <Attrs = {}>(this: T, ...attrs: Params<UIEvent, T, Attrs>) => Void;
+interface DOMListen<T extends HTMLElement> {
     /**
      * Fires when a non-primary mouse button (e.g., middle or right) is clicked, typically used for auxiliary actions.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/auxclick_event)
      */
-    onauxclick?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onauxclick?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the object loses the input focus, such as when the user tabs away or clicks elsewhere.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/blur_event)
      */
-    onblur?: <Attrs = {}>(this: T, ...attrs: Params<FocusEvent, T, Attrs>) => Void;
+    onblur?: EventHandler<T, FocusEvent>;
     /**
      * Fires when the user clicks the left mouse button on the object, triggering a standard click action.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/click_event)
      */
-    onclick?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onclick?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the user clicks the right mouse button in the client area, opening the context menu.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/contextmenu_event)
      */
-    oncontextmenu?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    oncontextmenu?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the user double-clicks the object with the primary mouse button.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/dblclick_event)
      */
-    ondblclick?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    ondblclick?: EventHandler<T, MouseEvent>;
     /**
      * Fires when an error occurs during the loading of an object, such as an image, script, or media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/error_event)
      */
-    onerror?: OnErrorEventHandler;
+    onerror?: EventHandler<T, OnErrorEventHandler>;
     /**
      * Fires when the object receives input focus, such as when the user tabs to or clicks it.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focus_event)
      */
-    onfocus?: <Attrs = {}>(this: T, ...attrs: Params<FocusEvent, T, Attrs>) => Void;
+    onfocus?: EventHandler<T, FocusEvent>;
     /**
      * Fires when an element or one of its descendants receives focus, bubbling up through the DOM.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focusin_event)
      */
-    onfocusin?: <Attrs = {}>(this: T, ...attrs: Params<FocusEvent, T, Attrs>) => Void;
+    onfocusin?: EventHandler<T, FocusEvent>;
     /**
      * Fires when an element or one of its descendants loses focus, bubbling up through the DOM.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focusout_event)
      */
-    onfocusout?: <Attrs = {}>(this: T, ...attrs: Params<FocusEvent, T, Attrs>) => Void;
+    onfocusout?: EventHandler<T, FocusEvent>;
     /**
      * Fires when the user presses a key on the keyboard, including modifier keys.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keydown_event)
      */
-    onkeydown?: <Attrs = {}>(this: T, ...attrs: Params<FocusEvent, T, Attrs>) => Void;
+    onkeydown?: EventHandler<T, FocusEvent>;
     /**
      * Fires when the user presses an alphanumeric key. This event is deprecated; use `onkeydown` or `oninput` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keypress_event)
      */
-    onkeypress?: <Attrs = {}>(this: T, ...attrs: Params<FocusEvent, T, Attrs>) => Void;
+    onkeypress?: EventHandler<T, FocusEvent>;
     /**
      * Fires when the user releases a key on the keyboard.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keyup_event)
      */
-    onkeyup?: <Attrs = {}>(this: T, ...attrs: Params<FocusEvent, T, Attrs>) => Void;
+    onkeyup?: EventHandler<T, FocusEvent>;
     /**
      * Fires immediately after the browser fully loads an object, such as an image, script, or SVG element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGElement/load_event)
      */
-    onload?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onload?: EventHandler<T, Event>;
     /**
      * Fires when the user presses a mouse button down over the object, initiating a click or drag.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousedown_event)
      */
-    onmousedown?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onmousedown?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse pointer enters an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseenter_event)
      */
-    onmouseenter?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onmouseenter?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse pointer leaves an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseleave_event)
      */
-    onmouseleave?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onmouseleave?: EventHandler<T, MouseEvent>;
     /**
      * Fires continuously when the user moves the mouse pointer over the object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousemove_event)
      */
-    onmousemove?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onmousemove?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse pointer moves outside the boundaries of the object or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseout_event)
      */
-    onmouseout?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onmouseout?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse pointer moves into the object or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseover_event)
      */
-    onmouseover?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onmouseover?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the user releases a mouse button while the pointer is over the object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseup_event)
      */
-    onmouseup?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onmouseup?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse wheel is rotated. This event is deprecated; use `onwheel` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousewheel_event)
      */
-    onmousewheel?: <Attrs = {}>(this: T, ...attrs: Params<MouseEvent, T, Attrs>) => Void;
+    onmousewheel?: EventHandler<T, MouseEvent>;
     /**
      * Fires when a pointer interaction (e.g., touch or pen) is interrupted, such as lifting a finger unexpectedly.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointercancel_event)
      */
-    onpointercancel?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onpointercancel?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer (e.g., mouse, touch, or pen) is pressed down on an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerdown_event)
      */
-    onpointerdown?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onpointerdown?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer enters an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerenter_event)
      */
-    onpointerenter?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onpointerenter?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer leaves an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerleave_event)
      */
-    onpointerleave?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onpointerleave?: EventHandler<T, PointerEvent>;
     /**
      * Fires continuously when a pointer moves over an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointermove_event)
      */
-    onpointermove?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onpointermove?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer moves out of an element or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerout_event)
      */
-    onpointerout?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onpointerout?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer moves into an element or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerover_event)
      */
-    onpointerover?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onpointerover?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer is released over an element, such as lifting a finger or mouse button.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerup_event)
      */
-    onpointerup?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onpointerup?: EventHandler<T, PointerEvent>;
     /**
      * Fires when the user repositions the scroll box in a scrollable element, indicating scrolling activity.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/scroll_event)
      */
-    onscroll?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onscroll?: EventHandler<T, Event>;
     /**
      * Fires when scrolling has stopped in a scrollable element, after the user finishes scrolling.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/scrollend_event)
      */
-    onscrollend?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onscrollend?: EventHandler<T, Event>;
     /**
      * Fires when a touch interaction is interrupted, such as lifting a finger unexpectedly during a gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchcancel_event)
      */
-    ontouchcancel?: <Attrs = {}>(this: T, ...attrs: Params<TouchEvent, T, Attrs>) => Void;
+    ontouchcancel?: EventHandler<T, TouchEvent>;
     /**
      * Fires when a touch point is removed from an element, such as lifting a finger from the screen.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchend_event)
      */
-    ontouchend?: <Attrs = {}>(this: T, ...attrs: Params<TouchEvent, T, Attrs>) => Void;
+    ontouchend?: EventHandler<T, TouchEvent>;
     /**
      * Fires continuously when a touch point moves over an element during a touch gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchmove_event)
      */
-    ontouchmove?: <Attrs = {}>(this: T, ...attrs: Params<TouchEvent, T, Attrs>) => Void;
+    ontouchmove?: EventHandler<T, TouchEvent>;
     /**
      * Fires when a touch point contacts an element, initiating a touch gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchstart_event)
      */
-    ontouchstart?: <Attrs = {}>(this: T, ...attrs: Params<TouchEvent, T, Attrs>) => Void;
+    ontouchstart?: EventHandler<T, TouchEvent>;
     /**
      * Fires when the window is about to be unloaded, such as when the user closes the tab or navigates away.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/unload_event)
      */
-    onunload?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onunload?: EventHandler<T, Event>;
     /**
      * Fires when the mouse wheel or trackpad is scrolled over an element, providing delta values for scroll direction.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/wheel_event)
      */
-    onwheel?: <Attrs = {}>(this: T, ...attrs: Params<WheelEvent, T, Attrs>) => Void;
+    onwheel?: EventHandler<T, WheelEvent>;
 }
 /**
  * Media-specific events (for <audio>, <video>)
  */
-interface MediaListeners<T extends HTMLElement = HTMLElement> {
+interface MediaListeners<T extends HTMLElement> {
     /**
-     * Occurs when playback is possible for a media element, but further buffering may be required to continue without interruption.
+     * Fires when the user aborts the download of a resource, such as a media element or fetch request.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event)
+     */
+    onabort?: EventHandler<T, UIEvent>;
+    /**
+     * Occurs when playback is possible for a media element, but further buffering may be required to
+     * continue without interruption.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplay_event)
      */
-    oncanplay?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    oncanplay?: EventHandler<T, Event>;
     /**
      * Occurs when a media element can play through to the end without requiring additional buffering.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event)
      */
-    oncanplaythrough?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    oncanplaythrough?: EventHandler<T, Event>;
     /**
      * Occurs when the duration attribute of a media element is updated, reflecting a change in media length.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/durationchange_event)
      */
-    ondurationchange?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    ondurationchange?: EventHandler<T, Event>;
     /**
      * Occurs when a media element is reset to its initial state, typically after its source is cleared.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/emptied_event)
      */
-    onemptied?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onemptied?: EventHandler<T, Event>;
     /**
      * Occurs when playback of a media element reaches its end.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ended_event)
      */
-    onended?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onended?: EventHandler<T, Event>;
     /**
      * Occurs when media data is loaded at the current playback position of a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadeddata_event)
      */
-    onloadeddata?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onloadeddata?: EventHandler<T, Event>;
     /**
      * Occurs when the duration and dimensions of a media element have been determined during loading.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadedmetadata_event)
      */
-    onloadedmetadata?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onloadedmetadata?: EventHandler<T, Event>;
     /**
      * Occurs when the browser begins looking for media data, marking the start of the loading process.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadstart_event)
      */
-    onloadstart?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onloadstart?: EventHandler<T, Event>;
     /**
      * Occurs when playback of a media element is paused, either by the user or programmatically.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/pause_event)
      */
-    onpause?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onpause?: EventHandler<T, Event>;
     /**
      * Occurs when playback of a media element is requested via the `play()` method, before it actually starts.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play_event)
      */
-    onplay?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onplay?: EventHandler<T, Event>;
     /**
      * Occurs when a media element has started playing, after buffering and any delays.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/playing_event)
      */
-    onplaying?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onplaying?: EventHandler<T, Event>;
     /**
      * Occurs periodically to indicate progress while downloading media data for a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/progress_event)
      */
-    onprogress: (ev: ProgressEvent) => void;
+    onprogress?: EventHandler<T, ProgressEvent>;
     /**
      * Occurs when the playback rate of a media element changes, such as speeding up or slowing down.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ratechange_event)
      */
-    onratechange?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onratechange?: EventHandler<T, Event>;
     /**
      * Occurs when a seek operation on a media element completes, positioning playback at the new time.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeked_event)
      */
-    onseeked?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onseeked?: EventHandler<T, Event>;
     /**
      * Occurs when a seek operation begins on a media element, moving the playback position.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeking_event)
      */
-    onseeking?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onseeking?: EventHandler<T, Event>;
     /**
      * Occurs when media download stalls due to insufficient data or network issues.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/stalled_event)
      */
-    onstalled?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onstalled?: EventHandler<T, Event>;
     /**
      * Occurs when media loading is intentionally suspended, such as when the browser pauses a download.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/suspend_event)
      */
-    onsuspend?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onsuspend?: EventHandler<T, Event>;
     /**
      * Occurs periodically to report the current playback position of a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/timeupdate_event)
      */
-    ontimeupdate?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    ontimeupdate?: EventHandler<T, Event>;
     /**
      * Occurs when the volume of a media element changes, including muting or unmuting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/volumechange_event)
      */
-    onvolumechange?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onvolumechange?: EventHandler<T, Event>;
     /**
      * Occurs when playback stops because the next frame of a media resource is unavailable, requiring buffering.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waiting_event)
      */
-    onwaiting?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onwaiting?: EventHandler<T, Event>;
 }
 /**
  * Form-specific events (for <form>, <input>, <select>, <textarea>)
  */
-interface FormListeners<T extends HTMLElement = HTMLElement> {
+interface FormListeners<T extends HTMLElement> {
     /**
      * Fires before an input element’s value is modified, allowing cancellation or modification of the input.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/beforeinput_event)
      */
-    onbeforeinput?: (ev: InputEvent) => void;
+    onbeforeinput?: EventHandler<T, InputEvent>;
     /**
      * Fires when the contents of an input element or selection have changed, such as after a user modifies a form field.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event)
      */
-    onchange?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onchange?: EventHandler<T, Event>;
     /**
      * Fires when content is copied to the clipboard, allowing modification or cancellation of the operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/copy_event)
      */
-    oncopy?: (ev: ClipboardEvent) => void;
+    oncopy?: EventHandler<T, ClipboardEvent>;
     /**
      * Fires when content is cut to the clipboard, allowing modification or cancellation of the operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/cut_event)
      */
-    oncut?: (ev: ClipboardEvent) => void;
+    oncut?: EventHandler<T, ClipboardEvent>;
     /**
      * Fires when a form’s data is being constructed, allowing modification of the `FormData` object before submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/formdata_event)
      */
-    onformdata?: (ev: FormDataEvent) => void;
+    onformdata?: EventHandler<T, FormDataEvent>;
     /**
      * Fires when the value of an input element changes due to user input, such as typing or pasting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/input_event)
      */
-    oninput?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    oninput?: EventHandler<T, Event>;
     /**
      * Fires when an input element’s value fails validation constraints upon form submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLInputElement/invalid_event)
      */
-    oninvalid?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    oninvalid?: EventHandler<T, Event>;
     /**
      * Fires when content is pasted from the clipboard into an element, allowing modification of the pasted data.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/paste_event)
      */
-    onpaste?: (ev: ClipboardEvent) => void;
+    onpaste?: EventHandler<T, ClipboardEvent>;
     /**
      * Fires when the user resets a form, restoring its fields to their default values.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/reset_event)
      */
-    onreset?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onreset?: EventHandler<T, Event>;
     /**
      * Fires when the current text selection changes within an input or textarea element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLInputElement/select_event)
      */
-    onselect?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onselect?: EventHandler<T, Event>;
     /**
      * Fires when the document’s text selection changes, such as selecting or deselecting text.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/selectionchange_event)
      */
-    onselectionchange?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onselectionchange?: EventHandler<T, Event>;
     /**
      * Fires when the user begins selecting text or content within an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/selectstart_event)
      */
-    onselectstart?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onselectstart?: EventHandler<T, Event>;
     /**
      * Fires when a form is submitted, either by user action or programmatically, allowing validation or cancellation.
      *
@@ -1213,246 +1326,1270 @@ interface FormListeners<T extends HTMLElement = HTMLElement> {
 /**
  * Drag-and-drop events (for draggable elements)
  */
-interface DragListeners<T extends HTMLElement = HTMLElement> {
+interface DragListeners<T extends HTMLElement> {
     /**
      * Fires on the source object continuously during a drag operation while the user moves the dragged item.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event)
      */
-    ondrag?: <Attrs = {}>(this: T, ...attrs: Params<DragEvent, T, Attrs>) => Void;
+    ondrag?: EventHandler<T, DragEvent>;
     /**
      * Fires on the source object when the user releases the mouse at the end of a drag operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event)
      */
-    ondragend?: <Attrs = {}>(this: T, ...attrs: Params<DragEvent, T, Attrs>) => Void;
+    ondragend?: EventHandler<T, DragEvent>;
     /**
      * Fires on the target element when the user drags an object into a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event)
      */
-    ondragenter?: <Attrs = {}>(this: T, ...attrs: Params<DragEvent, T, Attrs>) => Void;
+    ondragenter?: EventHandler<T, DragEvent>;
     /**
      * Fires on the target object when the user moves the dragged item out of a valid drop target during a drag operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event)
      */
-    ondragleave?: <Attrs = {}>(this: T, ...attrs: Params<DragEvent, T, Attrs>) => Void;
+    ondragleave?: EventHandler<T, DragEvent>;
     /**
      * Fires on the target element continuously while the user drags an object over a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event)
      */
-    ondragover?: <Attrs = {}>(this: T, ...attrs: Params<DragEvent, T, Attrs>) => Void;
+    ondragover?: EventHandler<T, DragEvent>;
     /**
      * Fires on the source object when the user starts dragging a text selection or selected object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event)
      */
-    ondragstart?: <Attrs = {}>(this: T, ...attrs: Params<DragEvent, T, Attrs>) => Void;
+    ondragstart?: EventHandler<T, DragEvent>;
     /**
      * Fires on the target element when the user drops a dragged object onto a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/drop_event)
      */
-    ondrop?: <Attrs = {}>(this: T, ...attrs: Params<DragEvent, T, Attrs>) => Void;
+    ondrop?: EventHandler<T, DragEvent>;
 }
 /**
  * Animation and transition events (for styled elements)
  */
-interface AnimationListeners<T extends HTMLElement = HTMLElement> {
+interface AnimationListeners<T extends HTMLElement> {
     /**
      * Fires when an animation is aborted unexpectedly, such as when the element is removed from the DOM before completion.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationcancel_event)
      */
-    onanimationcancel?: <Attrs = {}>(this: T, ...attrs: Params<AnimationEvent, T, Attrs>) => Void;
+    onanimationcancel?: EventHandler<T, AnimationEvent>;
     /**
      * Fires when a CSS animation completes successfully, after all iterations have finished.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationend_event)
      */
-    onanimationend?: <Attrs = {}>(this: T, ...attrs: Params<AnimationEvent, T, Attrs>) => Void;
+    onanimationend?: EventHandler<T, AnimationEvent>;
     /**
      * Fires when a CSS animation completes a single iteration, but only if the animation has multiple iterations.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event)
      */
-    onanimationiteration?: <Attrs = {}>(this: T, ...attrs: Params<AnimationEvent, T, Attrs>) => Void;
+    onanimationiteration?: EventHandler<T, AnimationEvent>;
     /**
      * Fires when a CSS animation begins, after any delay specified in the animation has elapsed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationstart_event)
      */
-    onanimationstart?: <Attrs = {}>(this: T, ...attrs: Params<AnimationEvent, T, Attrs>) => Void;
+    onanimationstart?: EventHandler<T, AnimationEvent>;
     /**
      * Fires when a CSS transition is cancelled before completion, such as when a property is removed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitioncancel_event)
      */
-    ontransitioncancel?: <Attrs = {}>(this: T, ...attrs: Params<TransitionEvent, T, Attrs>) => Void;
+    ontransitioncancel?: EventHandler<T, TransitionEvent>;
     /**
      * Fires when a CSS transition completes successfully, after reaching its end state.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionend_event)
      */
-    ontransitionend?: <Attrs = {}>(this: T, ...attrs: Params<TransitionEvent, T, Attrs>) => Void;
+    ontransitionend?: EventHandler<T, TransitionEvent>;
     /**
      * Fires when a CSS transition is first scheduled to run, before it actually starts.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionrun_event)
      */
-    ontransitionrun?: <Attrs = {}>(this: T, ...attrs: Params<TransitionEvent, T, Attrs>) => Void;
+    ontransitionrun?: EventHandler<T, TransitionEvent>;
     /**
      * Fires when a CSS transition begins, after any delay has elapsed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionstart_event)
      */
-    ontransitionstart?: <Attrs = {}>(this: T, ...attrs: Params<TransitionEvent, T, Attrs>) => Void;
+    ontransitionstart?: EventHandler<T, TransitionEvent>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationend`. It is deprecated; use `onanimationend` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationend_event)
      */
-    onwebkitanimationend?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onwebkitanimationend?: EventHandler<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationiteration`. It is deprecated; use `onanimationiteration` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event)
      */
-    onwebkitanimationiteration?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onwebkitanimationiteration?: EventHandler<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationstart`. It is deprecated; use `onanimationstart` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationstart_event)
      */
-    onwebkitanimationstart?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onwebkitanimationstart?: EventHandler<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `ontransitionend`. It is deprecated; use `ontransitionend` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionend_event)
      */
-    onwebkittransitionend?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onwebkittransitionend?: EventHandler<T, Event>;
 }
 /**
  * Canvas-specific events
  */
-interface CanvasListeners<T extends HTMLElement = HTMLElement> {
+interface CanvasListeners<T extends HTMLElement> {
     /**
      * Fires when a WebGL context is lost, typically due to hardware or driver issues, requiring reinitialization.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/webglcontextlost_event)
      */
-    oncontextlost?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    oncontextlost?: EventHandler<T, Event>;
     /**
      * Fires when a lost WebGL context is restored, allowing rendering to resume on a `<canvas>` element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextrestored_event)
      */
-    oncontextrestored?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    oncontextrestored?: EventHandler<T, Event>;
 }
 /**
  * Dialog-specific events
  */
-interface DialogListeners<T extends HTMLElement = HTMLElement> {
+interface DialogListeners<T extends HTMLElement> {
     /**
      * Fires when a dialog or similar cancellable action is aborted by the user, such as pressing Esc in a `<dialog>`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/cancel_event)
      */
-    oncancel?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    oncancel?: EventHandler<T, Event>;
     /**
      * Fires when a `<dialog>` element is closed, either by the user or programmatically.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/close_event)
      */
-    onclose?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onclose?: EventHandler<T, Event>;
 }
 /**
  * Details-specific events
  */
-interface DetailsListeners<T extends HTMLElement = HTMLElement> {
+interface DetailsListeners<T extends HTMLElement> {
     /**
      * Fires when a `<details>` element’s open state toggles, either opening or closing the details.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLDetailsElement/toggle_event)
      */
-    ontoggle?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    ontoggle?: EventHandler<T, Event>;
 }
 /**
  * Track-specific events
  */
-interface TrackListeners<T extends HTMLElement = HTMLElement> {
+interface TrackListeners<T extends HTMLElement> {
     /**
      * Fires when a text track cue changes, such as in a `<track>` element for subtitles or captions.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/cuechange_event)
      */
-    oncuechange?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    oncuechange?: EventHandler<T, Event>;
 }
 /**
  * Video-specific events (extends MediaListeners)
  */
-interface VideoListeners<T extends HTMLElement = HTMLElement> extends MediaListeners<T> {
+interface VideoListeners<T extends HTMLElement> extends MediaListeners<T> {
     /**
      * Fires when a video element’s intrinsic size changes, such as when new metadata is loaded.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/resize_event)
      */
-    onresize?: <Attrs = {}>(this: T, ...attrs: Params<UIEvent, T, Attrs>) => Void;
+    onresize?: EventHandler<T, UIEvent>;
 }
 /**
  * Popover-specific events (for elements with popover attribute)
  */
-interface PopoverListeners<T extends HTMLElement = HTMLElement> {
+interface PopoverListeners<T extends HTMLElement> {
     /**
      * Fires just before an element’s `popover` state toggles (e.g., before showing or hiding a popover).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/beforetoggle_event)
      */
-    onbeforetoggle?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    onbeforetoggle?: EventHandler<T, Event>;
     /**
      * Fires when an element’s `popover` state toggles (e.g., showing or hiding a popover).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/toggle_event)
      */
-    ontoggle?: <Attrs = {}>(this: T, ...attrs: Params<Event, T, Attrs>) => Void;
+    ontoggle?: EventHandler<T, Event>;
 }
 /**
  * Pointer capture-specific events (for elements using pointer capture)
  */
-interface PointerListeners<T extends HTMLElement = HTMLElement> {
+interface PointerListeners<T extends HTMLElement> {
     /**
      * Fires when an element captures a pointer (e.g., mouse or touch) after a `setPointerCapture` call.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event)
      */
-    ongotpointercapture?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    ongotpointercapture?: EventHandler<T, PointerEvent>;
     /**
      * Fires when an element loses pointer capture, such as when released via `releasePointerCapture`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/lostpointercapture_event)
      */
-    onlostpointercapture?: <Attrs = {}>(this: T, ...attrs: Params<PointerEvent, T, Attrs>) => Void;
+    onlostpointercapture?: EventHandler<T, PointerEvent>;
 }
 /**
  * Security policy violation event (for elements affected by CSP)
  */
-interface SecurityListeners<T extends HTMLElement = HTMLElement> {
+interface SecurityListeners<T extends HTMLElement> {
     /**
      * Fires when a Content Security Policy violation occurs, such as an attempt to load a blocked resource.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/securitypolicyviolation_event)
      */
-    onsecuritypolicyviolation?: <Attrs = {}>(this: T, event?: SecurityPolicyViolationEvent, dom?: T, attrs?: Attrs, children?: Children<T>, context?: Context) => Void;
+    onsecuritypolicyviolation?: EventHandler<T, SecurityPolicyViolationEvent>;
 }
 
 /**
- * Data Attributes
+ * Extends the {@link View} `attrs` to include sin specific attributes.
+ * Called by the {@link Attrs} namespace interface entries.
  */
-type DataAttributes = Record<`data-${string}`, string | number | boolean | null | undefined>;
-interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, AriaAttrs, SinAttrs<T>, Listener<T>, PointerListeners<T>, PopoverListeners<T> {
+interface SinAttributes<T extends HTMLElement> {
     /**
+     * DOM Element render callback. Dom is a creation lifcycle hook which
+     * will call in the post rendering cycle of a sin view.
+     *
+     * > **TIP**
+     * >
+     * > Attach any third-party libraries or tools for the element via `root`
+     *
+     * @example
+     *
+     * s`button`({
+     *   dom: (root, attrs, children, context) => {
+     *     root.innerText = attrs.name
+     *   }
+     * })
+     */
+    dom?: ((element: T, attrs?: Attrs, children?: Children, context?: Context) => Promise<any> | any) | Array<(element: T, attrs?: Attrs, children?: Children, context?: Context) => Promise<any> | any>;
+    /**
+      /**
+       * Waits for children using deferred removal
+       *
+       * @default false
+       */
+    deferrable?: boolean;
+    /**
+     * The value used to map a DOM element to its respective item in an array of data.
+     */
+    key?: any;
+}
+type AutoCompleteUnion = StringUnion<'additional-name' | 'address-level1' | 'address-level2' | 'address-level3' | 'address-level4' | 'address-line1' | 'address-line2' | 'address-line3' | 'bday' | 'bday-year' | 'bday-day' | 'bday-month' | 'billing' | 'cc-additional-name' | 'cc-csc' | 'cc-exp' | 'cc-exp-month' | 'cc-exp-year' | 'cc-family-name' | 'cc-given-name' | 'cc-name' | 'cc-number' | 'cc-type' | 'country' | 'country-name' | 'current-password' | 'email' | 'family-name' | 'fax' | 'given-name' | 'home' | 'honorific-prefix' | 'honorific-suffix' | 'impp' | 'language' | 'mobile' | 'name' | 'new-password' | 'nickname' | 'off' | 'on' | 'organization' | 'organization-title' | 'pager' | 'photo' | 'postal-code' | 'sex' | 'shipping' | 'street-address' | 'tel-area-code' | 'tel' | 'tel-country-code' | 'tel-extension' | 'tel-local' | 'tel-local-prefix' | 'tel-local-suffix' | 'tel-national' | 'transaction-amount' | 'transaction-currency' | 'url' | 'username' | 'work'>;
+/**
+ * **HTML Attributes**
+ *
+ * This interface inherits all DOM Element attributes and is used as a definitive
+ * fallback, presenting all possible tag attributes to sin components. Developers
+ * who provide generics to sin tagged literals in TypeScript runtimes can narrow
+ * intelliSense far better than those in JavaScript runtimes.
+ *
+ * The reason for such an exhaustive interface is due TypeScript limitation around
+ * handling of tagged literals via {@link TemplateStringsArray} which prevents type
+ * extraction and renders parse tag name analysis impossible.
+ */
+interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, BusyARIA, FormARIA, InteractiveARIA, ModalARIA, ProgressARIA, StructuralARIA, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<T>, MediaListeners<T>, PointerListeners<T>, PopoverListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T> {
+    /**
+     * - {@link InputAttributes}
+     *
+     * Specifies file types accepted for `<input>` elements with `type="file"` (e.g., `image/*`, `.pdf`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-accept)
+     */
+    accept?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link LinkAttributes}
+     * - {@link ImageAttributes}
+     * - {@link ScriptAttributes}
+     * - {@link VideoAttributes}
+     *
+     * Specifies how the element handles cross-origin requests when fetching resources.
+     * Valid values are:
+     *
+     * > `anonymous`
+     * >
+     * > Sends the request without credentials (e.g., cookies or HTTP authentication).
+     *
+     * > `use-credentials`
+     * >
+     * > Sends the request with credentials, if applicable.
+     *
+     * If omitted, defaults to `anonymous`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/link#attr-crossorigin)
+     */
+    crossOrigin?: StringUnion<"anonymous" | "use-credentials">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link LinkAttributes}
+     *
+     * Specifies the type of content being linked or embedded (e.g., `audio`, `script`, `video/mp4`).
+     * Helps the browser prioritize resource loading or handling.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/link#attr-as)
+     */
+    as?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ScriptAttributes}
+     *
+     * Indicates that the script should be executed asynchronously. Use `true` or an empty string.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-async)
+     */
+    async?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link ImageAttributes}
+     * - {@link AreaAttributes}
+     *
+     * Alternate text for `<input type="image">`, `<img>`, or `<area>` elements, displayed if the image fails to load
+     * or for accessibility (e.g., screen readers). Should describe the content or purpose.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-alt)
+     */
+    alt?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link VideoAttributes}
+     * - {@link AudioAttributes}
+     *
+     * Indicates that media playback should start automatically. Use `true` or an empty string.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-autoplay)
+     */
+    autoplay?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link Attributes}
+     *
+     * Controls whether inputted text is automatically capitalized. Valid values are:
+     *
+     * > `none` or `off`
+     * >
+     * > No autocapitalization is applied.
+     *
+     * > `sentences`
+     * >
+     * > First letter of each sentence is capitalized.
+     *
+     * > `on`
+     * >
+     * > Behavior varies by platform.
+     *
+     * > `words`
+     * >
+     * > First letter of each word is capitalized.
+     *
+     * > `characters`
+     * >
+     * > All letters are uppercase.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/autocapitalize)
+     */
+    autocapitalize?: StringUnion<"none" | "off" | "sentences" | "on" | "words" | "characters">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link FormAttributes}
+     * - {@link InputAttributes}
+     * - {@link SelectAttributes}
+     * - {@link TextAreaAttributes}
+     *
+     * Controls autocomplete behavior for form elements. Combines values from `<input>`, `<select>`, and `<textarea>`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-autocomplete)
+     */
+    autocomplete?: StringUnion<"on" | "off" | "additional-name" | "address-level1" | "address-level2" | "address-level3" | "address-level4" | "address-line1" | "address-line2" | "address-line3" | "bday" | "bday-year" | "bday-day" | "bday-month" | "billing" | "cc-additional-name" | "cc-csc" | "cc-exp" | "cc-exp-month" | "cc-exp-year" | "cc-family-name" | "cc-given-name" | "cc-name" | "cc-number" | "cc-type" | "country" | "country-name" | "current-password" | "email" | "family-name" | "fax" | "given-name" | "home" | "honorific-prefix" | "honorific-suffix" | "impp" | "language" | "mobile" | "name" | "new-password" | "nickname" | "organization" | "organization-title" | "pager" | "photo" | "postal-code" | "sex" | "shipping" | "street-address" | "tel-area-code" | "tel" | "tel-country-code" | "tel-extension" | "tel-local" | "tel-local-prefix" | "tel-local-suffix" | "tel-national" | "transaction-amount" | "transaction-currency" | "url" | "username" | "work">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     *
+     * Indicates that a checkbox or radio input is checked by default.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-checked)
+     */
+    checked?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link QuoteAttributes}
+     * - {@link ModAttributes}
+     *
+     * Specifies the source URL of a quotation, citation, or modification.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/blockquote#attr-cite)
+     */
+    cite?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TextAreaAttributes}
+     *
+     * Specifies the number of visible columns in a `<textarea>`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-cols)
+     */
+    cols?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TableCellAttributes}
+     *
+     * Number of columns a table cell spans.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/td#attr-colspan)
+     */
+    colSpan?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link VideoAttributes}
+     * - {@link AudioAttributes}
+     *
+     * Displays playback controls for `<video>` or `<audio>` elements.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-controls)
+     */
+    controls?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link AreaAttributes}
+     *
+     * Coordinates defining the clickable area in an image map (e.g., `x,y,r` for circle).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-coords)
+     */
+    coords?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ObjectAttributes}
+     *
+     * Specifies the URL of the resource to embed (e.g., image, PDF).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-data)
+     */
+    data?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TimeAttributes}
+     * - {@link ModAttributes}
+     *
+     * Specifies a machine-readable date or time (e.g., `2023-10-15T14:30Z`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/time#attr-datetime)
+     */
+    datetime?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ImageAttributes}
+     *
+     * Specifies how the browser decodes the image. Values: `sync`, `async`, or `auto`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-decoding)
+     */
+    decoding?: StringUnion<"sync" | "async" | "auto">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TrackAttributes}
+     *
+     * Marks the track as default. Use `true` or an empty string.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/track#attr-default)
+     */
+    default?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ScriptAttributes}
+     *
+     * Defers script execution until HTML is parsed. Use `true` or an empty string.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-defer)
+     */
+    defer?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link TextAreaAttributes}
+     *
+     * Name of the directionality field to submit for `<input>` or `<textarea>`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-dirname)
+     */
+    dirname?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ButtonAttributes}
+     * - {@link InputAttributes}
+     * - {@link SelectAttributes}
+     * - {@link OptGroupAttributes}
+     * - {@link OptionAttributes}
+     * - {@link TextAreaAttributes}
+     * - {@link FieldSetAttributes}
+     *
+     * Disables the element (e.g., button, input, fieldset). Use `true` or an empty string.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-disabled)
+     */
+    disabled?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link AnchorAttributes}
+     * - {@link AreaAttributes}
+     *
+     * Suggests a filename for downloading the linked resource.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/a#attr-download)
+     */
+    download?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link FormAttributes}
+     * - {@link ButtonAttributes}
+     * - {@link InputAttributes}
+     *
+     * Specifies the MIME type for form data submission. Values combined from `<form>` and `<button>`/`input`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-enctype)
+     */
+    enctype?: StringUnion<"application/x-www-form-urlencoded" | "multipart/form-data" | "text/plain">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ButtonAttributes}
+     * - {@link InputAttributes}
+     * - {@link SelectAttributes}
+     * - {@link TextAreaAttributes}
+     * - {@link FieldSetAttributes}
+     * - {@link OutputAttributes}
+     * - {@link ObjectAttributes}
+     *
+     * Associates the element with a form by its `id`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-form)
+     */
+    form?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ButtonAttributes}
+     * - {@link InputAttributes}
+     *
+     * URL to submit the form to, overriding the form’s `action`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formaction)
+     */
+    formAction?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ButtonAttributes}
+     * - {@link InputAttributes}
+     *
+     * MIME type for form data, overriding the form’s `enctype`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formenctype)
+     */
+    formEnctype?: StringUnion<"application/x-www-form-urlencoded" | "multipart/form-data" | "text/plain">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ButtonAttributes}
+     * - {@link InputAttributes}
+     *
+     * HTTP method for form submission, overriding the form’s `method`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formmethod)
+     */
+    formMethod?: StringUnion<"get" | "post">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ButtonAttributes}
+     * - {@link InputAttributes}
+     *
+     * Disables form validation, overriding the form’s `novalidate`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formnovalidate)
+     */
+    formNoValidate?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ButtonAttributes}
+     * - {@link InputAttributes}
+     *
+     * Target for form submission, overriding the form’s `target`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formtarget)
+     */
+    formTarget?: StringUnion<'_self' | '_blank' | '_parent' | '_top'>;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TableCellAttributes}
+     *
+     * Space-separated list of header cell IDs associated with this cell.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/td#attr-headers)
+     */
+    headers?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ImageAttributes}
+     * - {@link IFrameAttributes}
+     * - {@link EmbedAttributes}
+     * - {@link ObjectAttributes}
+     * - {@link VideoAttributes}
+     * - {@link InputAttributes}
+     * - {@link CanvasAttributes}
+     *
+     * Specifies the height of the element in pixels or CSS units (e.g., `<canvas>`, `<img>`, `<video>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/canvas#attr-height)
+     */
+    height?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link AnchorAttributes}
+     * - {@link LinkAttributes}
+     * - {@link AreaAttributes}
+     *
+     * Specifies the URL of the linked resource (e.g., `<a>`, `<link>`, `<area>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/a#attr-href)
+     */
+    href?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link AnchorAttributes}
+     * - {@link LinkAttributes}
+     *
+     * Specifies the language of the linked resource (e.g., `en`, `fr-CA`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/a#attr-hreflang)
+     */
+    hrefLang?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link LabelAttributes}
+     * - {@link OutputAttributes}
+     *
+     * Specifies the ID of the form control this label or output is associated with.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/label#attr-for)
+     */
+    htmlFor?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ScriptAttributes}
+     * - {@link LinkAttributes}
+     *
+     * Specifies a cryptographic hash to verify the integrity of the resource (e.g., `sha256-...`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-integrity)
+     */
+    integrity?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ImageAttributes}
+     *
+     * Indicates that the image is part of a server-side image map.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-ismap)
+     */
+    isMap?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TrackAttributes}
+     *
+     * Specifies the type of track for `<track>` elements. Values:
+     * `subtitles`, `captions`, `descriptions`, `chapters`, `metadata`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/track#attr-kind)
+     */
+    kind?: StringUnion<"subtitles" | "captions" | "descriptions" | "chapters" | "metadata">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link OptGroupAttributes}
+     * - {@link OptionAttributes}
+     * - {@link TrackAttributes}
+     *
+     * Specifies the label for an option group, option, or track.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/optgroup#attr-label)
+     */
+    label?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     *
+     * Specifies the ID of a `<datalist>` for input suggestions.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-list)
+     */
+    list?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ImageAttributes}
+     * - {@link IFrameAttributes}
+     * - {@link VideoAttributes}
+     *
+     * Controls resource loading behavior. Values: `eager` (immediate), `lazy` (deferred).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-loading)
+     */
+    loading?: boolean | StringUnion<"eager" | "lazy">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link VideoAttributes}
+     * - {@link AudioAttributes}
+     *
+     * Indicates that the media should loop playback.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-loop)
+     */
+    loop?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link ProgressAttributes}
+     * - {@link MeterAttributes}
+     *
+     * Specifies the maximum value for numeric inputs or progress/meter elements.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-max)
+     */
+    max?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link TextAreaAttributes}
+     *
+     * Specifies the maximum length of text input in characters.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-maxlength)
+     */
+    maxLength?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link LinkAttributes}
+     * - {@link StyleAttributes}
+     * - {@link SourceAttributes}
+     *
+     * Specifies the media query for which the resource is intended (e.g., `screen`, `print`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/link#attr-media)
+     */
+    media?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link FormAttributes}
+     *
+     * Specifies the HTTP method for form submission. Values: `get`, `post`, `dialog`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-method)
+     */
+    method?: StringUnion<"get" | "post" | "dialog">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link MeterAttributes}
+     *
+     * Specifies the minimum value for numeric inputs or meter elements.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-min)
+     */
+    min?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link TextAreaAttributes}
+     *
+     * Specifies the minimum length of text input in characters.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-minlength)
+     */
+    minLength?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link SelectAttributes}
+     *
+     * Allows multiple values (e.g., files, emails) for `<input>` or `<select>`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-multiple)
+     */
+    multiple?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link VideoAttributes}
+     * - {@link AudioAttributes}
+     *
+     * Mutes the media playback.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-muted)
+     */
+    muted?: string;
+    /**
+     * **Available Attributes**
+     *
+     * {@link MapAttributes}
+     * {@link IFrameAttributes}
+     * {@link ObjectAttributes}
+     * {@link InputAttributes}
+     * {@link ButtonAttributes}
+     * {@link SelectAttributes}
+     * {@link TextAreaAttributes}
+     * {@link OutputAttributes}
+     * {@link FieldSetAttributes}
+     * {@link FormAttributes}
+     *
+     * Specifies the name of the element (e.g., `<map>`, `<form>`, `<input>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/map#attr-name)
+     */
+    name?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link FormAttributes}
+     *
+     * Disables form validation.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-novalidate)
+     */
+    noValidate?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link DetailsAttributes}
+     *
+     * Indicates that the `<details>` element is open by default.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/details#attr-open)
+     */
+    open?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     *
+     * Specifies a regex pattern the input must match.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-pattern)
+     */
+    pattern?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link TextAreaAttributes}
+     *
+     * Placeholder text for `<input>` or `<textarea>` elements.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-placeholder)
+     */
+    placeholder?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link VideoAttributes}
+     *
+     * Plays video inline on mobile devices instead of fullscreen.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-playsinline)
+     */
+    playsInline?: boolean;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link VideoAttributes}
+     *
+     * Specifies the URL of an image to display before video playback starts.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-poster)
+     */
+    poster?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link VideoAttributes}
+     * - {@link AudioAttributes}
+     *
+     * Hints preload behavior for media. Values: `none`, `metadata`, `auto`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-preload)
+     */
+    preload?: StringUnion<"none" | "metadata" | "auto">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link TextAreaAttributes}
+     *
+     * Makes the element read-only (e.g., `<input>`, `<textarea>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-readonly)
+     */
+    readOnly?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link LinkAttributes}
+     * - {@link IFrameAttributes}
+     * - {@link ScriptAttributes}
+     *
+     * Specifies the referrer policy for fetching resources (e.g., `no-referrer`, `origin`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/link#attr-referrerpolicy)
+     */
+    referrerPolicy?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link AnchorAttributes}
+     * - {@link LinkAttributes}
+     * - {@link AreaAttributes}
+     * - {@link FormAttributes}
+     *
+     * Specifies the relationship between the document and linked resource (e.g., `nofollow`, `noopener`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/a#attr-rel)
+     */
+    rel?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link SelectAttributes}
+     * - {@link TextAreaAttributes}
+     *
+     * Marks the element as required for form submission.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-required)
+     */
+    required?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link OListAttributes}
+     *
+     * Reverses the order of an ordered list (`<ol>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/ol#attr-reversed)
+     */
+    reversed?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TableCellAttributes}
+     *
+     * Number of rows a table cell spans.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/td#attr-rowspan)
+     */
+    rowSpan?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TextAreaAttributes}
+     *
+     * Specifies the number of visible rows in a `<textarea>`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-rows)
+     */
+    rows?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link IFrameAttributes}
+     *
+     * Restricts iframe permissions. Values:
+     * `allow-forms`, `allow-modals`, `allow-pointer-lock`, `allow-popups`, `allow-popups-to-escape-sandbox`,
+     * `allow-same-origin`, `allow-scripts`, `allow-top-navigation`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-sandbox)
+     */
+    sandbox?: StringUnion<"allow-forms" | "allow-modals" | "allow-pointer-lock" | "allow-popups" | "allow-popups-to-escape-sandbox" | "allow-same-origin" | "allow-scripts" | "allow-top-navigation">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TableCellAttributes}
+     *
+     * Specifies the scope of a header cell. Values: `row`, `col`, `rowgroup`, `colgroup`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/th#attr-scope)
+     */
+    scope?: StringUnion<"row" | "col" | "rowgroup" | "colgroup">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link OptionAttributes}
+     *
+     * Marks the option as selected by default.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/option#attr-selected)
+     */
+    selected?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link AreaAttributes}
+     *
+     * Specifies the shape of an area in an image map. Values: `circle`, `default`, `poly`, `rect`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-shape)
+     */
+    shape?: StringUnion<"circle" | "default" | "poly" | "rect">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link SelectAttributes}
+     *
+     * Specifies the visible width of an input or select in characters.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-size)
+     */
+    size?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ImageAttributes}
+     * - {@link SourceAttributes}
+     * - {@link LinkAttributes}
+     *
+     * Specifies the intended display sizes for responsive images (e.g., `100vw`, `50vw, 600px`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-sizes)
+     */
+    sizes?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TableColAttributes}
+     *
+     * Number of columns an element spans (e.g., `<col>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/col#attr-span)
+     */
+    span?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     *
+     * Specifies the increment step for numeric inputs.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-step)
+     */
+    step?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link OListAttributes}
+     *
+     * Specifies the starting number for an ordered list (`<ol>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/ol#attr-start)
+     */
+    start?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ImageAttributes}
+     * - {@link SourceAttributes}
+     *
+     * Specifies a set of image sources for responsive images (e.g., `image-1x.jpg 1x, image-2x.jpg 2x`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-srcset)
+     */
+    srcSet?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link IFrameAttributes}
+     *
+     * Inline HTML to display within an iframe, overriding `src`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-srcdoc)
+     */
+    srcDoc?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link TrackAttributes}
+     *
+     * Specifies the language of the track (e.g., `en`, `fr`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/track#attr-srclang)
+     */
+    srcLang?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ImageAttributes}
+     * - {@link VideoAttributes}
+     * - {@link AudioAttributes}
+     * - {@link SourceAttributes}
+     * - {@link TrackAttributes}
+     * - {@link ScriptAttributes}
+     * - {@link IFrameAttributes}
+     * - {@link EmbedAttributes}
+     * - {@link InputAttributes}
+     *
+     * Specifies the URL of the resource (e.g., `<img>`, `<video>`, `<script>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-src)
+     */
+    src?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link AnchorAttributes}
+     * - {@link FormAttributes}
+     * - {@link AreaAttributes}
+     *
+     * Specifies where to open the linked resource. Values: `_self`, `_blank`, `_parent`, `_top`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/a#attr-target)
+     */
+    target?: StringUnion<'_self' | '_blank' | '_parent' | '_top'>;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link ButtonAttributes}
+     * - {@link OListAttributes}
+     * - {@link LinkAttributes}
+     * - {@link ScriptAttributes}
+     * - {@link SourceAttributes}
+     * - {@link EmbedAttributes}
+     * - {@link ObjectAttributes}
+     * - {@link AnchorAttributes}
+     *
+     * Specifies the type of input, content, or list marker (e.g., `text`, `checkbox`, `video/mp4`, `1`, `a`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-type)
+     */
+    type?: StringUnion<"hidden" | "text" | "search" | "tel" | "url" | "email" | "password" | "datetime" | "date" | "month" | "week" | "time" | "datetime-local" | "number" | "range" | "color" | "checkbox" | "radio" | "file" | "submit" | "image" | "reset" | "button" | "menu" | "1" | "a" | "A" | "i" | "I">;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link ImageAttributes}
+     * - {@link ObjectAttributes}
+     *
+     * Specifies the name of an image map (`<map>`) to associate with the element.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-usemap)
+     */
+    useMap?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link InputAttributes}
+     * - {@link OptionAttributes}
+     * - {@link ButtonAttributes}
+     * - {@link ProgressAttributes}
+     * - {@link MeterAttributes}
+     * - {@link DataAttributes}
+     * - {@link LIAttributes}
+     *
+     * Specifies the value of the element (e.g., `<input>`, `<option>`, `<progress>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-value)
+     */
+    value?: string;
+    /**
+     * **Available Attributes**
+     *
+     * - {@link CanvasAttributes}
+     * - {@link ImageAttributes}
+     * - {@link IFrameAttributes}
+     * - {@link EmbedAttributes}
+     * - {@link ObjectAttributes}
+     * - {@link VideoAttributes}
+     * - {@link InputAttributes}
+     *
+     * Specifies the width of the element in pixels or CSS units (e.g., `<canvas>`, `<img>`, `<video>`).
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/canvas#attr-width)
+     */
+    width?: string;
+    /**
+     * **Available Attributes**
+     *
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
+     * Controls line wrapping in a `<textarea>`. Values: `soft` (default), `hard`.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-wrap)
+     */
+    wrap?: StringUnion<"soft" | "hard">;
+}
+interface Attributes<T extends HTMLElement> extends AriaAttrs, SinAttributes<T>, DOMListen<T>, PointerListeners<T>, PopoverListeners<T> {
+    [attribute: string]: any;
+    /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Provides a hint for generating a keyboard shortcut for the current element.
      * This attribute consists of a space-separated list of characters. The browser
      * should use the first one that exists on the computer keyboard layout.
@@ -1461,13 +2598,15 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     accesskey?: string;
     /**
-      * Associates a positioned element with an anchor element. The attribute's value is the id value of the element
-      * you want to anchor the positioned element to. The element can then be positioned using CSS anchor positioning.
-      *
-      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/anchor)
-      */
+     * Associates a positioned element with an anchor element. The attribute's value is the id value of the element
+     * you want to anchor the positioned element to. The element can then be positioned using CSS anchor positioning.
+     *
+     * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/anchor)
+     */
     anchor?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Controls whether inputted text is automatically capitalized and, if so, in what manner. This is relevant to
      * `<input>` and `<textarea>` elements, and any element with `contenteditable` set on it. It affects virtual
      * keyboards on mobile devices and voice input, but not physical keyboards. Valid values are:
@@ -1496,6 +2635,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     autocapitalize?: StringUnion<"none" | "off" | "sentences" | "on" | "words" | "characters">;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Indicates that an element is to be focused on page load, or as soon as the `<dialog>` it is part of is displayed.
      * This attribute is a boolean, initially false. Only one element in the document may have this attribute; if multiple
      * elements have it, the first one receives focus. Use with caution, as it can affect accessibility by shifting focus
@@ -1505,6 +2646,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     autofocus?: boolean | string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * A space-separated list of the classes of the element. Classes allows CSS and JavaScript to select and access
      * specific elements via the [class selectors](https://developer.mozilla.org/docs/Web/CSS/Class_selectors) or
      * functions like the method [`Document.getElementsByClassName()`](https://developer.mozilla.org/docs/Web/API/Document/getElementsByClassName). returns an array-like object of all child elements which have all of the
@@ -1514,6 +2657,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     class?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * An enumerated attribute indicating if the element should be editable by the user. If so, the browser
      * modifies its widget to allow editing. The attribute must take one of the following values:
      *
@@ -1529,6 +2674,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     contenteditable?: boolean | "true" | "false";
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * An enumerated attribute indicating the directionality of the element's text. It can have the following values:
      *
      * > `ltr`
@@ -1551,6 +2698,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     dir?: StringUnion<"ltr" | "rtl" | "auto">;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * An enumerated attribute indicating whether the element can be dragged, using the
      * [Drag and Drop API](https://developer.mozilla.org/docs/DragDrop/Drag_and_Drop). It
      * can have the following values?:
@@ -1567,6 +2716,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     draggable?: boolean | "true" | "false";
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Provides a hint to virtual keyboards about the expected action when the "Enter" key is pressed on an element,
      * such as `<input>` or `<textarea>`. This attribute enhances the user experience on touch devices by customizing
      * the Enter key’s label or icon. Valid values include:
@@ -1605,6 +2756,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     enterkeyhint?: StringUnion<'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'>;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Exports named parts from a shadow DOM to allow styling from outside the shadow boundary. The value is a
      * comma-separated list of part names (optionally with mappings, e.g., `part-name?: exported-name`). These exported
      * parts can be targeted in the containing document using the `::part()` pseudo-element, facilitating cross-boundary
@@ -1614,6 +2767,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     exportparts?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * A Boolean attribute indicates that the element is not yet, or is no longer, _relevant_. For example,
      * it can be used to hide elements of the page that can't be used until the login process has been completed.
      * The browser won't render such elements. This attribute must not be used to hide content that could
@@ -1623,6 +2778,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     hidden?: boolean | "true" | "false";
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Defines a unique identifier (ID) which must be unique in the whole document. Its purpose is to identify
      * the element when linking (using a fragment identifier), scripting, or styling (with CSS).
      *
@@ -1630,6 +2787,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     id?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Provides a hint to the browser about the type of virtual keyboard to display for entering data into an element,
      * such as `<input>` or `<textarea>`. This attribute helps optimize the input experience on touch devices by
      * suggesting an appropriate keyboard layout. Common values include:
@@ -1672,6 +2831,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     inputmode?: StringUnion<"none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url">;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Indicates that the element and its subtree are to be ignored by user interaction and assistive technologies,
      * such as screen readers. When set to `true`, the element becomes non-focusable, non-clickable, and is skipped
      * during keyboard navigation. It can take the following values:
@@ -1692,34 +2853,46 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     inert?: boolean | "true" | "false";
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * The unique, global identifier of an item.
      */
     itemid?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Used to add properties to an item. Every HTML element may have an `itemprop` attribute specified,
      * where an `itemprop` consists of a name and value pair.
      */
     itemprop?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Properties that are not descendants of an element with the `itemscope` attribute can be associated with
      * the item using an `itemref`. It provides a list of element ids (not `itemid`s) with additional
      * properties elsewhere in the document.
      */
     itemref?: string | string[];
     /**
-     * `itemscope` (usually) works along with `[itemtype](https://developer.mozilla.org/docs/Web/HTML/Global_attributes#attr-itemtype)`
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
+     * `itemscope` (usually) works along with [itemtype](https://developer.mozilla.org/docs/Web/HTML/Global_attributes#attr-itemtype)
      *  to specify that the HTML contained in a block is about a particular item. `itemscope` creates
      * the Item and defines the scope of the `itemtype` associated with it. `itemtype` is a valid URL of a
      * vocabulary (such as [schema.org](https://schema.org/)) that describes the item and its properties context.
      */
     itemscope?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Specifies the URL of the vocabulary that will be used to define `itemprop`s (item properties) in the
      * data structure. `[itemscope](https://developer.mozilla.org/docs/Web/HTML/Global_attributes#attr-itemscope)`
      * is used to set the scope of where in the data structure the vocabulary set by `itemtype` will be active.
      */
     itemtype?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Helps define the language of an element?: the language that non-editable elements are in, or the language
      * that editable elements should be written in by the user. The attribute contains one "language tag"
      * (made of hyphen-separated "language subtags") in the format defined in:
@@ -1732,6 +2905,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     lang?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * A cryptographic nonce ("number used once") used with a `<script>` or `<style>` element to allow
      * it under a strict Content Security Policy (CSP). The nonce value must match the one specified in
      * the CSP’s `script-src` or `style-src` directive. It’s a single-use token generated by the server
@@ -1742,6 +2917,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     nonce?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * A space-separated list of part names used to reference shadow DOM elements across shadow boundaries.
      * When an element in a shadow tree has a `part` attribute, it can be styled from the host document
      * using the `::part()` pseudo-element.
@@ -1752,6 +2929,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     part?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Designates an element as a popover, which is a top-layer UI element that appears on demand
      * (e.g., menus or dialogs). Valid values include:
      *
@@ -1773,6 +2952,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     popover?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Defines the accessibility role of an element for assistive technologies (e.g., screen readers), as per the ARIA
      * (Accessible Rich Internet Applications) specification. The value is an ARIA role
      * (e.g., `button`, `dialog`, `navigation`), which overrides the element’s default role if specified.
@@ -1783,6 +2964,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     role?: ARIARole;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Assigns an element to a named slot within a shadow DOM tree.
      * The value corresponds to the `name` attribute of a `<slot>` element in the shadow root.
      *
@@ -1793,6 +2976,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     slot?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * An enumerated attribute defines whether the element may be checked for spelling errors. It may have the
      * following values?: `true`, which indicates that the element should be, if possible, checked for spelling
      * errors; `false`, which indicates that the element should not be checked for spelling errors.
@@ -1801,6 +2986,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     spellcheck?: boolean | "true" | "false";
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Contains [CSS](https://developer.mozilla.org/docs/Web/CSS) styling declarations to be applied to the element.
      * Note that it is recommended for styles to be defined in a separate file or files. This attribute and the
      * [`<style>`](https://developer.mozilla.org/docs/Web/HTML/Element/style). The HTML <style> element contains
@@ -1811,6 +2998,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     style?: string | Record<string, any>;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * An integer attribute indicating if the element can take input focus (is _focusable_), if it should
      * participate to sequential keyboard navigation, and if so, at what position. It can take several values:
      *
@@ -1826,6 +3015,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     tabindex?: string | number;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Contains a text representing advisory information related to the element it belongs to. Such information
      * can typically, but not necessarily, be presented to the user as a tooltip.
      *
@@ -1833,6 +3024,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     title?: string;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * An enumerated attribute that is used to specify whether an element's attribute values and the values of its
      * [`Text`](https://developer.mozilla.org/docs/Web/API/Text). The Text export interface represents the textual content
      * of Element or Attr. If an element has no markup within its content, it has a single child implementing Text
@@ -1847,6 +3040,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     translate?: StringUnion<"yes" | "no">;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Controls the behavior of the virtual (on-screen) keyboard for elements that can trigger it, such as `<input>` or
      * elements with `contenteditable`. It determines whether the virtual keyboard is automatically shown when the
      * element is focused. Valid values are:
@@ -1866,6 +3061,8 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     virtualkeyboardpolicy?: StringUnion<"auto" | "manual">;
     /**
+     * {@link HTMLElement}  →  {@link Attributes}
+     *
      * Indicates whether the browser should offer writing suggestions (e.g., spelling, grammar, or text completion)
      * for editable elements like `<input>`, `<textarea>`, or those with `contenteditable`. This attribute enhances
      * user input by providing or suppressing predictive text and correction features.
@@ -1884,16 +3081,19 @@ interface Attributes<T extends HTMLElement> extends Partial<DataAttributes>, Ari
      */
     writingsuggestions?: boolean | "true" | "false";
 }
-interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityListeners<T> {
+interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends Attributes<T>, SecurityListeners<T> {
     /**
-     * Specifies the URL of the resource linked by the `<link>` element, such as a stylesheet, icon, or prefetch resource.
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
      *
+     * Specifies the URL of the resource linked by the `<link>` element, such as a stylesheet, icon, or prefetch resource.
      * The value can be an absolute URL or a relative URL. If omitted, the link is invalid and has no effect.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/link#attr-href)
      */
     href?: string;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies the relationship between the current document and the resource linked by `href`.
      * Used on `<link>` elements.
      *
@@ -1904,6 +3104,8 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     rel?: string;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies the type of content being linked by the `<link>` element when used with
      * `rel="preload"` or `rel="modulepreload"`.
      *
@@ -1915,6 +3117,8 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     as?: string;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies how the `<link>` element handles cross-origin requests when fetching the resource.
      *
      * Valid values are:
@@ -1933,6 +3137,8 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     crossOrigin?: StringUnion<'anonymous' | 'use-credentials'>;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies the language of the resource linked by `href`. Used on `<link>` elements,
      * typically with `rel="alternate"`.
      *
@@ -1943,6 +3149,8 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     hrefLang?: string;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies the media for which the linked resource is intended. Used on `<link>` elements,
      * such as stylesheets.
      *
@@ -1953,6 +3161,8 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     media?: string;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies the size of the linked resource, used with `<link>` elements where
      * `rel="icon"` or `rel="apple-touch-icon"`.
      *
@@ -1963,6 +3173,8 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     sizes?: string;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies a title for the linked resource. Used on `<link>` elements with `rel="alternate"`
      * (e.g., feeds) to describe the link.
      *
@@ -1972,6 +3184,8 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     title?: string;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies the MIME type of the linked resource. Used on `<link>` elements to hint at the
      * resource’s format.
      *
@@ -1982,6 +3196,8 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     type?: string;
     /**
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
+     *
      * Specifies a cryptographic hash of the linked resource to verify its integrity.
      * Used on `<link>` elements with external resources.
      *
@@ -1992,64 +3208,72 @@ interface LinkAttrs<T extends HTMLLinkElement> extends Attributes<T>, SecurityLi
      */
     integrity?: string;
     /**
-     * Specifies the referrer policy for fetching the linked resource. Used on `<link>`
-     * elements to control referrer information.
+     * {@link HTMLLinkElement}  →  {@link LinkAttributes}
      *
-     * Common values include `no-referrer`, `origin`, `same-origin`, and `unsafe-url`.
-     * If omitted, the default policy applies.
+     * Specifies the referrer policy for fetching the linked resource. Used on `<link>`
+     * elements to control referrer information. Common values include `no-referrer`, `origin`, `same-origin`
+     * and `unsafe-url`. If omitted, the default policy applies.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/link#attr-referrerpolicy)
      */
     referrerpolicy?: string;
 }
-interface StyleAttrs<T extends HTMLStyleElement> extends Attributes<T> {
+interface StyleAttributes<T extends HTMLStyleElement = HTMLStyleElement> extends Attributes<T> {
     /**
-     * Specifies the media for which the `<style>` element’s styles are intended.
+     * {@link HTMLStyleElement}  →  {@link StyleAttributes}
      *
-     * The value is a media query (e.g., `screen`, `print`, `all`, `(min-width: 768px)`). If omitted, defaults to `all`.
+     * Specifies the media for which the `<style>` element’s styles are intended.
+     * The value is a media query (e.g., `screen`, `print`, `all`, `(min-width: 768px)`).
+     * If omitted, defaults to `all`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/style#attr-media)
      */
     media?: string;
     /**
-     * Specifies a cryptographic nonce ("number used once") to allow the `<style>` element under
-     * a strict Content Security Policy (CSP).
+     * {@link HTMLStyleElement}  →  {@link StyleAttributes}
      *
-     * The value must match the nonce in the CSP’s `style-src` directive. If omitted, the style may be blocked by CSP.
+     * Specifies a cryptographic nonce ("number used once") to allow the `<style>` element under
+     * a strict Content Security Policy (CSP). The value must match the nonce in the CSP’s
+     * `style-src` directive. If omitted, the style may be blocked by CSP.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/style#attr-nonce)
      */
     nonce?: string;
     /**
-     * Specifies a title for the `<style>` element, used to identify it among multiple stylesheets
-     * for alternate style switching.
+     * {@link HTMLStyleElement}  →  {@link StyleAttributes}
      *
-     * The value is a string. If omitted, the style applies by default unless disabled programmatically.
+     * Specifies a title for the `<style>` element, used to identify it among multiple stylesheets
+     * for alternate style switching. The value is a string. If omitted, the style applies by default
+     * unless disabled programmatically.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/style#attr-title)
      */
     title?: string;
 }
-interface QuoteAttrs<T extends HTMLQuoteElement> extends Attributes<T>, AnimationListeners<T>, DragListeners<T> {
+interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends Attributes<T>, AnimationListeners<T>, DragListeners<T> {
     /**
-     * Specifies the source URL of a quotation or citation. Used on `<blockquote>`, `<q>`, and `<cite>` elements.
+     * {@link HTMLQuoteElement}  →  {@link QuoteAttributes}
      *
+     * Specifies the source URL of a quotation or citation. Used on `<blockquote>`, `<q>`, and `<cite>` elements.
      * The value is an absolute or relative URL pointing to the original source. If omitted, no source is indicated.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/blockquote#attr-cite)
      */
     cite?: string;
     /**
+     * {@link HTMLQuoteElement}  →  {@link QuoteAttributes}
+     *
      * Defines the semantic role of a quote element, such as a blockquote or note.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"blockquote" | "note" | "presentation">;
 }
-interface OListAttrs<T extends HTMLOListElement> extends Attributes<T>, StructuralARIA, AnimationListeners<T>, DragListeners<T> {
+interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>, StructuralARIA, AnimationListeners<T>, DragListeners<T> {
     /**
-     * Specifies that the `<ol>` (ordered list) should display its items in reverse order, from highest to lowest.
+     * {@link HTMLOListElement}  →  {@link OListAttributes}
      *
+     * Specifies that the `<ol>` (ordered list) should display its items in reverse order, from highest to lowest.
      * The presence of the attribute (e.g., `reversed` or `reversed=""`) enables this behavior. If omitted,
      * the list is in ascending order.
      *
@@ -2057,17 +3281,19 @@ interface OListAttrs<T extends HTMLOListElement> extends Attributes<T>, Structur
      */
     reversed?: string;
     /**
-     * Specifies the starting number for the `<ol>` (ordered list).
+     * {@link HTMLOListElement}  →  {@link OListAttributes}
      *
+     * Specifies the starting number for the `<ol>` (ordered list).
      * The value is an integer (e.g., `1`, `5`, `-2`). If omitted, defaults to `1`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/ol#attr-start)
      */
     start?: string;
     /**
-     * Specifies the type of marker to use for the `<ol>` (ordered list) items.
+     * {@link HTMLOListElement}  →  {@link OListAttributes}
      *
-     * Valid values are:
+     * Specifies the type of marker to use for the `<ol>` (ordered list) items. If omitted, defaults to `1`,
+     * and accepts the following valid values:
      *
      * > `1`
      * >
@@ -2089,22 +3315,23 @@ interface OListAttrs<T extends HTMLOListElement> extends Attributes<T>, Structur
      * >
      * > Uppercase Roman numerals (e.g., I, II, III).
      *
-     * If omitted, defaults to `1`.
-     *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/ol#attr-type)
      */
     type?: StringUnion<'1' | 'a' | 'A' | 'i' | 'I'>;
     /**
+     * {@link HTMLOListElement}  →  {@link OListAttributes}
+     *
      * Specifies the role of an ordered list, such as a list or menu.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"list" | "directory" | "menu" | "tablist" | "tree">;
 }
-interface LIAttrs<T extends HTMLLIElement> extends Attributes<T>, StructuralARIA, AnimationListeners<T>, DragListeners<T> {
+interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>, StructuralARIA, AnimationListeners<T>, DragListeners<T> {
     /**
-     * Specifies the numeric value of an `<li>` (list item) within an `<ol>` (ordered list).
+     * {@link HTMLLIElement}  →  {@link LIAttributes}
      *
+     * Specifies the numeric value of an `<li>` (list item) within an `<ol>` (ordered list).
      * The value is an integer (e.g., `1`, `10`, `-5`). It overrides the automatic numbering
      * for this item and subsequent items unless another `value` is set. Ignored in unordered
      * lists (`<ul>`). If omitted, the list’s natural order applies.
@@ -2113,24 +3340,29 @@ interface LIAttrs<T extends HTMLLIElement> extends Attributes<T>, StructuralARIA
      */
     value?: string;
     /**
+     * {@link HTMLLIElement}  →  {@link LIAttributes}
+     *
      * Indicates the role of a list item, such as an option or menuitem.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"listitem" | "menuitem" | "option" | "tab" | "treeitem">;
 }
-interface AnchorAttrs<T extends HTMLAnchorElement> extends Attributes<T>, InteractiveARIA {
+interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> extends Attributes<T>, InteractiveARIA {
     /**
-     * Specifies the URL of the resource or page the anchor element links to, or the location
-     * within the current document (e.g., a fragment identifier like `#section1`).
+     * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
      *
-     * If omitted, the anchor acts as a placeholder and does not navigate. The value can be an
-     * absolute URL, relative URL, or a hash (`#`) for in-page navigation.
+     * Specifies the URL of the resource or page the anchor element links to, or the location
+     * within the current document (e.g, a fragment identifier like `#section1`). If omitted,
+     * the anchor acts as a placeholder and does not navigate. The value can be an absolute URL,
+     * relative URL, or a hash (`#`) for in-page navigation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/a#attr-href)
      */
     href?: string;
     /**
+     * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
+     *
      * Specifies where to open the linked resource defined by `href`. Valid values are:
      *
      * > `_self`
@@ -2149,11 +3381,12 @@ interface AnchorAttrs<T extends HTMLAnchorElement> extends Attributes<T>, Intera
      * >
      * > Opens the link in the topmost frame (replacing all frames; otherwise, behaves like `_self`).
      *
-     *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/a#attr-target)
      */
     target?: StringUnion<'_self' | '_blank' | '_parent' | '_top'>;
     /**
+     * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
+     *
      * Indicates that the linked resource should be downloaded instead of navigated to when clicked.
      * The value specifies the suggested filename for the downloaded file. If omitted, the browser
      * navigates to the `href` URL instead of downloading. If the value is an empty string
@@ -2163,6 +3396,8 @@ interface AnchorAttrs<T extends HTMLAnchorElement> extends Attributes<T>, Intera
      */
     download?: string;
     /**
+     * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
+     *
      * Specifies the relationship between the current document and the resource linked by `href`.
      * If omitted, no specific relationship is implied. Common combinations like
      * `rel="noopener noreferrer"` are often used with `target="_blank"`.
@@ -2189,13 +3424,18 @@ interface AnchorAttrs<T extends HTMLAnchorElement> extends Attributes<T>, Intera
      */
     rel?: string;
     /**
+     * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
+     *
      * Specifies the language of the resource linked by `href`. The value is a BCP 47 language tag (e.g., `en`, `fr-CA`).
-     * This attribute is advisory and helps browsers or assistive technologies understand the linked content’s language. If omitted, no language is specified.
+     * This attribute is advisory and helps browsers or assistive technologies understand the linked content’s language.
+     * If omitted, no language is specified.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/a#attr-hreflang)
      */
     hrefLang?: string;
     /**
+     * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
+     *
      * Specifies the MIME type of the resource linked by `href` (e.g., `text/html`, `application/pdf`).
      * This attribute is advisory and helps the browser determine how to handle the resource before fetching it.
      * If omitted, the browser infers the type from the server response or file extension.
@@ -2204,23 +3444,26 @@ interface AnchorAttrs<T extends HTMLAnchorElement> extends Attributes<T>, Intera
      */
     type?: string;
     /**
+     * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
+     *
      * Specifies the role of an anchor, typically a link or interactive element like a button.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"link" | "button" | "menuitem">;
 }
-interface TimeAttrs<T extends HTMLTimeElement> extends Attributes<T>, AnimationListeners<T> {
+interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends Attributes<T>, AnimationListeners<T> {
     /**
-     * Specifies a machine-readable date or time for the `<time>` element’s content.
+     * {@link HTMLTimeElement}  →  {@link TimeAttributes}
      *
+     * Specifies a machine-readable date or time for the `<time>` element’s content.
      * The value must be a valid date, time, or datetime string in a format like:
      *
      * - `YYYY-MM-DD`
      * - `HH:MM`
      * - `YYYY-MM-DDTHH:MMZ`
      *
-     * (e.g., `2023-10-15`, `14:30`, `2023-10-15T14:30Z`). Used to provide semantic meaning
+     * (e.g, `2023-10-15`, `14:30`, `2023-10-15T14:30Z`). Used to provide semantic meaning
      * to human-readable text within the element. If omitted, the element’s text content is
      * assumed to be human-readable only, with no machine-readable interpretation.
      *
@@ -2228,24 +3471,28 @@ interface TimeAttrs<T extends HTMLTimeElement> extends Attributes<T>, AnimationL
      */
     datetime?: string;
     /**
+     * {@link HTMLTimeElement}  →  {@link TimeAttributes}
+     *
      * Defines the role of a time element, typically representing a time value.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"time">;
 }
-interface ModAttrs<T extends HTMLModElement> extends Attributes<T>, AnimationListeners<T> {
+interface ModAttributes<T extends HTMLModElement = HTMLModElement> extends Attributes<T>, AnimationListeners<T> {
     /**
-     * Specifies the source URL of the document or resource explaining the modification.
-     * Used on `<ins>` (inserted) and `<del>` (deleted) elements.
+     * {@link HTMLModElement}  →  {@link ModAttributes}
      *
-     * The value is an absolute or relative URL pointing to the source of the change. If omitted,
-     * no source is indicated.
+     * Specifies the source URL of the document or resource explaining the modification.
+     * Used on `<ins>` (inserted) and `<del>` (deleted) elements. The value is an absolute
+     * or relative URL pointing to the source of the change. If omitted, no source is indicated.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/ins#attr-cite)
      */
     cite?: string;
     /**
+     * {@link HTMLModElement}  →  {@link ModAttributes}
+     *
      * Specifies the date and time when the modification was made. Used on `<ins>` (inserted)
      * and `<del>` (deleted) elements. The value must be a valid datetime string (e.g., `2023-10-15T14:30Z`).
      * If omitted, no timestamp is associated with the change.
@@ -2254,26 +3501,30 @@ interface ModAttrs<T extends HTMLModElement> extends Attributes<T>, AnimationLis
      */
     datetime?: string;
     /**
+     * {@link HTMLModElement}  →  {@link ModAttributes}
+     *
      * Indicates the role of a modification element (ins/del), such as insertion or deletion.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"insertion" | "deletion" | "presentation">;
 }
-interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
+interface ImageAttributes<T extends HTMLImageElement = HTMLImageElement> extends Attributes<T> {
     /**
-     * Specifies alternative text for the `<img>` element, displayed if the image fails
-     * to load or for accessibility (e.g., screen readers).
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
      *
-     * The value is a concise description of the image's content or purpose (e.g., `A red apple`).
-     * If omitted, accessibility is impaired, and no fallback text is shown.
+     * Specifies alternative text for the `<img>` element, displayed if the image fails
+     * to load or for accessibility (e.g., screen readers). The value is a concise description
+     * of the image's content or purpose (e.g., `A red apple`). If omitted, accessibility is
+     * impaired, and no fallback text is shown.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-alt)
      */
     alt?: string;
     /**
-     * Specifies the URL of the image resource for the `<img>` element.
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
      *
+     * Specifies the URL of the image resource for the `<img>` element.
      * The value can be an absolute or relative URL (e.g., `/images/photo.jpg`).
      * If omitted or invalid, the image fails to load, and the `alt` text is displayed instead.
      *
@@ -2281,6 +3532,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     src?: string;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies a set of image sources for the `<img>` element, allowing the browser to choose
      * based on resolution or viewport.
      *
@@ -2292,6 +3545,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     srcSet?: string;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies the intended display sizes for the `<img>` element when used with `srcset`.
      *
      * The value is a comma-separated list of sizes (e.g., `100vw`, `50vw, 600px`).
@@ -2302,6 +3557,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     sizes?: string;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies how the `<img>` element handles cross-origin requests when fetching the image.
      *
      * Valid values are:
@@ -2320,6 +3577,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     crossOrigin?: StringUnion<'anonymous' | 'use-credentials'>;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies the name of an image map (`<map>`) to associate with the `<img>` element.
      *
      * The value is the `name` attribute of a `<map>` element (e.g., `#mapname`), prefixed with `#`.
@@ -2329,6 +3588,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     useMap?: string;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies that the `<img>` element is part of a server-side image map. Used with `useMap`.
      *
      * The presence of the attribute (e.g., `isMap` or `isMap=""`) indicates the image coordinates
@@ -2339,6 +3600,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     isMap?: string;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies the width of the `<img>` element in pixels or CSS units.
      *
      * The value is a positive number (e.g., `300`, `50%`). It sets the display width, overriding the
@@ -2348,6 +3611,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     width?: string;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies the height of the `<img>` element in pixels or CSS units.
      *
      * The value is a positive number (e.g., `200`, `25vh`). It sets the display height, overriding
@@ -2358,6 +3623,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     height?: string;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies how the `<img>` element should be decoded by the browser. If omitted, defaults to `auto`.
      *
      * Valid values are:
@@ -2378,6 +3645,8 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      */
     decoding?: StringUnion<'sync' | 'async' | 'auto'>;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies how the `<img>` element should be loaded relative to viewport visibility.
      *
      * If omitted, defaults to `eager`. Valid values are:
@@ -2392,34 +3661,44 @@ interface ImageAttrs<T extends HTMLImageElement> extends Attributes<T> {
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/img#attr-loading)
      */
-    loading?: StringUnion<'eager' | 'lazy'>;
+    loading?: boolean | StringUnion<'eager' | 'lazy'>;
     /**
+     * {@link HTMLImageElement}  →  {@link ImageAttributes}
+     *
      * Specifies the role of an image, typically as an image or decorative element.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"img" | "presentation">;
 }
-interface IFrameAttrs<T extends HTMLIFrameElement> extends Attributes<T>, BusyARIA {
+interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElement> extends Attributes<T>, BusyARIA {
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Specifies the URL of the content to embed in the iframe. Can be a webpage, file, or data URI.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-src)
      */
     src?: string;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Inline HTML to display within the iframe, overriding `src` if both are present.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-srcdoc)
      */
     srcDoc?: string;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * A name for the iframe, used as a target for links or forms.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Restricts iframe permissions. Values include:
      *
      * - `allow-forms`
@@ -2434,1172 +3713,1544 @@ interface IFrameAttrs<T extends HTMLIFrameElement> extends Attributes<T>, BusyAR
      */
     sandbox?: StringUnion<'allow-forms' | 'allow-modals' | 'allow-pointer-lock' | 'allow-popups' | 'allow-popups-to-escape-sandbox' | 'allow-same-origin' | 'allow-scripts' | 'allow-top-navigation'>;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Defines feature policies for the iframe (e.g., `fullscreen`, `payment`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-allow)
      */
     allow?: string;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Allows the iframe content to enter fullscreen mode. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-allowfullscreen)
      */
     allowFullscreen?: string;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Sets the iframe width in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-width)
      */
     width?: string;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Sets the iframe height in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-height)
      */
     height?: string;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Controls HTTP referrer info sent with requests (e.g., `no-referrer`, `origin`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-referrerpolicy)
      */
     referrerPolicy?: string;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Controls iframe loading: `eager` (immediate) or `lazy` (deferred).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-loading)
      */
-    loading?: StringUnion<'eager' | 'lazy'>;
+    loading?: boolean | StringUnion<'eager' | 'lazy'>;
     /**
+     * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
+     *
      * Defines the role of an iframe, such as an application or document container.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"application" | "document" | "presentation">;
 }
-interface EmbedAttrs<T extends HTMLEmbedElement> extends Attributes<T>, BusyARIA {
+interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> extends Attributes<T>, BusyARIA {
     /**
+     * {@link HTMLEmbedElement}  →  {@link EmbedAttributes}
+     *
      * Specifies the URL of the resource to embed (e.g., plugin content).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/embed#attr-src)
      */
     src?: string;
     /**
+     * {@link HTMLEmbedElement}  →  {@link EmbedAttributes}
+     *
      * MIME type of the embedded resource (e.g., `application/x-shockwave-flash`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/embed#attr-type)
      */
     type?: string;
     /**
+     * {@link HTMLEmbedElement}  →  {@link EmbedAttributes}
+     *
      * Sets the embed width in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/embed#attr-width)
      */
     width?: string;
     /**
+     * {@link HTMLEmbedElement}  →  {@link EmbedAttributes}
+     *
      * Sets the embed height in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/embed#attr-height)
      */
     height?: string;
     /**
+     * {@link HTMLEmbedElement}  →  {@link EmbedAttributes}
+     *
      * Indicates the role of an embed element, often an application or media container.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"application" | "presentation">;
 }
-interface ObjectAttrs<T extends HTMLObjectElement> extends Attributes<T>, BusyARIA {
+interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> extends Attributes<T>, BusyARIA {
     /**
+     * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
+     *
      * Specifies the URL of the resource to embed (e.g., image, PDF).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-data)
      */
     data?: string;
     /**
+     * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
+     *
      * MIME type of the embedded resource (e.g., `application/pdf`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-type)
      */
     type?: string;
     /**
+     * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
+     *
      * A name for the object, used as a target or identifier.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
+     *
      * Links to an `<map>` element by its `name` for clickable areas.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-usemap)
      */
     useMap?: string;
     /**
+     * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
+     *
      * Associates the object with a form by its `id`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-form)
      */
     form?: string;
     /**
+     * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
+     *
      * Sets the object width in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-width)
      */
     width?: string;
     /**
+     * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
+     *
      * Sets the object height in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/object#attr-height)
      */
     height?: string;
     /**
+     * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
+     *
      * Specifies the role of an object element, typically an application or media container.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"application" | "presentation">;
 }
-interface VideoAttrs<T extends HTMLVideoElement> extends Attributes<T>, BusyARIA, VideoListeners<T>, DragListeners<T>, AnimationListeners<T> {
+interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>, BusyARIA, VideoListeners<T>, DragListeners<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Specifies the URL of the video file.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-src)
      */
     src?: string;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Starts video playback automatically. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-autoplay)
      */
     autoplay?: string;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Displays video controls (e.g., play, pause). Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-controls)
      */
     controls?: string;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Controls CORS: `anonymous` (no credentials) or `use-credentials`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-crossorigin)
      */
     crossOrigin?: StringUnion<'anonymous' | 'use-credentials'>;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Loops the video. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-loop)
      */
     loop?: string;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Mutes the video. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-muted)
      */
     muted?: string;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Plays video inline instead of fullscreen on mobile. Use `true`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-playsinline)
      */
     playsInline?: boolean;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * URL of an image to display before playback starts.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-poster)
      */
     poster?: string;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Hints preload behavior: `none`, `metadata`, or `auto`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-preload)
      */
     preload?: StringUnion<'none' | 'metadata' | 'auto'>;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Sets the video width in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-width)
      */
     width?: string;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Sets the video height in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/video#attr-height)
      */
     height?: string;
     /**
+     * {@link HTMLVideoElement}  →  {@link VideoAttributes}
+     *
      * Defines the role of a video element, often an application or media presentation.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"application" | "presentation">;
 }
-interface AudioAttrs<T extends HTMLAudioElement> extends Attributes<T>, BusyARIA, MediaListeners<T>, AnimationListeners<T> {
+interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>, BusyARIA, MediaListeners<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLAudioElement}  →  {@link AudioAttributes}
+     *
      * Specifies the URL of the audio file.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/audio#attr-src)
      */
     src?: string;
     /**
+     * {@link HTMLAudioElement}  →  {@link AudioAttributes}
+     *
      * Starts audio playback automatically. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/audio#attr-autoplay)
      */
     autoplay?: string;
     /**
+     * {@link HTMLAudioElement}  →  {@link AudioAttributes}
+     *
      * Displays audio controls (e.g., play, pause). Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/audio#attr-controls)
      */
     controls?: string;
     /**
+     * {@link HTMLAudioElement}  →  {@link AudioAttributes}
+     *
      * Loops the audio. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/audio#attr-loop)
      */
     loop?: string;
     /**
+     * {@link HTMLAudioElement}  →  {@link AudioAttributes}
+     *
      * Mutes the audio. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/audio#attr-muted)
      */
     muted?: string;
     /**
+     * {@link HTMLAudioElement}  →  {@link AudioAttributes}
+     *
      * Hints preload behavior: `none`, `metadata`, or `auto`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/audio#attr-preload)
      */
     preload?: StringUnion<'none' | 'metadata' | 'auto'>;
     /**
+     * {@link HTMLAudioElement}  →  {@link AudioAttributes}
+     *
      * Indicates the role of an audio element, typically an application or media presentation.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"application" | "presentation">;
 }
-interface SourceAttrs<T extends HTMLSourceElement> extends Attributes<T> {
+interface SourceAttributes<T extends HTMLSourceElement = HTMLSourceElement> extends Attributes<T> {
     /**
+     * {@link HTMLSourceElement}  →  {@link SourceAttributes}
+     *
      * Specifies the URL of the media resource.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/source#attr-src)
      */
     src?: string;
     /**
+     * {@link HTMLSourceElement}  →  {@link SourceAttributes}
+     *
      * MIME type of the media resource (e.g., `video/mp4`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/source#attr-type)
      */
     type?: string;
     /**
+     * {@link HTMLSourceElement}  →  {@link SourceAttributes}
+     *
      * Comma-separated list of image URLs for responsive images.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/source#attr-srcset)
      */
     srcSet?: string;
     /**
+     * {@link HTMLSourceElement}  →  {@link SourceAttributes}
+     *
      * Sizes for responsive images (e.g., `100w`, `50vw`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/source#attr-sizes)
      */
     sizes?: string;
     /**
+     * {@link HTMLSourceElement}  →  {@link SourceAttributes}
+     *
      * Media query for when the source applies (e.g., `(min-width: 600px)`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/source#attr-media)
      */
     media?: string;
 }
-interface TrackAttrs<T extends HTMLTrackElement> extends Attributes<T>, TrackListeners<T> {
+interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> extends Attributes<T>, TrackListeners<T> {
     /**
+     * {@link HTMLTrackElement}  →  {@link TrackAttributes}
+     *
      * Marks this track as default. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/track#attr-default)
      */
     default?: string;
     /**
+     * {@link HTMLTrackElement}  →  {@link TrackAttributes}
+     *
      * Type of track: `subtitles`, `captions`, `descriptions`, `chapters`, or `metadata`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/track#attr-kind)
      */
     kind?: StringUnion<'subtitles' | 'captions' | 'descriptions' | 'chapters' | 'metadata'>;
     /**
+     * {@link HTMLTrackElement}  →  {@link TrackAttributes}
+     *
      * User-visible label for the track.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/track#attr-label)
      */
     label?: string;
     /**
+     * {@link HTMLTrackElement}  →  {@link TrackAttributes}
+     *
      * URL of the track file (e.g., `.vtt`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/track#attr-src)
      */
     src?: string;
     /**
+     * {@link HTMLTrackElement}  →  {@link TrackAttributes}
+     *
      * Language of the track (e.g., `en`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/track#attr-srclang)
      */
     srcLang?: string;
 }
-interface MapAttrs<T extends HTMLMapElement> extends Attributes<T> {
+interface MapAttributes<T extends HTMLMapElement = HTMLMapElement> extends Attributes<T> {
     /**
+     * {@link HTMLMapElement}  →  {@link MapAttributes}
+     *
      * Name of the image map, referenced by `usemap`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/map#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLMapElement}  →  {@link MapAttributes}
+     *
      * Specifies the role of a map element, often a region or decorative container.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"region" | "presentation">;
 }
-interface AreaAttrs<T extends HTMLAreaElement> extends Attributes<T>, InteractiveARIA {
+interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends Attributes<T>, InteractiveARIA {
     /**
+     * {@link HTMLAreaElement}  →  {@link AreaAttributes}
+     *
      * Alternate text for the area if the image fails to load.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-alt)
      */
     alt?: string;
     /**
+     * {@link HTMLAreaElement}  →  {@link AreaAttributes}
+     *
      * Coordinates defining the clickable area (e.g., `x,y,r` for circle).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-coords)
      */
     coords?: string;
     /**
+     * {@link HTMLAreaElement}  →  {@link AreaAttributes}
+     *
      * Shape of the area: `circle`, `default`, `poly`, or `rect`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-shape)
      */
     shape?: StringUnion<'circle' | 'default' | 'poly' | 'rect'>;
     /**
+     * {@link HTMLAreaElement}  →  {@link AreaAttributes}
+     *
      * URL of the linked resource.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-href)
      */
     href?: string;
     /**
+     * {@link HTMLAreaElement}  →  {@link AreaAttributes}
+     *
      * Where to open the link: `_self`, `_blank`, `_parent`, or `_top`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-target)
      */
     target?: StringUnion<'_self' | '_blank' | '_parent' | '_top'>;
     /**
+     * {@link HTMLAreaElement}  →  {@link AreaAttributes}
+     *
      * Suggests a filename for downloading the linked resource.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-download)
      */
     download?: string;
     /**
+     * {@link HTMLAreaElement}  →  {@link AreaAttributes}
+     *
      * Relationship to the linked resource (e.g., `nofollow`, `noopener`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/area#attr-rel)
      */
     rel?: string;
     /**
+     * {@link HTMLAreaElement}  →  {@link AreaAttributes}
+     *
      * Defines the role of an area element, typically a link or interactive button.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"link" | "button">;
 }
-interface TableAttrs<T extends HTMLTableElement> extends Attributes<T>, StructuralARIA {
+interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends Attributes<T>, StructuralARIA {
     /**
+     * {@link HTMLTableElement}  →  {@link TableAttributes}
+     *
      * Sets the border width of the table (deprecated; use CSS instead).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/table#attr-border)
      */
     border?: string;
     /**
+     * {@link HTMLTableElement}  →  {@link TableAttributes}
+     *
      * Indicates the role of a table, such as a table or grid structure.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"table" | "grid" | "treegrid">;
 }
-interface TableColAttrs<T extends HTMLTableColElement> extends Attributes<T>, StructuralARIA {
+interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement> extends Attributes<T>, StructuralARIA {
     /**
+     * {@link HTMLTableColElement}  →  {@link TableColAttributes}
+     *
      * Number of columns this `<col>` spans.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/col#attr-span)
      */
     span?: string;
     /**
+     * {@link HTMLTableColElement}  →  {@link TableColAttributes}
+     *
      * Specifies the role of a table column, typically a column header.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"columnheader">;
 }
-interface TableCellAttrs<T extends HTMLTableCellElement> extends Attributes<T>, StructuralARIA {
+interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElement> extends Attributes<T>, StructuralARIA {
     /**
+     * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
+     *
      * Number of columns this cell spans.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/td#attr-colspan)
      */
     colSpan?: string;
     /**
+     * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
+     *
      * Space-separated list of header cell IDs this cell is associated with.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/td#attr-headers)
      */
     headers?: string;
     /**
+     * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
+     *
      * Number of rows this cell spans.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/td#attr-rowspan)
      */
     rowSpan?: string;
     /**
+     * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
+     *
      * Scope of the header cell: `row`, `col`, `rowgroup`, or `colgroup`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/th#attr-scope)
      */
     scope?: StringUnion<'row' | 'col' | 'rowgroup' | 'colgroup'>;
     /**
+     * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
+     *
      * Abbreviated version of the cell content for accessibility.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/th#attr-abbr)
      */
     abbr?: string;
     /**
+     * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
+     *
      * Defines the role of a table cell, such as a cell or row header.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"cell" | "gridcell" | "rowheader">;
 }
-interface FormAttrs<T extends HTMLFormElement> extends Attributes<T>, FormARIA, FormListeners<T>, AnimationListeners<T> {
+interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>, FormARIA, FormListeners<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * URL to submit the form to.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-action)
      */
     action?: string;
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * HTTP method for form submission: `get`, `post`, or `dialog`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-method)
      */
     method?: StringUnion<'get' | 'post' | 'dialog'>;
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * MIME type for form data: `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-enctype)
      */
     enctype?: StringUnion<'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain'>;
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * Controls autocomplete: `on` or `off`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-autocomplete)
      */
     autocomplete?: StringUnion<'on' | 'off'>;
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * Where to display the response: `_self`, `_blank`, `_parent`, or `_top`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-target)
      */
     target?: StringUnion<'_self' | '_blank' | '_parent' | '_top'>;
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * Disables form validation. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-novalidate)
      */
     noValidate?: string;
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * Name of the form for scripting or targeting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * Relationship to the form action (e.g., `nofollow`, `noopener`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-rel)
      */
     rel?: string;
     /**
+     * {@link HTMLFormElement}  →  {@link FormAttributes}
+     *
      * Indicates the role of a form, typically a form or search container.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"form" | "search">;
 }
-interface LabelAttrs<T extends HTMLLabelElement> extends Attributes<T>, AnimationListeners<T> {
+interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends Attributes<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLLabelElement}  →  {@link LabelAttributes}
+     *
      * ID of the form control this label is for.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/label#attr-for)
      */
     htmlFor?: string;
 }
-interface InputAttrs<T extends HTMLInputElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T>, DragListeners<T> {
+interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T>, DragListeners<T> {
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * File types accepted (e.g., `image/*`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-accept)
      */
     accept?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Alternate text for image inputs.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-alt)
      */
     alt?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Autocomplete hint (e.g., `email`, `off`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-autocomplete)
      */
     autocomplete?: StringUnion<'additional-name' | 'address-level1' | 'address-level2' | 'address-level3' | 'address-level4' | 'address-line1' | 'address-line2' | 'address-line3' | 'bday' | 'bday-year' | 'bday-day' | 'bday-month' | 'billing' | 'cc-additional-name' | 'cc-csc' | 'cc-exp' | 'cc-exp-month' | 'cc-exp-year' | 'cc-family-name' | 'cc-given-name' | 'cc-name' | 'cc-number' | 'cc-type' | 'country' | 'country-name' | 'current-password' | 'email' | 'family-name' | 'fax' | 'given-name' | 'home' | 'honorific-prefix' | 'honorific-suffix' | 'impp' | 'language' | 'mobile' | 'name' | 'new-password' | 'nickname' | 'off' | 'on' | 'organization' | 'organization-title' | 'pager' | 'photo' | 'postal-code' | 'sex' | 'shipping' | 'street-address' | 'tel-area-code' | 'tel' | 'tel-country-code' | 'tel-extension' | 'tel-local' | 'tel-local-prefix' | 'tel-local-suffix' | 'tel-national' | 'transaction-amount' | 'transaction-currency' | 'url' | 'username' | 'work'>;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Focuses the input on page load. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-autofocus)
      */
     autofocus?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Marks the input as checked (for checkboxes/radios).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-checked)
      */
     checked?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Name of the directionality field to submit.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-dirname)
      */
     dirname?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Disables the input. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-disabled)
      */
     disabled?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Associates with a form by its `id`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-form)
      */
     form?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * URL to submit the form to (overrides form’s `action`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-formaction)
      */
     formAction?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * MIME type for form data (overrides form’s `enctype`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-formenctype)
      */
     formEnctype?: StringUnion<'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain'>;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * HTTP method for form submission (overrides form’s `method`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-formmethod)
      */
     formMethod?: StringUnion<'get' | 'post'>;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Disables validation (overrides form’s `novalidate`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-formnovalidate)
      */
     formNoValidate?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Target for form submission (overrides form’s `target`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-formtarget)
      */
     formTarget?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Height of image inputs in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-height)
      */
     height?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * ID of a `<datalist>` for suggestions.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-list)
      */
     list?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Maximum value for numeric inputs.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-max)
      */
     max?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Maximum length of text input in characters.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-maxlength)
      */
     maxLength?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Minimum value for numeric inputs.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-min)
      */
     min?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Minimum length of text input in characters.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-minlength)
      */
     minLength?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Allows multiple values (e.g., for file or email inputs).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-multiple)
      */
     multiple?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Name of the input for form submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Regex pattern the input must match.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-pattern)
      */
     pattern?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Placeholder text for the input.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-placeholder)
      */
     placeholder?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Makes the input read-only. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-readonly)
      */
     readOnly?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Marks the input as required. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-required)
      */
     required?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Visible width of the input in characters.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-size)
      */
     size?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * URL of the image for `type="image"`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-src)
      */
     src?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Increment step for numeric inputs.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-step)
      */
     step?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Type of input (e.g., `text`, `checkbox`, `file`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-type)
      */
     type?: StringUnion<'hidden' | 'text' | 'search' | 'tel' | 'url' | 'email' | 'password' | 'datetime' | 'date' | 'month' | 'week' | 'time' | 'datetime-local' | 'number' | 'range' | 'color' | 'checkbox' | 'radio' | 'file' | 'submit' | 'image' | 'reset' | 'button'>;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Initial value of the input.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-value)
      */
     value?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Width of image inputs in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/input#attr-width)
      */
     width?: string;
     /**
+     * {@link HTMLInputElement}  →  {@link InputAttributes}
+     *
      * Specifies the role of an input, such as a checkbox or textbox.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"checkbox" | "combobox" | "radio" | "searchbox" | "slider" | "spinbutton" | "switch" | "textbox">;
 }
-interface ButtonAttrs<T extends HTMLButtonElement> extends Attributes<T>, InteractiveARIA, AnimationListeners<T> {
+interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>, InteractiveARIA, AnimationListeners<T> {
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * Disables the button. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-disabled)
      */
     disabled?: string;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * Associates with a form by its `id`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-form)
      */
     form?: string;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * URL to submit the form to (overrides form’s `action`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formaction)
      */
     formAction?: string;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * MIME type for form data (overrides form’s `enctype`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formenctype)
      */
     formEnctype?: StringUnion<'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain'>;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * HTTP method for form submission (overrides form’s `method`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formmethod)
      */
     formMethod?: StringUnion<'get' | 'post'>;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * Disables validation (overrides form’s `novalidate`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formnovalidate)
      */
     formNoValidate?: string;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * Target for form submission (overrides form’s `target`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-formtarget)
      */
     formTarget?: string;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * Name of the button for form submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * Button behavior: `button`, `submit`, `reset`, or `menu`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-type)
      */
     type?: StringUnion<'button' | 'submit' | 'reset' | 'menu'>;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * Value submitted with the form.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/button#attr-value)
      */
     value?: string;
     /**
+     * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
+     *
      * Defines the role of a button, typically a button or menu item.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"button" | "menuitem" | "menuitemcheckbox" | "menuitemradio">;
 }
-interface SelectAttrs<T extends HTMLSelectElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T> {
+interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLSelectElement}  →  {@link SelectAttributes}
+     *
      * Autocomplete hint (e.g., `off`, `country`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/select#attr-autocomplete)
      */
     autocomplete?: AutoCompleteUnion;
     /**
+     * {@link HTMLSelectElement}  →  {@link SelectAttributes}
+     *
      * Disables the select. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/select#attr-disabled)
      */
     disabled?: string;
     /**
+     * {@link HTMLSelectElement}  →  {@link SelectAttributes}
+     *
      * Associates with a form by its `id`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/select#attr-form)
      */
     form?: string;
     /**
+     * {@link HTMLSelectElement}  →  {@link SelectAttributes}
+     *
      * Allows multiple selections. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/select#attr-multiple)
      */
     multiple?: string;
     /**
+     * {@link HTMLSelectElement}  →  {@link SelectAttributes}
+     *
      * Name of the select for form submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/select#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLSelectElement}  →  {@link SelectAttributes}
+     *
      * Marks the select as required. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/select#attr-required)
      */
     required?: string;
     /**
+     * {@link HTMLSelectElement}  →  {@link SelectAttributes}
+     *
      * Number of visible options.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/select#attr-size)
      */
     size?: string;
     /**
+     * {@link HTMLSelectElement}  →  {@link SelectAttributes}
+     *
      * Indicates the role of a select element, such as a listbox or combobox.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"listbox" | "combobox">;
 }
-interface OptGroupAttrs<T extends HTMLOptGroupElement> extends Attributes<T>, StructuralARIA {
+interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroupElement> extends Attributes<T>, StructuralARIA {
     /**
+     * {@link HTMLOptGroupElement}  →  {@link OptGroupAttributes}
+     *
      * Disables the option group. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/optgroup#attr-disabled)
      */
     disabled?: string;
     /**
+     * {@link HTMLOptGroupElement}  →  {@link OptGroupAttributes}
+     *
      * Label for the option group.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/optgroup#attr-label)
      */
     label?: string;
     /**
+     * {@link HTMLOptGroupElement}  →  {@link OptGroupAttributes}
+     *
      * Specifies the role of an option group, typically a grouping container.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"group">;
 }
-interface OptionAttrs<T extends HTMLOptionElement> extends Attributes<T>, InteractiveARIA {
+interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> extends Attributes<T>, InteractiveARIA {
     /**
+     * {@link HTMLOptionElement}  →  {@link OptionAttributes}
+     *
      * Disables the option. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/option#attr-disabled)
      */
     disabled?: string;
     /**
+     * {@link HTMLOptionElement}  →  {@link OptionAttributes}
+     *
      * User-visible label for the option.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/option#attr-label)
      */
     label?: string;
     /**
+     * {@link HTMLOptionElement}  →  {@link OptionAttributes}
+     *
      * Marks the option as selected. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/option#attr-selected)
      */
     selected?: string;
     /**
+     * {@link HTMLOptionElement}  →  {@link OptionAttributes}
+     *
      * Value submitted with the form.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/option#attr-value)
      */
     value?: string;
     /**
+     * {@link HTMLOptionElement}  →  {@link OptionAttributes}
+     *
      * Defines the role of an option, typically a selectable option.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"option">;
 }
-interface TextAreaAttrs<T extends HTMLTextAreaElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T> {
+interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Autocomplete hint (e.g., `off`, `sentence`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-autocomplete)
      */
     autocomplete?: AutoCompleteUnion;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Number of visible columns.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-cols)
      */
     cols?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Name of the directionality field to submit.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-dirname)
      */
     dirname?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Disables the textarea. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-disabled)
      */
     disabled?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Associates with a form by its `id`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-form)
      */
     form?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Maximum length in characters.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-maxlength)
      */
     maxLength?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Minimum length in characters.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-minlength)
      */
     minLength?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Name of the textarea for form submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Placeholder text for the textarea.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-placeholder)
      */
     placeholder?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Makes the textarea read-only. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-readonly)
      */
     readOnly?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Marks the textarea as required. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-required)
      */
     required?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Number of visible rows.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-rows)
      */
     rows?: string;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Line wrapping: `soft` (default) or `hard`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/textarea#attr-wrap)
      */
     wrap?: StringUnion<'soft' | 'hard'>;
     /**
+     * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
+     *
      * Indicates the role of a textarea, typically a textbox.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"textbox">;
 }
-interface OutputAttrs<T extends HTMLOutputElement> extends Attributes<T>, AnimationListeners<T> {
+interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> extends Attributes<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLOutputElement}  →  {@link OutputAttributes}
+     *
      * Space-separated IDs of inputs this output relates to.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/output#attr-for)
      */
     htmlFor?: string;
     /**
+     * {@link HTMLOutputElement}  →  {@link OutputAttributes}
+     *
      * Associates with a form by its `id`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/output#attr-form)
      */
     form?: string;
     /**
+     * {@link HTMLOutputElement}  →  {@link OutputAttributes}
+     *
      * Name of the output for scripting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/output#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLOutputElement}  →  {@link OutputAttributes}
+     *
      * Specifies the role of an output, typically a status indicator.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"status">;
 }
-interface ProgressAttrs<T extends HTMLProgressElement> extends Attributes<T>, ProgressARIA, AnimationListeners<T> {
+interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>, ProgressARIA, AnimationListeners<T> {
     /**
+     * {@link HTMLProgressElement}  →  {@link ProgressAttributes}
+     *
      * Current progress value.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/progress#attr-value)
      */
     value?: string;
     /**
+     * {@link HTMLProgressElement}  →  {@link ProgressAttributes}
+     *
      * Maximum progress value.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/progress#attr-max)
      */
     max?: string;
     /**
+     * {@link HTMLProgressElement}  →  {@link ProgressAttributes}
+     *
      * Defines the role of a progress element, typically a progressbar.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"progressbar">;
 }
-interface MeterAttrs<T extends HTMLMeterElement> extends Attributes<T>, ProgressARIA, AnimationListeners<T> {
+interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>, ProgressARIA, AnimationListeners<T> {
     /**
+     * {@link HTMLMeterElement}  →  {@link MeterAttributes}
+     *
      * Current meter value.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/meter#attr-value)
      */
     value?: string;
     /**
+     * {@link HTMLMeterElement}  →  {@link MeterAttributes}
+     *
      * Minimum meter value.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/meter#attr-min)
      */
     min?: string;
     /**
+     * {@link HTMLMeterElement}  →  {@link MeterAttributes}
+     *
      * Maximum meter value.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/meter#attr-max)
      */
     max?: string;
     /**
+     * {@link HTMLMeterElement}  →  {@link MeterAttributes}
+     *
      * Boundary for low values.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/meter#attr-low)
      */
     low?: string;
     /**
+     * {@link HTMLMeterElement}  →  {@link MeterAttributes}
+     *
      * Boundary for high values.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/meter#attr-high)
      */
     high?: string;
     /**
+     * {@link HTMLMeterElement}  →  {@link MeterAttributes}
+     *
      * Optimal value for the meter.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/meter#attr-optimum)
      */
     optimum?: string;
     /**
+     * {@link HTMLMeterElement}  →  {@link MeterAttributes}
+     *
      * Indicates the role of a meter, such as a progressbar or status indicator.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"progressbar" | "status">;
 }
-interface FieldSetAttrs<T extends HTMLFieldSetElement> extends Attributes<T>, AnimationListeners<T> {
+interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement> extends Attributes<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLFieldSetElement}  →  {@link FieldSetAttributes}
+     *
      * Disables the fieldset and its controls. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/fieldset#attr-disabled)
      */
     disabled?: string;
     /**
+     * {@link HTMLFieldSetElement}  →  {@link FieldSetAttributes}
+     *
      * Associates with a form by its `id`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/fieldset#attr-form)
      */
     form?: string;
     /**
+     * {@link HTMLFieldSetElement}  →  {@link FieldSetAttributes}
+     *
      * Name of the fieldset for scripting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/fieldset#attr-name)
      */
     name?: string;
     /**
+     * {@link HTMLFieldSetElement}  →  {@link FieldSetAttributes}
+     *
      * Specifies the role of a fieldset, typically a grouping or presentation container.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"group" | "presentation">;
 }
-interface DetailsAttrs<T extends HTMLDetailsElement> extends Attributes<T>, InteractiveARIA, ModalARIA, DetailsListeners<T>, AnimationListeners<T> {
+interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>, InteractiveARIA, ModalARIA, DetailsListeners<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLDetailsElement}  →  {@link DetailsAttributes}
+     *
      * Shows the details open by default. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/details#attr-open)
      */
     open?: string;
     /**
+     * {@link HTMLDetailsElement}  →  {@link DetailsAttributes}
+     *
      * Defines the role of a details element, such as a group or dialog.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"group" | "dialog">;
 }
-interface DialogAttrs<T extends HTMLDialogElement> extends Attributes<T>, InteractiveARIA, ModalARIA, DialogListeners<T>, AnimationListeners<T> {
+interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>, InteractiveARIA, ModalARIA, DialogListeners<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLDialogElement}  →  {@link DialogAttributes}
+     *
      * Indicates the role of a dialog, typically a dialog or alertdialog.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"dialog" | "alertdialog">;
 }
-interface ScriptAttrs<T extends HTMLScriptElement> extends Attributes<T> {
+interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElement> extends Attributes<T> {
     /**
+     * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
+     *
      * URL of the external script file.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-src)
      */
     src?: string;
     /**
+     * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
+     *
      * MIME type of the script (e.g., `text/javascript`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-type)
      */
     type?: string;
     /**
+     * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
+     *
      * Executes script asynchronously. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-async)
      */
     async?: string;
     /**
+     * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
+     *
      * Defers script execution until HTML is parsed. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-defer)
      */
     defer?: string;
     /**
+     * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
+     *
      * Controls CORS: `anonymous` (no credentials) or `use-credentials`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-crossorigin)
      */
     crossOrigin?: StringUnion<'anonymous' | 'use-credentials'>;
     /**
+     * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
+     *
      * Integrity hash for script validation (e.g., `sha256-...`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-integrity)
      */
     integrity?: string;
     /**
+     * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
+     *
      * Controls HTTP referrer info (e.g., `no-referrer`).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-referrerpolicy)
      */
     referrerPolicy?: string;
     /**
+     * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
+     *
      * Excludes script for module-supporting browsers. Use `true` or empty string.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/script#attr-nomodule)
      */
     nomodule?: string;
 }
-interface CanvasAttrs<T extends HTMLCanvasElement> extends Attributes<T>, BusyARIA, CanvasListeners<T> {
+interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>, BusyARIA, CanvasListeners<T> {
     /**
+     * {@link HTMLCanvasElement}  →  {@link CanvasAttributes}
+     *
      * Width of the canvas in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/canvas#attr-width)
      */
     width?: string;
     /**
+     * {@link HTMLCanvasElement}  →  {@link CanvasAttributes}
+     *
      * Height of the canvas in pixels or CSS units.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/canvas#attr-height)
      */
     height?: string;
     /**
+     * {@link HTMLCanvasElement}  →  {@link CanvasAttributes}
+     *
      * Specifies the role of a canvas, such as an application or presentation area.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
      */
     role?: StringUnion<"application" | "presentation">;
 }
-interface DataAttrs<T extends HTMLDataElement> extends Attributes<T>, AnimationListeners<T> {
+interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends Attributes<T>, AnimationListeners<T> {
     /**
+     * {@link HTMLDataElement}  →  {@link DataAttributes}
+     *
      * Machine-readable value of the element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/data#attr-value)
      */
     value?: string;
     /**
+     * {@link HTMLDataElement}  →  {@link DataAttributes}
+     *
      * Defines the role of a data element, typically a term or presentation item.
      *
      * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
@@ -3607,43 +5258,202 @@ interface DataAttrs<T extends HTMLDataElement> extends Attributes<T>, AnimationL
     role?: StringUnion<"term" | "presentation">;
 }
 
-type SinElement<T> = (T extends HTMLBaseElement ? Attributes<T> : T extends HTMLLinkElement ? LinkAttrs<T> : T extends HTMLStyleElement ? StyleAttrs<T> : T extends HTMLQuoteElement ? QuoteAttrs<T> : T extends HTMLOListElement ? OListAttrs<T> : T extends HTMLLIElement ? LIAttrs<T> : T extends HTMLAnchorElement ? AnchorAttrs<T> : T extends HTMLQuoteElement ? QuoteAttrs<T> : T extends HTMLTimeElement ? TimeAttrs<T> : T extends HTMLModElement ? ModAttrs<T> : T extends HTMLModElement ? ModAttrs<T> : T extends HTMLImageElement ? ImageAttrs<T> : T extends HTMLIFrameElement ? IFrameAttrs<T> : T extends HTMLEmbedElement ? EmbedAttrs<T> : T extends HTMLObjectElement ? ObjectAttrs<T> : T extends HTMLVideoElement ? VideoAttrs<T> : T extends HTMLAudioElement ? AudioAttrs<T> : T extends HTMLSourceElement ? SourceAttrs<T> : T extends HTMLTrackElement ? TrackAttrs<T> : T extends HTMLMapElement ? MapAttrs<T> : T extends HTMLAreaElement ? AreaAttrs<T> : T extends HTMLTableElement ? TableAttrs<T> : T extends HTMLTableColElement ? TableColAttrs<T> : T extends HTMLTableColElement ? TableColAttrs<T> : T extends HTMLTableCellElement ? TableCellAttrs<T> : T extends HTMLTableCellElement ? TableCellAttrs<T> : T extends HTMLFormElement ? FormAttrs<T> : T extends HTMLLabelElement ? LabelAttrs<T> : T extends HTMLInputElement ? InputAttrs<T> : T extends HTMLButtonElement ? ButtonAttrs<T> : T extends HTMLSelectElement ? SelectAttrs<T> : T extends HTMLOptGroupElement ? OptGroupAttrs<T> : T extends HTMLOptionElement ? OptionAttrs<T> : T extends HTMLTextAreaElement ? TextAreaAttrs<T> : T extends HTMLOutputElement ? OutputAttrs<T> : T extends HTMLProgressElement ? ProgressAttrs<T> : T extends HTMLMeterElement ? MeterAttrs<T> : T extends HTMLFieldSetElement ? FieldSetAttrs<T> : T extends HTMLDetailsElement ? DetailsAttrs<T> : T extends HTMLDialogElement ? DialogAttrs<T> : T extends HTMLScriptElement ? ScriptAttrs<T> : T extends HTMLCanvasElement ? CanvasAttrs<T> : T extends HTMLDataElement ? DataAttrs<T> : T extends HTMLElement ? Attributes<T> : T extends HTMLUListElement ? Attributes<T> : never);
-interface Component {
-    (strings: TemplateStringsArray, ...style: any[]): Static<HTMLElement>;
-    <T extends HTMLElement>(attrs: SinElement<T>, children?: Children): View<T>;
-    <T extends HTMLElement>(...children: Children): View<T>;
-    <T extends HTMLElement>(fn: (attrs: any, children: Children, context: Context) => Children): View<T>;
-}
-interface Static<T> {
-    /**
-     * @example
-     *
-     * s`h1`('Sinnner!');
-     * s`ul`({ onclick: () => {}}, ['s','i','n'].map(x => s`li`(x) ));
-     */
-    <Attrs = {}>(attrs: SinElement<T>, children: Children<Attrs>): View<T>;
-    <Attrs = {}>(attrs: SinElement<T>, children: Children<Attrs>): View<T>;
-    <Attrs = {}>(attrs: SinElement<T>, ...children: Children<Attrs>): View<T>;
-}
+type SinElement<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLElement ? HTMLAttributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : never;
 /**
- * Represents invocation component type
+ * Signature Arguments Expected
+ */
+type Arguments<T = any> = [
+    attrs: isInferred<T, any, T>,
+    children: [...Children[]],
+    context: Context
+];
+/**
+ * Partial Signature Arguments
+ */
+type Signature<T = any> = Partial<[
+    attrs: isInferred<T, any, Partial<T>>,
+    children: Children,
+    context: Context
+]>;
+/**
+ * Style Component Signature
+ *
+ */
+type StyledSignature<T extends HTMLElement> = [
+    attributes: SinElement<T>,
+    ...children: Children[]
+] | [
+    ...children: Children[]
+];
+/**
+ * Styled Component Overloads
+ *
+ * @example
+ * s``(attributes, [])
+ * s('', attributes, [])
+ */
+type StyledComponent<T extends HTMLElement = HTMLElement> = {
+    /** Element with Attributes Signature */
+    (...attibutes: Partial<StyledSignature<T>>): View;
+    /** Stateless Component Literal Signature */
+    (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
+};
+/**
+ * Stateless Component Signature
+ */
+type StatelessSignature<T = any> = (...args: Arguments<T>) => Children | StyledComponent;
+/**
+ * Stateless Component Overloads
+ *
+ * @example
+ * s(({}, [], {}) => s``)
+ */
+type StatelessComponent<T> = {
+    /** Stateless Component Literal Signature */
+    (tag: TagLiteral, ...interpolate: Interpolate): StatelessComponent<T>;
+    /** Stateless Component attrs Signature */
+    (...attrs: Signature<T>): View;
+    /** Stateless Component children signature */
+    (...children: Children[]): View;
+};
+/**
+ * Stateful Utility Function
+ */
+type Stateless<A = {}, C = Context> = (attrs: A, children?: Children, context?: C) => (attrs: A, children?: Children, context?: C) => View<A>;
+/**
+ * Stateful Async Component Options
+ *
+ * @example
+ * s({
+ *   loading: s`h1`('Committing Sins!'),
+ *   error: (e) => s`h1 c red`('Failed!')
+ * }(async ({}, [], context) => {
+ *
+ *   await s.sleep(2000)
+ *
+ *   return s`h1`('Loki')
+ * })
+ */
+type StatefullAsync = {
+    /**
+     * Render a loading dom element
+     *
+     * @example
+     * s(
+     *  {
+     *    loading: s`div`('patience...')
+     *  },
+     *  async () => {
+     *    // Perform some task...
+     *    await s.sleep(3000);
+     *
+     *    return () => s`h1`('Hello Sinner!')
+     *  }
+     * )
+     */
+    loading?: Component;
+    /**
+     * Intercept throws or errors
+     *
+     * @example
+     * s(
+     *  {
+     *    loading: s`div`('patience...'),
+     *    error: e => s`h1 fc red`('There was an error ' + e)
+     *  },
+     *  async () => {
+     *    // Perform some task...
+     *    await s.sleep(3000);
+     *
+     *    return () => s`h1`('Hello Sinner!')
+     *  }
+     * )
+     */
+    error?: <Exception extends DOMException = any>(err: Exception) => Component;
+};
+/**
+ * Statefull Component Signature
+ *
+ * Accepts upto 3 curried callbacks
+ */
+type StatefullSignature<T = any> = (...attrs: Arguments<T>) => (...attrs: Arguments<T>) => Children | ((...attrs: Arguments<T>) => Children);
+/**
+ * Statefull Component Overloads
+ *
+ * @example
+ * s(({}, [], {}) => ({}, [], {}) => s``)
+ */
+type StatefullComponent<T> = {
+    /** Literal Signature */
+    (tag: TagLiteral, ...interpolate: Interpolate): StatefullComponent<T>;
+    /** Direct Signature */
+    (...attrs: Signature<T>): View;
+    /** Statefull Component children signature */
+    (...children: Children[]): View;
+};
+/**
+ * Stateful Utility Function
+ */
+type Statefull<A = {}, C = Context> = (attrs: A, children?: Children, context?: C) => (attrs: A, children?: Children, context?: C) => View<A>;
+/**
+ * COMPONENTS
  *
  * @example
  *
- * s`div`({ onclick: () => {}}, 'Sinnner!');
- * s`h1`('Sinnner!');
- * s`ul`({ onclick: () => {}}, ['s','i','n'].map(x => s`li`(x) ));
+ * // Literal Element Signatures
+ * //
+ * s`div`
+ * s`div`('')
+ * s`div`(null)
+ * s`div`(1000)
+ * s`ul`(s`li`('one'), s`li`('two'))
+ * s`ul`([ s`li`('one'), s`li`('two') ])
+ * s`a`({ href: '' }, 'link')
+ * s`a`({ href: '' }, s`span`('link'))
+ *
+ * // HyperScript Element Signatures
+ * //
+ * s('div', '')
+ * s('div', 1000)
+ * s('ul', s('li', 'one'), s('li', 'two'))
+ * s('ul', [ s('li', 'one'), s('li', 'two') ])
+ * s('a', { href: '' }, 'link')
+ * s('a', { href: '' }, s`span`('link'))
+ *
+ * // Component Function Signatures
+ * //
+ * s(() => s`div`)
+ * s((attrs) => s`div`(''))
+ * s((attrs, children) => children)
+ * s((attrs, children, context) => [])
+ * s((attrs, children, context) => (attrs, children, context) => [])
+ *
+ * // Component Curried Signatures
+ * //
+ * x = s`button`
+ * x({ onclick: () => {} }, '')
+ *
+ * x = s(({ prop = 'foo', ...attrs }) => s``(prop))
+ * x({ prop: 'bar' })
+ *
+ * x = s(({ value }) => ({}, children) => [ children, s`div`(value) ])
+ * x({ value: 'baz' }, 'qux')
+ *
+ * x = s(() => ({}, children) => children)
+ * x([ s`h1`('hello'), s`h1`('world') ])
  */
-declare interface Constructor {
-    /**
-     * Tagged Literal Component with View/s
-     *
-     * @example
-     *
-     * s`input`('Hello Sinner!')
-     */
-    <T extends HTMLElement>(tag: Literal, ...style: string[]): Static<SinElement<T>>;
-}
+type Component = {
+    /** HyperScript signature for creating a sin view */
+    <T extends Selector>(selector: T, ...attributes: StyledSignature<HTMLTagElement<T>>): View;
+    /** Literal signature for creating a sin view */
+    <T extends HTMLElement>(tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
+    /** Stateless component signature */
+    <T>(fn: StatefullSignature<T>): StatefullComponent<T>;
+    /** Async component signature */
+    <T>(options: StatefullAsync, fn: Promise<StatefullComponent<T>>): View;
+    /** Statefull component signature */
+    <T>(fn: StatelessSignature<T>): StatelessComponent<T>;
+};
 
 /**
  * Route handler options argument type
@@ -3656,7 +5466,7 @@ declare interface Constructor {
  *   state: {}
  * })
  */
-interface Options<T = {}> {
+type Options<State = {}> = {
     /**
      * History pushState replace
      *
@@ -3674,8 +5484,8 @@ interface Options<T = {}> {
      *
      * @default {}
      */
-    state?: T;
-}
+    state?: State;
+};
 /**
  * Route `query` value interface
  *
@@ -3683,7 +5493,7 @@ interface Options<T = {}> {
  *
  * s.route.query // Route.Query
  */
-interface Query {
+type Query = {
     /**
      * Get a query parameter value
      *
@@ -3693,7 +5503,7 @@ interface Query {
      *
      * s.route.query.get('fruit') // => apple
      */
-    get: (key: string) => string;
+    get: (key: string) => string | null;
     /**
      * Set a query parameter value
      *
@@ -3703,7 +5513,7 @@ interface Query {
      *
      * s.route.query.set('garden', 'eden')
      */
-    set: <T = any>(key: string, value: T) => void;
+    set: <T extends string | number | boolean>(key: string, value: T) => void;
     /**
      * Replaces query parameters. Accepts object or string
      *
@@ -3716,7 +5526,7 @@ interface Query {
      *   eve: 'female',
      * })
      */
-    replace: <T = {} | string>(params: T) => URLSearchParams;
+    replace: <T extends Record<string, string | number | boolean> | string>(params: T) => URLSearchParams;
     /**
      * Clear/remove the query parameters from URL
      *
@@ -3725,19 +5535,12 @@ interface Query {
      * s.route.query.clear()
      */
     clear: () => void;
-}
+};
 /**
- * Route handler value interface
+ * Component Routes
  */
-interface Handler<A> {
-    /**
-     * Route Handler
-     */
-    [path: `/${string}`]: (() => Constructor | Constructor[]) | Constructor | Constructor[];
-}
+declare type Routes<T extends Attrs = Attrs> = Record<`/${string}`, ((attrs: T & Record<string, string>) => Component | Component[]) | Component | Component[]>;
 /**
- * #### Route Instance/s and Method
- *
  * Function type for the `s.route` method and `{ route }` instance/s.
  */
 interface Route {
@@ -3765,13 +5568,13 @@ interface Route {
      *  ],
      * })
      */
-    <A>(routes: Handler<A>, options?: Options): View;
+    <T extends Attrs = Attrs>(routes: Routes<T>, options?: Options): View;
     /**
      * Returns the current URL pathname (route)
      *
      * @example
      *
-     * s.route.path // => '/'
+     * s.route.path // -> '/'
      */
     readonly path: string;
     /**
@@ -3789,7 +5592,7 @@ interface Route {
      *
      * @example
      *
-     * s.route.parent.path // /a/b > /a is parent
+     * s.route.parent.path // -> /a/b > /a is parent
      */
     parent: Route;
     /**
@@ -3807,8 +5610,8 @@ interface Route {
      *
      * // Pathname: /sinner/loki
      *
-     * s.route.has('loki') // => true;
-     * s.route.has('sin') // => false;
+     * s.route.has('loki') // -> true;
+     * s.route.has('sin') // -> false;
      */
     has(path: string): boolean;
     /**
@@ -3816,7 +5619,7 @@ interface Route {
      *
      * @example
      *
-     * s.toString() // => '/'
+     * s.toString() // -> '/'
      */
     toString(): string;
 }
@@ -3824,7 +5627,7 @@ interface Route {
 /**
  * Sin Component Context
  */
-interface Context {
+type Context = {
     /**
      * Sin SSR (last modified date of `sin build`)
      */
@@ -3877,7 +5680,7 @@ interface Context {
      */
     refresh: () => void;
     /**
-     * Reinitialize component, similar to updating `key` reference.
+     * Reloads the component, similar to updating `key` reference.
      *
      * > Use `reload()` to crucify and resurrect the component.
      *
@@ -3894,185 +5697,342 @@ interface Context {
      * s(({}, [], { redraw }) => redraw())
      */
     redraw: () => Promise<void>;
-}
+};
 
 /**
- * The child node of a component
+ * DOM Event handler
  */
-type Child<Attrs = {}> = Views<Attrs> | string | number | undefined;
-/**
- * Children of a component
- */
-type Children<Attrs = {}> = [] | Child<Attrs>[];
-/**
- * Children of a component
- */
-interface Redraw {
-    (): void;
+type On = {
+    <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
     /**
-     * Force Redraw
+     * The DOM Element listener will be attached
      */
-    force(): void;
-}
-/**
- * Component view instance `{ tag }` interface
- */
-interface Tag {
+    target: T, 
     /**
-     * The `nodeName` of a DOM element, as per the markup case.
+     * The event name
+     */
+    event: K, 
+    /**
+     * The listener callback function
+     */
+    listener: (this: T, event: WindowEventMap[K]) => Void, 
+    /**
+     * Event Options
+     */
+    options?: boolean | AddEventListenerOptions): Void;
+};
+/**
+ * Custom event handler with observer pattern support.
+ */
+type Listener<T extends any[] = any[]> = {
+    /**
+     * Triggers the event, calling all subscribed observers with the provided arguments.
+     * Returns an array of return values from all observer functions
+     *
+     * @param {...T} args - The arguments to pass to all observers
+     * @returns {any[]} An array of return values from all observer functions
+     * @example
+     *
+     * const listen = s.event();
+     *
+     * listen.observe((x) => x * 2);
+     * listen(5); // returns [10]
+     */
+    (...args: T): any[];
+    /**
+     * Adds an observer function to be called when the event is triggered.
+     */
+    observe: {
+        /**
+         * Subscribes a persistent observer that remains until explicitly removed.
+         * The function will return a function which can be used to unsubscribe the observer.
+         *
+         * @example
+         *
+         * const event = s.event();
+         * const unsubscribe = event.observe(x => console.log(x));
+         *
+         * event(1); // logs: 1
+         * unsubscribe(); // removes observer
+         */
+        (observer: (...args: T) => any): () => void;
+        /**
+         * Subscribes a one-time observer that automatically unsubscribes after first trigger.
+         * Returns a function which will unsubscribe the observer before it fires if called.
+         *
+         * @example
+         *
+         * const event = s.event();
+         * event.observe(x => console.log(x), true);
+         *
+         * event(1); // logs: 1
+         * event(2); // no log (observer already removed)
+         */
+        (observer: (...args: T) => any, once: true): () => void;
+    };
+    /**
+     * Gets an AbortSignal that can be used to monitor the events lifecycle.
+     * The signal aborts when an observer is added with `once: true`.
      *
      * @example
      *
-     * const node = s`button`('Baptise Bazel!');
+     * const event = s.event();
+     * const signal = ev.signal;
      *
-     * console.log(node.tag.name) // 'button'
+     * signal.addEventListener('abort', () => console.log('aborted'));
      */
-    readonly tag: string;
-    /**
-     * The elements attribute `id=""` value
-     *
-     * @default ''
-     *
-     * @example
-     *
-     * const node = s`#sinner`('Seek Atonement');
-     *
-     * console.log(node.tag.id) // 'sinner'
-     */
-    readonly id: string;
-    /**
-     * The elements attribute `class=""` value. This will contain
-     * Sin CSS or shorthand expressions hash values.
-     *
-     * @default ''
-     *
-     * @example
-     *
-     * const a = s`a.xxx`('Lustful Intent');
-     * const b = s`a bc red`('Immorality');
-     *
-     * console.log(a.tag.classes) // 'a1b2c3d4'
-     * console.log(b.tag.classes) // 'foo bar'
-     */
-    readonly classes: string;
-    /**
-     * The `parent` tag reference.
-     *
-     * @default undefined
-     */
-    readonly parent: undefined | Tag;
-    /**
-     * Holds the raw tag template literal parameters
-     *
-     * @default []
-     */
-    readonly args: any[];
-    /**
-     * Corresponding CSS Variables which hold the
-     *
-     * @internal
-     * @todo Speak with Rasmus
-     * @default {}
-     */
-    readonly vars: {};
-}
-/**
- * Sin components will return a View interface
- *
- * @example
- *
- * s`button`('Hello Sinner!') // => View
- */
-interface View<Attrs = {}> {
-    /**
-     * @todo Rasmus walk through
-     */
-    readonly children?: [] | Array<((attrs: Attrs, view: View[], context: Context) => View)>;
-    /**
-     * Tag reference describing the syntactic markup on the node
-     */
-    readonly tag?: Tag;
-    /**
-     * @todo
-     */
-    readonly specificity: number;
-    /**
-     * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
-     */
-    attrs: Attrs;
-    /**
-     * The value used to map a DOM element to its respective item in an array of data.
-     */
-    key: any;
-}
-/**
- * Component view/s argument type
- */
-type Views<Attrs = {}> = View<Attrs> | View<Attrs>[];
+    readonly signal: AbortSignal;
+};
 
 /**
  * DOM element argument type
  */
 type DOM = HTMLElement | Element | {};
-type MountDOM<Attrs = {}> = (dom: DOM, attrs: Attrs, children: View[] | [], context: Context) => Children;
 /**
  * Function type for the `s.mount` method.
+*/
+type Mount = {
+    (fn: (route: {
+        route: Route;
+    }) => Children): void;
+    (fn: <Attrs = {}>(attrs: Attrs, children: View[] | [], context: Context) => Children): void;
+    (fn: (children: View[] | [], context: Context) => Children): void;
+    (dom: DOM, fn: (attrs: any, children: View[] | [], context: Context) => Children): void;
+};
+
+/**
+ * HTTP Parameter Options
+ */
+interface Params<T = {}> {
+    /**
+     * Request URL
+     *
+     * @default undefined
+     */
+    url: string | URL;
+    /**
+     * The request method
+     *
+     * @default 'GET'
+     */
+    method?: StringUnion<'HEAD' | 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH'>;
+    /**
+     * Whether or not to apply redraw upon request resolution.
+     *
+     * @default true
+     */
+    redraw?: boolean;
+    /**
+     * The XMLHttpRequest property responseType is an enumerated string value
+     * specifying the type of data contained in the response.
+     *
+     * @default ""
+     */
+    responseType?: StringUnion<"" | 'arraybuffer' | 'blob' | 'document' | 'json' | 'text'>;
+    /**
+     * JSON Content
+     *
+     * @deprecated
+     * @default 'application/json'
+     */
+    json?: string;
+    /**
+     * Query Parameters
+     *
+     * @default {}
+     */
+    query?: Record<string, string | number | boolean> | URLSearchParams;
+    /**
+     * The data to be serialized into the body (for other types of requests).
+     *
+     * @default undefined
+     */
+    body?: T;
+    /**
+     * A username for HTTP authorization.
+     *
+     * @default undefined
+     */
+    user?: string;
+    /**
+     * A password for HTTP authorization. This option is provided for XMLHttpRequest compatibility,
+     * but you should avoid using it because it sends the password in plain text over the network.
+     *
+     * @default undefined
+     */
+    pass?: string;
+    /**
+     * Request headers
+     *
+     * @default {}
+     */
+    headers?: Record<string, string>;
+    /**
+     * Exposes the underlying XMLHttpRequest object for low-level configuration and optional
+     * replacement (by returning a new XHR).
+     */
+    config?: (xhr: XMLHttpRequest) => void | XMLHttpRequest;
+    /**
+     * The amount of milliseconds a request can take before automatically being terminated.
+     *
+     * @default 0
+     */
+    timeout?: number;
+}
+/**
+ * HTTP request method functions
  *
  * @example
  *
-* s.mount((dom, component, context) => [])
-*/
-interface Mount {
-    <Attrs = {}>(dom: HTMLElement | Element | {}, sin: MountDOM<Attrs>): Views<Attrs>;
-    <Attrs = {}>(fn: (attrs: Attrs, children: View[] | [], context: Context) => Children): Views<Attrs>;
-    <Attrs = {}>(fn: (children: View[] | [], context: Context) => Children): Views<Attrs>;
-    <Attrs = {}>(fn: (children: View[] | [], context: Context) => Children): Views<Attrs>;
+ * s.http.get()
+ * s.http.post()
+ * s.http.put()
+ *
+ * // etc etc
+ */
+interface Methods {
+    /**
+     * HTTP GET Request
+     *
+     * @example
+     *
+     * s.http.get('/api/path', {});
+     */
+    get: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP POST Request
+     *
+     * @example
+     *
+     * s.http.post('/api/path', {});
+     */
+    post: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP PUT Request
+     *
+     * @example
+     *
+     * s.http.put('/api/path', {});
+     */
+    put: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP PATCH Request
+     *
+     * @example
+     *
+     * s.http.put('/api/path', {});
+     */
+    patch: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP DELETE Request
+     *
+     * @example
+     *
+     * s.http.delete('/api/path', {});
+     */
+    delete: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP HEAD Request
+     *
+     * @example
+     *
+     * s.http.head('/api/path', {});
+     */
+    head: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+}
+/**
+ * Function type/s for the `s.http` method, including `s.http.get`, `s.http.post` etc.
+ */
+interface Http extends Methods {
+    /**
+    * HTTP Request
+    *
+    * @example
+    *
+    * s.http('/api/path', {
+    *  method: 'GET',
+    *  redraw: true,
+    *  responseType: 'json',
+    *  json: 'application/json',
+    *  query: {},
+    *  body: {},
+    *  user: '',
+    *  pass: '',
+    *  headers: {},
+    *  timeout: 0,
+    *  config: (xhr) => {},
+    * })
+    */
+    <T = any>(url: string, params?: Omit<Params<T>, 'url'>): Promise<T>;
+    <T = any>(params?: Params<T>): Promise<T>;
 }
 
-declare class Sin {
+type Sin = Component & {
     /**
      * Global Window Object
      */
-    static readonly window: Window & typeof globalThis;
+    readonly window: Window & typeof globalThis;
     /**
       * Scroll Restoration
       */
-    static readonly scroll: boolean;
+    readonly scroll: boolean;
     /**
-     * Check server
+     * Runtime references
      */
-    static readonly is: {
+    readonly is: {
         /**
          * Whether or not code is executing on server.
          */
-        server: boolean;
+        readonly server: boolean;
     };
     /**
      * Redrawing
      */
-    static readonly redrawing: boolean;
+    readonly redrawing: boolean;
     /**
-     * JSX
+     * JSX Component Creation Reference
+     *
+     * > **𓃵 Sacrificial Decision**
      */
-    static jsx: View;
+    jsx: any;
     /**
      * Delay redraw or operation.
      *
      * @example
      *
-     * // For in that sleep of death...
+     * // 💤 For in that sleep of death...
      * await sleep(2000)
      * // What dreams my come?
      */
-    static sleep(x: number): Promise<number>;
+    sleep(x: number): Promise<number>;
     /**
-     * Sin Redraw
-     */
-    static redraw: Redraw;
-    /**
-     * Sin Style
+     * **⮂** Sin Redraw
      *
-     * Set the base `<style>` which sin uses.
+     * @example
+     *
+     * s.redraw() // Asynchronous Redraws
+     */
+    redraw: Redraw;
+    /**
+     * Set the base `<style>` element which sin uses for CSS cascades.
      *
      * @example
      *
@@ -4083,73 +6043,35 @@ declare class Sin {
      * // Omitting parameter returns current <style> sin is using
      * s.style() // => HTMLStyleElement
      */
-    static style: (element?: HTMLStyleElement) => HTMLStyleElement;
+    style: (element?: HTMLStyleElement) => HTMLStyleElement;
     /**
-     * ### Sin Event
-     *
-     * @todo Speak with Rasmus
+     * Creates a custom event handler with observer pattern support.
      *
      * @example
+     * // 𓋹 Call forth events and partake in blasphemy!
      *
      * const sinned = s.event(x => console.log(x))
      *
      * sinned.observe('repent')
      */
-    static event<T = any>(cb?: (x: T) => void): {
-        /**
-         * Observe event (Returns an unobserver callback function)
-         */
-        observe: (x: any, once: any) => () => boolean;
-    };
+    event: <T extends any[] = any[]>(fn?: (...args: T) => any) => Listener<T>;
     /**
-     * Sin CSS
+     * CSS Methods for controlling the cascades
      */
-    static css: {
-        <T = any>(...params: T[]): Literal;
-        /**
-         * CSS Alias Syntaxes
-         *
-         * @todo Rasmus Example
-         */
-        alias: {
-            /**
-             * Set alias using key and value
-             */
-            (name: string, value: string): void;
-            /**
-             * Set alias using object
-             */
-            (value: {
-                [query: string]: string;
-            }): void;
-        };
-        /**
-         * CSS Resets
-         *
-         * @todo Rasmus Example
-         */
-        reset: (x?: any[], ...xs: any[]) => Literal;
-        /**
-         * CSS custom unit control
-         *
-         * @example
-         *
-         * // Option 1
-         * s.css.unit('n', (value, property) => (x * .25) + 'rem' )
-         *
-         * // Option 2
-         * s.css.unit({ n: (value, property) => (x * .25) + 'rem' })
-         */
-        unit: Units;
-    };
+    css: CSS;
     /**
      * CSS Animate utility
      */
-    static animate: () => (defferable?: boolean) => void;
+    animate: () => (defferable?: boolean) => void;
     /**
-     * Mount
+     * Sin Mount
+     *
+     * @example
+     * // 𓋹 The wicked etch their dreams!
+     *
+     * s.mount(document.body, () => s`div`('In the den of sin!'))
      */
-    static mount: Mount;
+    mount: Mount;
     /**
      * HTTP utility for requests
      *
@@ -4169,7 +6091,7 @@ declare class Sin {
      *  config: (xhr) => {},
      * })
      */
-    static http: Http;
+    http: Http;
     /**
      * Create live stream with value. Optionally pass a list of observers.
      *
@@ -4178,11 +6100,33 @@ declare class Sin {
      * const a = s.live(10);
      * const b = s.live(20, x => {}, x => {});
      */
-    static live: Live;
+    live: LiveStatic;
     /**
      * Sin Routing
+     *
+     * @example
+     *
+     * // Path
+     * s.route('/sin-path')
+     *
+     * s.route({
+     *  // View
+     *  '/sin-view': s`main`([
+     *    s`h1`('Unrepentant Rapture!')
+     *  ]),
+     *  // Component
+     *  '/sin-component': s(() => [
+     *    `main`(
+     *      s`h1`('Hail the wicked!')
+     *    )
+     *  ]),
+     *  // Function
+     *  '/sin-function': () => [
+     *    s`section`('Joyous Blasphemy')
+     *  ],
+     * })
      */
-    static route: Route;
+    route: Route;
     /**
      * DOM Event listener - forwarded to `addEventListener`
      *
@@ -4194,56 +6138,44 @@ declare class Sin {
      *
      *  // In the den of sin!
      *
-     * }, {
-     *  passive: true
-     * })
+     * }, { passive: true })
      */
-    static on: {
-        <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
-        /**
-         * The DOM Element listener will be attached
-         */
-        target: T, 
-        /**
-         * The event name
-         */
-        event: K, 
-        /**
-         * The listener callback function
-         */
-        listener: (this: Window, event: WindowEventMap[K]) => any, 
-        /**
-         * Event Options
-         */
-        options?: boolean | AddEventListenerOptions): void;
-    };
+    on: On;
     /**
-     * Forgiving HTML or SVG string forms into unescaped HTML or SVG.
+     * Forgiving HTML or SVG strings into unescaped HTML or SVG.
      *
      * > Unsanitized user input is **Forbidden!**
      *
      * @example
      *
+     * s.trust`<small>In the den of Sin</small>`
      * s.trust(`<h1>Woe to the wicked!</h1>`)
      */
-    static trust<T extends HTMLElement>(strings: string, ...values: string[]): T;
+    trust: {
+        (markup: TagLiteral, ...interpolate: Interpolate): View;
+        (markup: string): View;
+    };
     /**
      * Error
      */
-    static error(): Children;
+    error(): Children;
+};
+
+declare global {
+    namespace S {
+        export const Component: Component;
+        export const Http: Http;
+        export const Live: LiveStatic;
+        export const View: View;
+        export const Route: Route;
+        export const Mount: Mount;
+        export const Event: Listener;
+        export const On: On;
+        export const CSS: CSS;
+        export const Context: Context;
+        export type { Statefull, Stateless, EventHandler };
+    }
 }
+declare const s: Sin;
 
-declare namespace S {
-    const Component: Component;
-    const Http: Http;
-    const Live: Live;
-    const View: View;
-    const Route: Route;
-    const Mount: Mount;
-    const CSS: CSS;
-    const Context: Context;
-}
-
-declare const s: Identity<typeof Sin> & Component;
-
-export { S, s as default };
+export { s as default };

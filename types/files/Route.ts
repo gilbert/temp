@@ -1,5 +1,5 @@
-import type { StringUnion } from "./Utilities";
-import type { Constructor } from "./Components";
+import type { Attrs, StringUnion } from "./Utilities";
+import type { Component } from "./Components";
 import type { View } from "./View";
 
 /**
@@ -12,7 +12,7 @@ import type { View } from "./View";
  *   state: {} // ← { attrs } reference
  * })
  */
-export interface State<T = {}> {
+export type State<T = {}> = {
   /**
    * Update HistoryState `state`
    */
@@ -30,7 +30,7 @@ export interface State<T = {}> {
  *   state: {}
  * })
  */
-export interface Options<T = {}> {
+export type Options<State = {}> = {
   /**
    * History pushState replace
    *
@@ -48,7 +48,7 @@ export interface Options<T = {}> {
    *
    * @default {}
    */
-  state?: T
+  state?: State
 }
 
 /**
@@ -58,7 +58,7 @@ export interface Options<T = {}> {
  *
  * s.route.query // Route.Query
  */
-export interface Query {
+export type Query = {
   /**
    * Get a query parameter value
    *
@@ -68,7 +68,7 @@ export interface Query {
    *
    * s.route.query.get('fruit') // => apple
    */
-  get: (key: string) => string;
+  get: (key: string) => string | null;
   /**
    * Set a query parameter value
    *
@@ -78,7 +78,7 @@ export interface Query {
    *
    * s.route.query.set('garden', 'eden')
    */
-  set: <T = any>(key: string, value: T) => void;
+  set: <T extends string | number | boolean>(key: string, value: T) => void;
   /**
    * Replaces query parameters. Accepts object or string
    *
@@ -91,7 +91,7 @@ export interface Query {
    *   eve: 'female',
    * })
    */
-  replace: <T = {} | string>(params: T) => URLSearchParams;
+  replace: <T extends Record<string, string | number | boolean> | string>(params: T) => URLSearchParams;
   /**
    * Clear/remove the query parameters from URL
    *
@@ -102,20 +102,18 @@ export interface Query {
   clear: () => void;
 }
 
+
+
 /**
- * Route handler value interface
+ * Component Routes
  */
-export interface Handler<A> {
-  /**
-   * Route Handler
-   */
-  [path: `/${string}`]: (() => Constructor | Constructor[]) | Constructor | Constructor[]
-}
-
+declare type Routes<T extends Attrs = Attrs> = Record<`/${string}`,
+  | ((attrs: T & Record<string, string>) => Component | Component[])
+  | Component
+  | Component[]
+>
 
 /**
- * #### Route Instance/s and Method
- *
  * Function type for the `s.route` method and `{ route }` instance/s.
  */
 export interface Route {
@@ -143,13 +141,13 @@ export interface Route {
    *  ],
    * })
    */
-  <A>(routes: Handler<A>, options?: Options): View;
+  <T extends Attrs = Attrs>(routes: Routes<T>, options?: Options): View;
   /**
    * Returns the current URL pathname (route)
    *
    * @example
    *
-   * s.route.path // => '/'
+   * s.route.path // -> '/'
    */
   readonly path: string;
   /**
@@ -167,7 +165,7 @@ export interface Route {
    *
    * @example
    *
-   * s.route.parent.path // /a/b > /a is parent
+   * s.route.parent.path // -> /a/b > /a is parent
    */
   parent: Route;
   /**
@@ -185,8 +183,8 @@ export interface Route {
    *
    * // Pathname: /sinner/loki
    *
-   * s.route.has('loki') // => true;
-   * s.route.has('sin') // => false;
+   * s.route.has('loki') // -> true;
+   * s.route.has('sin') // -> false;
    */
   has(path: string): boolean
   /**
@@ -194,7 +192,7 @@ export interface Route {
    *
    * @example
    *
-   * s.toString() // => '/'
+   * s.toString() // -> '/'
    */
   toString(): string;
 }

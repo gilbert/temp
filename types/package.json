@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "dev": "tsup --dts-only --format esm --watch",
     "build": "tsup --dts-only --format esm"
   },
   "author": {

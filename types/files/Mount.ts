@@ -1,24 +1,19 @@
-import type { Children, View, Views } from "./View";
+import type { Children, View } from "./View";
 import { Context } from "./Context";
+import { Route } from "./Route";
 
 /**
  * DOM element argument type
  */
 export type DOM = HTMLElement | Element | {};
 
-type MountDOM<Attrs = {}> = (dom: DOM, attrs: Attrs, children: View[] | [], context: Context) => Children
-
 /**
  * Function type for the `s.mount` method.
- *
- * @example
- *
-* s.mount((dom, component, context) => [])
 */
-export interface Mount {
-  <Attrs = {}>(dom: HTMLElement | Element | {}, sin: MountDOM<Attrs>): Views<Attrs>;
-  <Attrs = {}>(fn: (attrs: Attrs, children: View[] | [], context: Context) => Children): Views<Attrs>;
-  <Attrs = {}>(fn: (children: View[] | [], context: Context) => Children): Views<Attrs>;
-  <Attrs = {}>(fn: (children: View[] | [], context: Context) => Children): Views<Attrs>;
+export type Mount = {
+  (fn: (route: { route: Route }) => Children): void;
+  (fn: <Attrs = {}>(attrs: Attrs, children: View[] | [], context: Context) => Children): void;
+  (fn: (children: View[] | [], context: Context) => Children): void;
+  (dom: DOM, fn: (attrs: any, children: View[] | [], context: Context) => Children): void;
 }
 

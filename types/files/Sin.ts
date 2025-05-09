@@ -1,55 +1,62 @@
-import type { Literal } from "./Utilities";
-import type { Units } from "./CSS";
+import type { Interpolate, TagLiteral, Void } from "./Utilities";
+import type { CSS } from "./CSS";
 import type { Http } from "./Http";
-import type { Live } from "./Live";
+import type { SinLive } from "./Live";
 import type { Mount } from "./Mount";
 import type { Route } from "./Route";
 import type { Children, Redraw, View } from "./View";
+import type { Component, StatelessComponent } from "./Components";
+import type { Listener, On } from "./Listeners";
 
-export declare class Sin {
+
+export type Sin = Component & {
   /**
    * Global Window Object
    */
-  static readonly window: Window & typeof globalThis;
+  readonly window: Window & typeof globalThis;
  /**
    * Scroll Restoration
    */
-  static readonly scroll: boolean;
+  readonly scroll: boolean;
   /**
-   * Check server
+   * Runtime references
    */
-  static readonly is: {
+  readonly is: {
     /**
      * Whether or not code is executing on server.
      */
-    server: boolean;
+    readonly server: boolean;
   };
   /**
    * Redrawing
    */
-  static readonly redrawing: boolean;
+  readonly redrawing: boolean;
   /**
-   * JSX
+   * JSX Component Creation Reference
+   *
+   * > **𓃵 Sacrificial Decision**
    */
-  static jsx: View;
+  jsx: any;
   /**
    * Delay redraw or operation.
    *
    * @example
    *
-   * // For in that sleep of death...
+   * // 💤 For in that sleep of death...
    * await sleep(2000)
    * // What dreams my come?
    */
-  static sleep(x: number): Promise<number>
+  sleep(x: number): Promise<number>
   /**
-   * Sin Redraw
-   */
-  static redraw: Redraw;
-  /**
-   * Sin Style
+   * **⮂** Sin Redraw
    *
-   * Set the base `<style>` which sin uses.
+   * @example
+   *
+   * s.redraw() // Asynchronous Redraws
+   */
+  redraw: Redraw;
+  /**
+   * Set the base `<style>` element which sin uses for CSS cascades.
    *
    * @example
    *
@@ -60,74 +67,35 @@ export declare class Sin {
    * // Omitting parameter returns current <style> sin is using
    * s.style() // => HTMLStyleElement
    */
-  static style: (element?: HTMLStyleElement) => HTMLStyleElement;
-
+  style: (element?: HTMLStyleElement) => HTMLStyleElement;
   /**
-   * ### Sin Event
-   *
-   * @todo Speak with Rasmus
+   * Creates a custom event handler with observer pattern support.
    *
    * @example
+   * // 𓋹 Call forth events and partake in blasphemy!
    *
    * const sinned = s.event(x => console.log(x))
    *
    * sinned.observe('repent')
    */
-  static event <T = any>(cb?: (x: T) => void): {
-    /**
-     * Observe event (Returns an unobserver callback function)
-     */
-    observe: (x: any, once: any) => () => boolean;
-  }
-
+  event: <T extends any[] = any[]>(fn?: (...args: T) => any) => Listener<T>;
   /**
-   * Sin CSS
+   * CSS Methods for controlling the cascades
    */
-  static css: {
-    <T = any>(...params: T[]): Literal;
-    /**
-     * CSS Alias Syntaxes
-     *
-     * @todo Rasmus Example
-     */
-    alias: {
-      /**
-       * Set alias using key and value
-       */
-      (name: string, value: string): void;
-      /**
-       * Set alias using object
-       */
-      (value: { [query: string]: string; }): void;
-    }
-    /**
-     * CSS Resets
-     *
-     * @todo Rasmus Example
-     */
-    reset: (x?: any[], ...xs: any[]) => Literal;
-    /**
-     * CSS custom unit control
-     *
-     * @example
-     *
-     * // Option 1
-     * s.css.unit('n', (value, property) => (x * .25) + 'rem' )
-     *
-     * // Option 2
-     * s.css.unit({ n: (value, property) => (x * .25) + 'rem' })
-     */
-    unit: Units
-  }
+  css: CSS
   /**
    * CSS Animate utility
    */
-  static animate: () => (defferable?: boolean) =>void
+  animate: () => (defferable?: boolean) =>void
   /**
-   * Mount
+   * Sin Mount
+   *
+   * @example
+   * // 𓋹 The wicked etch their dreams!
+   *
+   * s.mount(document.body, () => s`div`('In the den of sin!'))
    */
-  static mount: Mount;
-
+  mount: Mount;
   /**
    * HTTP utility for requests
    *
@@ -147,8 +115,7 @@ export declare class Sin {
    *  config: (xhr) => {},
    * })
    */
-  static http: Http;
-
+  http: Http;
   /**
    * Create live stream with value. Optionally pass a list of observers.
    *
@@ -157,12 +124,33 @@ export declare class Sin {
    * const a = s.live(10);
    * const b = s.live(20, x => {}, x => {});
    */
-  static live: Live;
-
+  live: SinLive;
   /**
    * Sin Routing
+   *
+   * @example
+   *
+   * // Path
+   * s.route('/sin-path')
+   *
+   * s.route({
+   *  // View
+   *  '/sin-view': s`main`([
+   *    s`h1`('Unrepentant Rapture!')
+   *  ]),
+   *  // Component
+   *  '/sin-component': s(() => [
+   *    `main`(
+   *      s`h1`('Hail the wicked!')
+   *    )
+   *  ]),
+   *  // Function
+   *  '/sin-function': () => [
+   *    s`section`('Joyous Blasphemy')
+   *  ],
+   * })
    */
-  static route: Route;
+  route: Route;
   /**
    * DOM Event listener - forwarded to `addEventListener`
    *
@@ -174,43 +162,26 @@ export declare class Sin {
    *
    *  // In the den of sin!
    *
-   * }, {
-   *  passive: true
-   * })
+   * }, { passive: true })
    */
-  static on: {
-    <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
-      /**
-       * The DOM Element listener will be attached
-       */
-      target: T,
-      /**
-       * The event name
-       */
-      event: K,
-      /**
-       * The listener callback function
-       */
-      listener: (this: Window, event: WindowEventMap[K]) => any,
-      /**
-       * Event Options
-       */
-      options?: boolean | AddEventListenerOptions
-    ): void;
-  }
+  on: On
 
   /**
-   * Forgiving HTML or SVG string forms into unescaped HTML or SVG.
+   * Forgiving HTML or SVG strings into unescaped HTML or SVG.
    *
    * > Unsanitized user input is **Forbidden!**
    *
    * @example
    *
+   * s.trust`<small>In the den of Sin</small>`
    * s.trust(`<h1>Woe to the wicked!</h1>`)
    */
-  static trust<T extends HTMLElement>(strings: string, ...values: string[]): T;
+  trust: {
+    (markup: TagLiteral, ...interpolate: Interpolate): View;
+    (markup: string): View;
+  }
   /**
    * Error
    */
-  static error(): Children;
+  error(): Children;
 }

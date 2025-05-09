@@ -21,10 +21,10 @@
   },
   "exports": {
     ".": {
+      "types": "./sin.d.ts",
       "node": "./ssr/sin.js",
       "import": "./src/index.js",
-      "default": "./src/index.js",
-      "types": "./sin.d.ts"
+      "default": "./src/index.js"
     },
     "./bin/color": "./bin/color.js",
     "./env": "./bin/env.js",

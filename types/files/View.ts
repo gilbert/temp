@@ -1,19 +1,37 @@
-import { Context } from "./Context";
+import type { Vars } from "./CSS";
+
+/**
+ * Child node [Primitive](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
+ */
+export type Primitive = string | number | boolean | null | undefined;
 
 /**
  * The child node of a component
  */
-export type Child<Attrs = {}> = Views<Attrs> | string | number | undefined;
+export type Child = View | Primitive | Nodes
+
+/**
+ * An array of {@link Children}
+ */
+export interface Nodes extends Array<Children> {}
+
+/**
+ * An array of nodes in a sin component
+ */
+export type Children = Child | Nodes | []
+
+/**
+ * An array of nodes in a sin component
+ */
+export type Node = Nodes | string | number | boolean
 
 /**
  * Children of a component
  */
-export type Children<Attrs = {}> = [] | Child<Attrs>[]
-
-/**
- * Children of a component
- */
-export interface Redraw {
+export type Redraw = {
+  /**
+   * Asynchronous Redraws
+   */
   (): void;
   /**
    * Force Redraw
@@ -24,21 +42,22 @@ export interface Redraw {
 /**
  * Component view instance `{ tag }` interface
  */
-export interface Tag {
+export type Tag = {
   /**
    * The `nodeName` of a DOM element, as per the markup case.
    *
    * @example
    *
-   * const node = s`button`('Baptise Bazel!');
+   * const node = s`button`('Vain is the pride of the wicked');
    *
    * console.log(node.tag.name) // 'button'
    */
-  readonly tag: string;
+  readonly name: string;
   /**
    * The elements attribute `id=""` value
    *
-   * @default ''
+   * @default
+   * ''
    *
    * @example
    *
@@ -48,18 +67,20 @@ export interface Tag {
    */
   readonly id: string;
   /**
-   * The elements attribute `class=""` value. This will contain
-   * Sin CSS or shorthand expressions hash values.
+   * The elements attribute `class=""` value. This value will
+   * hold reference to the CSS class name passed or sin shorthand
+   * expressions hash values.
    *
-   * @default ''
+   * @default
+   * ''
    *
    * @example
    *
    * const a = s`a.xxx`('Lustful Intent');
    * const b = s`a bc red`('Immorality');
    *
-   * console.log(a.tag.classes) // 'a1b2c3d4'
-   * console.log(b.tag.classes) // 'foo bar'
+   * console.log(a.tag.classes) // 'xxx'
+   * console.log(b.tag.classes) // 's1n666' (hashed value)
    */
   readonly classes: string;
   /**
@@ -71,17 +92,34 @@ export interface Tag {
   /**
    * Holds the raw tag template literal parameters
    *
-   * @default []
+   * > **NOTE**
+   * >
+   * > This is a readonly value that is primarily for internal usage
+   * > and has been derived from the parsing stack.
+   *
+   * @default
+   * [] // empty array when no interpolation
+   *
+   * @example
+   *
+   * const { tag } = s`h1 color ${'red'} h ${666}`('Sinner!');
+   *
+   * console.log(tag.args) // ['red', 666]
    */
   readonly args: any[];
   /**
-   * Corresponding CSS Variables which hold the
+   * Corresponding CSS Variables expressed in the tagged literal.
    *
-   * @internal
-   * @todo Speak with Rasmus
-   * @default {}
+   * > **NOTE**
+   * >
+   * > This is a readonly value that is primarily for internal usage
+   * > and has been derived from the parsing stack.
+   *
+   * @default
+   * {} // empty object if no vars
    */
-  readonly vars: {}
+  readonly vars: Record<`--${string}`, Vars>;
+
 }
 
 /**
@@ -91,32 +129,21 @@ export interface Tag {
  *
  * s`button`('Hello Sinner!') // => View
  */
-export interface View<Attrs = {}> {
+export type View<T = any> = {
  /**
-  * @todo Rasmus walk through
+  * Sin Children (child nodes)
   */
- readonly children?: [] | Array<((attrs: Attrs, view: View[], context: Context) => View)>;
+ readonly children?: Children;
  /**
   * Tag reference describing the syntactic markup on the node
   */
  readonly tag?: Tag;
  /**
-  * @todo
-  */
- readonly specificity: number;
- /**
   * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
   */
- attrs: Attrs;
+ attrs: T;
  /**
   * The value used to map a DOM element to its respective item in an array of data.
   */
  key: any;
 }
-
-
-/**
- * Component view/s argument type
- */
-export type Views<Attrs = {}> = View<Attrs> | View<Attrs>[];
-
