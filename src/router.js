@@ -34,9 +34,9 @@ export default function router(s, root, rootContext, parent) {
   route.parent = parent || route
   route.query = rootContext.query
   route.toString = route
-  route.has = x => x === '/'
+  route.has = x => (x = x.replace(root, '')) === '/'
     ? (getPath(location) === root || (getPath(location) === '/' && root === ''))
-    : getPath(location).indexOf(cleanHref(root + '/' + x.replace(root, ''))) === 0
+    : getPath(location).indexOf(cleanHref(root + '/' + x)) === 0
 
   Object.defineProperty(route, 'path', {
     get() {
