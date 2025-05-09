@@ -533,18 +533,17 @@ Content here.
 ### s.animate
 
 ```js
-  s``(
-    [animate=entry] {
-      opacity 1
-    }
+s`
+  [animate=entry] {
+    opacity 1
+  }
 
-    [animate=exit] {
-      opacity 0
-    }
+  [animate=exit] {
+    opacity 0
+  }
 `({
   dom: s.animate
 })
-
 ```
 
 
