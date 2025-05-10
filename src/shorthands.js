@@ -1,6 +1,8 @@
 export default {
   ai: 'align-items',
   as: 'align-self',
+  ac: 'align-content',
+  ar: 'aspect-ratio',
   b: 'bottom',
   bc: 'background-color',
   br: 'border-radius',
