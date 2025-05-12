@@ -706,20 +706,20 @@ function createElement(view, context, tagName) {
 }
 
 class Instance {
-  constructor(init, view, error, loading, hydrating, attrs, children) {
+  constructor(init, view, error, loading, context, hydrating, attrs, children) {
     this.init = init
     this.key = undefined
     this.view = view
     this.error = error
     this.caught = undefined
     this.loading = loading
+    this.context = context
     this.hydrating = hydrating
     this.onremoves = undefined
     this.promise = undefined
     this.stateful = undefined
     this.next = undefined
     this.ignore = false
-    this.context = undefined
     this.recreate = false
     this.attrs = proxy(attrs)
     this.children = proxy(children)
@@ -758,6 +758,7 @@ class Stack {
       init,
       options && options.error || context.error,
       options && options.loading || context.loading,
+      options && options.context || context.context,
       context.hydrating,
       view.attrs,
       view.children
@@ -792,7 +793,7 @@ class Stack {
       update(e, true, true)
       instance = this.xs[index]
     })
-    instance.context = Object.create(context, {
+    instance.context = Object.create(instance.context || context, {
       hydrating: { value: context.hydrating, writable: true },
       onremove: { value: fn => { onremoves(instance, fn) } },
       ignore: { value: x => { instance.ignore = x } },
