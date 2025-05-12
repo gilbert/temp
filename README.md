@@ -1,12 +1,14 @@
 <p  align="center">
 <a href ="https://sinjs.com">
-<img src="https://sinjs.com/sin.svg" width="500px">
+<img src="https://sinjs.com/sin.svg" width="400px">
 </a>
 </p>
 
 # Sin
 
-Sin is a lightweight, reactive JavaScript framework designed to craft dynamic, performant, and accessible web applications with a touch of wicked flair. It embraces a declarative, component-based approach, offering a unique blend of tagged template literals, reactive streams, and a minimalist API. If you understand HTML, CSS and JavaScript you will understand sin.
+Sin is a lightweight, reactive JavaScript framework designed to craft dynamic, performant, and accessible web applications. It embraces a declarative, component-based approach, offering a unique blend of tagged template literals, reactive streams, and a minimalist API. If you understand HTML, CSS and JavaScript you will understand sin.
+
+<pre><code><i><strong><a href="https://flems.io/sin">https://flems.io/sin</a></strong></i></code></pre>
 
 ### Features
 
@@ -18,11 +20,10 @@ Sin is a lightweight, reactive JavaScript framework designed to craft dynamic, p
 - 👩‍💻 Best DX in town (sub eye blink hot reload)
 - 🏎️ Lean and Fast (Only 2 dependencies) 12kb~ish
 
+### Samples
 
-### Example/s
-
-- [Carousel Fun](https://flems.io/https://gist.github.com/panoply/bb1b15cdae4e98bca253016e2c4ed9c4)
-
+- [Carousel](https://flems.io/https://gist.github.com/panoply/bb1b15cdae4e98bca253016e2c4ed9c4)
+- [Toast](https://flems.io/https://gist.github.com/porsager/d799d962c435e5e647cc0f6a6b560909)
 
 # Installation
 
@@ -46,7 +47,7 @@ iex (irm install.sinjs.com)
 
 ### Latest Versions
 
-Sin is not yet available for consumption via the NPM Registry. Given that there are frequent changes and improvements, once the `sin` binary is exposed you can keep aligned with via the Github Repository.
+Sin is not yet available for consumption via the NPM Registry. Given that there are frequent changes and improvements, once the `sin` binary is exposed you can keep aligned via the Github Repository.
 
 ```bash
 GITHUB_TOKEN=xxx sin i porsager/sin
@@ -77,6 +78,8 @@ Sin projects use a default structure and when leveraging the sin CLI, projects s
 
 ### VSCode Extension
 
+Sintax provides some basic support for sin, including Syntax highlighting for literal styles and ile icons.
+
 - [Sintax](https://marketplace.visualstudio.com/items?itemName=sissel.sintax)
 
 ---
@@ -84,29 +87,38 @@ Sin projects use a default structure and when leveraging the sin CLI, projects s
 # Table of Contents
 
 - [Elements](#elements)
+- [Attributes](#attributes)
+  - [dom](#dom--dom----)
+  - [deferrable](#deferrable--deferrable-boolean-)
+  - [key](#key--key-any-)
 - [Arguments](#arguments)
   - [attrs](#attrs-)
   - [children](#children-)
   - [context](#context-)
 - [Mounting](#mounting-smount)
 - [Components](#components)
-  - [Styled](#styled-s)
-  - [Stateless](#stateless-s---)
-  - [Statefull](#statefull-s----)
-  - [Async](#async-sasync---)
+  - [Styled](#styled-component-s)
+  - [Stateless](#stateless-component-s--)
+  - [Statefull](#statefull-component-s----)
+  - [Async](#async-component-sasync---)
 - [CSS](#css-scss)
-  - [Reset](#resets-scssreset)
-  - [Units](#units)
-  - [Variables](#variables)
-  - [Alias](#alias-scssalias)
-  - [Shothands](#shorthands)
+  - [reset](#resets-scssreset)
+  - [units](#units)
+  - [variables](#variables)
+  - [alias](#alias-scssalias)
+  - [ahothands](#shorthands)
 - [Routing](#routing)
 - [Live](#live)
 - [HTTP](#http-shttp)
   - [Methods](#request-methods)
   - [Options](#request-options)
-- [Animate](#animate-sanimate)
+- [DOM Helpers](#dom-helpers)
+  - [on](#on-son)
+  - [animate](#animate-sanimate)
 - [Trust](#trust-strust)
+
+
+---
 
 # ```s`` ```
 
@@ -114,7 +126,7 @@ Sin revolves around components, which are the building blocks of your applicatio
 
 > The beauty of the Sin component model is that you will never have to change your callsite usage, even if you need to advance the complexity of your component.
 
-# Elements
+## Elements
 
 Elements (vnodes) are composed as tagged template literals. Sin defaults to creating `div` elements if an HTML element type is not specified and allows `#` and class names `.` right after the element type or at the start of the tagged template literal to be passed.
 
@@ -151,7 +163,60 @@ s('h1.loki', [ s('h1', 'Hello Sinner!') ])
 </p>
 </details>
 
-# Arguments
+## Attributes
+
+Element (vnode) attributes support HTML attribute properties. Sin resolves attributes via JavaScript and DOM APIs (`setAttribute`). Event handler binding supports all DOM events, including those without an `on` property, like `touchstart`. Event handlers are enhanced, with per-element references and additional properties for improved render control.
+
+### dom `{ dom: () => {} }`
+
+DOM Element render callback. Dom is a creation lifcycle hook which will call in the post rendering cycle of a sin view. You will attach third-party tools using this callback method.
+
+```js
+s`div`({
+  dom: (element, attributes, children, context) => {
+
+    element      // -> <div> Element
+    attributes   // -> element attributes
+    children     // -> nested content
+    context      // -> context reference
+
+  }
+})
+```
+
+The `dom` key also accepts an array of handler functions which can be used to chain operations
+
+```js
+s`div`({
+  dom: [
+    (dom, attributes, children, context) => console.log(dom, attributes, children, context),
+    (dom, attributes, children, context) => console.log(dom, attributes, children, context),
+    (dom, attributes, children, context) => console.log(dom, attributes, children, context)
+  ]
+})
+```
+
+### deferrable `{ deferrable: boolean }`
+
+The `deferrable` key accepts a boolean, it waits for children using deferred removal:
+
+```js
+s`div`({
+  deferrable: false
+})
+```
+
+### key `{ key: any }`
+
+The `key` property is a value used to map a DOM element to its respective item in an array of data.
+
+```js
+s`div`({
+  key: 1
+})
+```
+
+## Arguments
 
 In Sin, the `attrs`, `children`, and `context` arguments are fundamental to component creation and management, as they define the properties, content, and environment of components. Function signatures of sin components are comprised of 3 arguments. Each argument represents render specifics.
 
@@ -214,7 +279,7 @@ s.mount(({}, [], context) => {
 })
 ```
 
-# Mounting `s.mount(...)`
+## Mounting `s.mount(...)`
 
 The mount method is used to render elements and components. By default, sin will mount to `document.body`, but you can provide a specific element. Mount can be used to construct the DOM for your application.
 
@@ -222,13 +287,13 @@ The mount method is used to render elements and components. By default, sin will
 s.mount(() => s`h1`('Hello Sinner'))
 ```
 
-# Components
+## Components
 
 Sin revolves around components, which are the building blocks of your application. Components can be stateless, stateful, or asynchronous, and they support a variety of signatures. All components in Sin are made to allow overriding styles anywhere they are used.
 
 > The beauty of the Sin component model is that you will never have to change your callsite usage, even if you need to advance the complexity of your component.
 
-### Styled `s``(...)`
+## Styled Component `s``(...)`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/7b60cf8898c8d1f22dbdf6006b7b252a)
 
@@ -263,7 +328,7 @@ sinner`
 )
 ```
 
-### Stateless `s(() => ...)`
+## Stateless Component `s(() => ...)`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/32e1ada26743cc3d42b988a56f87b34e)
 
@@ -294,7 +359,7 @@ const apostate = s(({ onclick, ...attrs }, children) =>
 )
 ```
 
-### Statefull `s(() => () => ...)`
+## Statefull Component `s(() => () => ...)`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/2bbf9b783cbacdb2feefb956ccd09109)
 
@@ -326,7 +391,7 @@ const example = s(() => {
 ```
 
 
-### Async `s(async () => )`
+## Async Component `s(async () => )`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/4e3e517c8384a384de9b72a74665a7ea)
 
@@ -347,8 +412,7 @@ const judgement = s(
 )
 ```
 
-
-# CSS `s.css`
+## CSS `s.css`` `
 
 Element styling can be expressed inline and allows for expressive cascades to be applied. The `:` and `;` are optional for single line definitions. No more bloated syntax.
 
@@ -373,7 +437,7 @@ s`span
 > ```
 
 
-### Resets `s.css.reset`
+### Resets `s.css.reset`` `
 
 To reduce browser inconsistencies you can use the opinionated css reset style rules when writing your global CSS.
 
@@ -393,11 +457,16 @@ Sin applies a very minimal default CSS reset, that includes:
 
 
 ```css
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-input, button, textarea, select {
+input,
+button,
+textarea,
+select {
   font: inherit;
   text-transform: none;
 }
@@ -450,7 +519,7 @@ s`span
 ```
 
 
-### Variables
+### Variables `$variable`
 
 Sin provides a convenient way to access and define CSS variabes. The `$` prefix keywords will render vars.
 
@@ -564,7 +633,7 @@ The most popular CSS properties can be references by its initials. A few popular
 
 </details>
 
-# Routing
+## Routing `s.route(...)`
 
 Sin includes the most `get out of your way` router possible. There is always a scoped router available in context which let's you implement routing (as nested as you like) — not being concerned about the mount point. Using `href` is highly encouraged and the default way of telling Sin to route away. Every sin `route` instance even has a sweet .toString method, so you can simply do `href: route + 'sub-page'`. You can also use `route.has()` if you want to highlight which route is active, and if that's too boring Sin sets an `[active]` attribute for you to use for styling.
 
@@ -591,11 +660,11 @@ s.mount(({ route }) => [
 ])
 ```
 
-### `target`
+### Target
 
 For any ``s`a`({ href: "/my/route" }, ...)`` tag, Sin will automatically hook it into `history.pushState` routing. However, if you don't want this behavior (e.g to hit your `/oauth/github` backend route), just add a `target: '_self'` attribute to your anchor tag.
 
-# Live `s.live`
+## Live `s.live`
 
 The `s.live` method creates reactive streams that automatically update the UI when their values change. These streams are versatile, supporting numbers, strings, objects, and more. They can be observed, transformed, and used to drive dynamic behavior.
 
@@ -616,7 +685,7 @@ stream.if(equals, isTrue, isFalse)             // Conditional value based on equ
 ```
 
 
-# HTTP `s.http`
+## HTTP `s.http`
 
 The `s.http` method perform HTTP requests with minimal boilerplate. Built on top of XMLHttpRequest, it offers a promise-based interface for asynchronous operations, supporting common HTTP methods (GET, POST, PUT, PATCH, DELETE, HEAD) and customizable request configurations.
 
@@ -652,7 +721,7 @@ All the standard configuration options for HTTP requests are avaiable, with addi
 
 ```js
 s.http({
-  url: ''                   // Request URL, can also be defined as first argument
+  url: '',                  // Request URL, can also be defined as first argument
   method: 'GET',            // HTTP method 'HEAD' | 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH'
   redraw: true,             // Trigger redraw after resolution
   responseType: 'json',     // '' | 'arraybuffer' | 'blob' | 'document' | 'json' | 'text'
@@ -661,13 +730,36 @@ s.http({
   user: undefined,          // Username for HTTP authorization (default: undefined)
   pass: undefined,          // Password for HTTP authorization (default: undefined, avoid due to plaintext)
   headers: {},              // Request headers (default: {})
+  timeout: 0,               // Request timeout in milliseconds (default: 0, no timeout)
   config: (xhr) => {},      // Custom XMLHttpRequest configuration
-  timeout: 0                // Request timeout in milliseconds (default: 0, no timeout)
 })
 ```
 
+# DOM Helpers
 
-# Animate `s.animate`
+Sin provides dom helper methods that can be used to improve interfacing on the element (vnode) level.
+
+## on `s.on(...)`
+
+
+[![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/c662596e14c94ca238ea063754cfad9b)
+
+
+The `s.on` helper is a DOM Event listener which is forwarded to `addEventListener` event. This helper returns a function and can be passed to the element `{ dom }` as a callback.
+
+```js
+s`pre`({
+  dom: s.on(window, 'keydown', (event, dom) => {
+
+    dom.append(`Pressed: ${event.key}`)  // prints the key typed
+
+  })
+})
+```
+
+## animate `s.animate(...)`
+
+CSS Animation DOM helper utility
 
 ```js
 s`
@@ -684,9 +776,12 @@ s`
 ```
 
 
-# Trust `s.trust`
+## Trust `s.trust`
+
+Forgiving HTML or SVG strings into unescaped HTML or SVG.
 
 ```js
-s.trust('')
+s.trust`<small>In the den of Sin</small>`   // Literal Expression
+s.trust(`<h1>Woe to the wicked!</h1>`)      // Function Expression
 ```
 
