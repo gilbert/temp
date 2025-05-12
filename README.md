@@ -1,274 +1,356 @@
-![Sin](https://sinjs.com/sin.svg)
+<p  align="center">
+<a href ="https://sinjs.com">
+<img src="https://sinjs.com/sin.svg" width="500px">
+</a>
+</p>
+
+# Sin
+
+Sin is a lightweight, reactive JavaScript framework designed to craft dynamic, performant, and accessible web applications with a touch of wicked flair. It embraces a declarative, component-based approach, offering a unique blend of tagged template literals, reactive streams, and a minimalist API. If you understand HTML, CSS and JavaScript you will understand sin.
+
+### Features
 
 - 🔥 Full Stack Web Framework
 - 💍 HTML, CSS & JS in a sinful threesome
-- 🧐 SPA, MPA, SSR, SSG, CLI, ACME, WAT
+- 💦 DOM Hydration and SSR
+- 🧐 SPA, MPA, SSR, SSG, CLI, ACME and WAT
+- 📦 Package Management
 - 👩‍💻 Best DX in town (sub eye blink hot reload)
-- 🏎️ Lean and Fast (Only 2 dependencies) 12kbish
-- 🐦 Follow on [Twitter](https://twitter.com/rporsager)
-
-# 🔥 Sìn.js - Your only dependency!
-
-```js
+- 🏎️ Lean and Fast (Only 2 dependencies) 12kb~ish
 
 
+### Example/s
 
-// Flems gif with nice code sample
+- [Carousel Fun](https://flems.io/https://gist.github.com/panoply/bb1b15cdae4e98bca253016e2c4ed9c4)
 
 
+# Installation
 
-```
-
-# 4-5 line missions statement
-Sin started out as a simple view library in the spirit of Mithril.js, but is now much more than that.
-If you understand html, css and javascript you will understand sin. You're not learning some custom abstraction that is out of style in a year or two (jsx, tailwind)
-
-# Getting Started
-
-#### Global install
+Sin is a (currently) private, accessible only with explicit authorization. The Sin CLI handles development, bundling, package management, and project generation. After installation, use the `sin` binary for all development tasks.
 
 ```bash
 source <(curl -fsSL install.sinjs.com)
 ```
 
-```powershell
-iex (irm install.sinjs.com)
-```
+### CDN
 
-#### Just import and go!
 ```js
 import sin from 'https://sinjs.com'
 ```
 
-### Local development
-```bash
-npx sin create
+### IEX
+
+```powershell
+iex (irm install.sinjs.com)
 ```
 
-Or if you have installed Sin globally
+### Latest Versions
+
+Sin is not yet available for consumption via the NPM Registry. Given that there are frequent changes and improvements, once the `sin` binary is exposed you can keep aligned with via the Github Repository.
+
 ```bash
-sin create
+GITHUB_TOKEN=xxx sin i porsager/sin
 ```
 
-#### Good old fashioned non module script
-```js
-<script src="https://sinjs.com"></script>
-<script>s.mount(() => s`h1`('Hello Sinners'))</script>
+> Obtain the GITHUB_TOKEN from Rasmus or one of us in the [discord](https://discord.gg/PQAsXkRGkp).
+
+### Forked Linking
+
+Forks of sin from `porsager/sin` can be used as global links.
+
+```bash
+sin link sin
 ```
+
+### Project Structure
+
+Sin projects use a default structure and when leveraging the sin CLI, projects should adhere to this directory layout.
+
+```bash
+├── +             # Server Side Scripting
+├── +build        # Build Scripts
+├── +public       # Pass-through files
+├── index.js      # Client side entry
+├── package.json  # Package
+└── sin.lock      # Sin lock for package management
+```
+
+### VSCode Extension
+
+- [Sintax](https://marketplace.visualstudio.com/items?itemName=sissel.sintax)
+
+---
 
 # Table of Contents
 
-* [Syntax](#syntax)
-  - [Tagged Template Literals](#tagged-template-literals)
-  - [Functions](#functions)
-  - [Closures](#closures)
-  - [JavaScript (The Good Parts)](#javascript-the-good-parts)
-* [CSS](#css)
-  - [Lean](#lean)
-  - [Shorthands](#shorthands)
+- [Elements](#elements)
+- [Arguments](#arguments)
+  - [attrs](#attrs-)
+  - [children](#children-)
+  - [context](#context-)
+- [Mounting](#mounting-smount)
+- [Components](#components)
+  - [Styled](#styled-s)
+  - [Stateless](#stateless-s---)
+  - [Statefull](#statefull-s----)
+  - [Async](#async-sasync---)
+- [CSS](#css-scss)
+  - [Reset](#resets-scssreset)
+  - [Units](#units)
   - [Variables](#variables)
-  - [Reset](#reset)
-  - [Animations](#animations)
-* [Events](#events)
-  - [Onclick](#onclick)
-  - [s.on](#son)
-  - [DOM Lifecycle](#dom-lifecycle)
-  - [s.animate](#sanimate)
-* [Components](#components)
-  - [Styled](#styled)
-  - [Stateless](#stateless)
-  - [Stateful](#stateful)
-  - [Async](#async)
-  - [Context](#context)
-  - [Lifecycle](#component-lifecycle)
-* [Routing](#routing)
-  - [context.route](#contextroute)
-  - [Href](#href)
-  - [Recursive Nested Context](#recursive-nested-context)
-  - [Lazy (Code Splitting)](#lazy-code-splitting)
-  - [Query Route.query](#query-routequery)
-* [Project Structure](#project-structure)
-  - [Index.js](#indexjs)
-  - [+Index.js](#indexjs-1)
-  - [export default s.mount (SSR)](#export-default-smount-ssr)
-  - [export default function(app) (Server Routing)](#export-default-functionapp-server-routing)
-  - [+Build](#build)
-  - [+Public](#public)
-* [HTTP](#http)
-  - [s.http](#shttp)
-  - [s.http[Method]](#shttpmethod)
-* [CLI](#cli)
-  - [Create](#create)
-  - [Dev](#dev)
-    - [--Live](#live)
-  - [Start](#start)
-  - [Build](#build-1)
-  - [Generate](#generate)
-  - [Install (Private Registry Proxy)](#install-private-registry-proxy)
-  - [Acme](#acme)
-  - [Version](#version)
-  - [Building](#building)
-* [TEST](#test)
-  - [CLI Test](#cli-test)
-  - [Sin/Test](#sintest)
+  - [Alias](#alias-scssalias)
+  - [Shothands](#shorthands)
+- [Routing](#routing)
+- [Live](#live)
+- [HTTP](#http-shttp)
+  - [Methods](#request-methods)
+  - [Options](#request-options)
+- [Animate](#animate-sanimate)
+- [Trust](#trust-strust)
 
-## Components
+# ```s`` ```
 
-All components in Sin are made to allow overriding styles anywhere they're used. The beauty of the Sin component model is that you will never have to change your callsite usage, even if you need to advance the complexity of your component.
+Sin revolves around components, which are the building blocks of your application. Components can be stateless, stateful, or asynchronous, and they support a variety of signatures. All components in Sin are made to allow overriding styles anywhere they are used.
 
-## The Styled Component
+> The beauty of the Sin component model is that you will never have to change your callsite usage, even if you need to advance the complexity of your component.
 
-#### ```s`` ```
+# Elements
 
-The styled component is the most basic form of component in Sin. It has no logic, but only defines the tag name and styles.
+Elements (vnodes) are composed as tagged template literals. Sin defaults to creating `div` elements if an HTML element type is not specified and allows `#` and class names `.` right after the element type or at the start of the tagged template literal to be passed.
+
 ```js
-// Definition
-const wonderButton = s`button
-  background hotpink
-`
+// Basic Element Structures
+//
+s``('Hello Sinner!')           // -> <div>Hello Sinner!</div>
+s`#id`('Sinner with id')       // -> <div id="penance">Hello Sinner</div>
+s`h1.loki`('Sinner class')     // -> <h1 class="loki">Sinner class</h1>
 
-// Usage
-wonderButton({
-  onclick: () => alert('Are you really using alert? Hell yeah!')
-},
-  'My wonderful button!'
-)
+// Sinfull Element Styling
+//
+s`span
+  font-size: 16px;
+  text-decoration: underline;
+  color: pink;
+`('Sinfull Styling')          // -> <span class="s1cnspbk">Sinfull Styling</span>
+```
+
+<details>
+<summary>
+<strong>HyperScript Syntactical</strong>
+</summary>
+<p>
+
+If you're coming from mithril.js and prefer the old HyperScript syntax, You can compose elements as normal:
+
+```js
+s('', 'Hello Sinner!')
+s('#penance', 'Hello Sinner!')
+s('h1.loki', [ s('h1', 'Hello Sinner!') ])
+```
+
+</p>
+</details>
+
+# Arguments
+
+In Sin, the `attrs`, `children`, and `context` arguments are fundamental to component creation and management, as they define the properties, content, and environment of components. Function signatures of sin components are comprised of 3 arguments. Each argument represents render specifics.
+
+```js
+s((attrs, children, context) => [
+  s`h1`('Garden')
+  s`button`(attrs, name)
+])
 
 ```
 
+### attrs `{}`
 
-## The Stateless Component `s(() => ...)`
+The `attrs` argument is a hashmap object. We use `attrs` as a blueprint for how a component behaves and appears, allowing you to define everything from standard HTML attributes to event handlers (e.g., onclick) and custom properties.
 
-The Stateless component accepts an object for attributes and an array of children
+```js
+const person = s(({ name = 'Eve', ...attrs }) => s`button`(attrs, name))
+
+s.mount(() => [
+  person({ name: 'Adam' }),
+  person({ onclick: () => alert('Apples?') })
+])
+```
+
+### children `[]`
+
+The `children` argument represents the nested content within a sin component, forming the heart of its compositional power and  UI hierarchies. It's a flexible, array-like structure that can include elements, primitive values (like strings or numbers), or arrays of other children.
+
+```js
+const people = s(({}, children) => s`ui`(children))
+
+s.mount(() => people(
+  s`li`(person({ name: 'Adam' })),
+  s`li`(person({ onclick: () => alert('Apples?') }))
+))
+```
+
+### context `{}`
+
+The context argument holds global accessible methods which can be used to interact with the broader application. It encapsulates utilities for document manipulation, client-side routing, lifecycle management, and redraw control.
+
+```js
+const people = s(({}, children) => s`ui`(children))
+
+s.mount(({}, [], context) => {
+
+  const { doc } = context
+
+  doc.title('Garden of Eden')
+  doc.lang('da')
+  doc.head([
+    s`link`({ rel: 'icon', href: '/favicon.ico', sizes: 'any' }),
+    s`meta`({ name: 'apple-mobile-web-app-capable', content: 'yes' })
+  ])
+
+  return () => people(
+    s`li`(person({ name: 'Adam' })),
+    s`li`(person({ onclick: () => alert('Apples?') }))
+  )
+})
+```
+
+# Mounting `s.mount(...)`
+
+The mount method is used to render elements and components. By default, sin will mount to `document.body`, but you can provide a specific element. Mount can be used to construct the DOM for your application.
+
+```js
+s.mount(() => s`h1`('Hello Sinner'))
+```
+
+# Components
+
+Sin revolves around components, which are the building blocks of your application. Components can be stateless, stateful, or asynchronous, and they support a variety of signatures. All components in Sin are made to allow overriding styles anywhere they are used.
+
+> The beauty of the Sin component model is that you will never have to change your callsite usage, even if you need to advance the complexity of your component.
+
+### Styled `s``(...)`
+
+[![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/7b60cf8898c8d1f22dbdf6006b7b252a)
+
+The styled component is the most basic form of component in Sin. It has no logic, but only defines the tag name and styles.
+
 ```js
 // Definition
-const statelessWonderButton = s(({ onclick, ...attrs }, children) =>
-  wonderButton({
+const sinner = s`button
+  p 10 15
+  fs 15
+  mr 10
+  bc cyan
+`
+
+// Basic Usage
+sinner({
+  onclick: () => alert('Blasphemy!')
+},
+  'Hello Sinner!'
+)
+
+// Style Override
+sinner`
+  br 4
+  border 1 solid
+  color white
+  bc hotpink
+`({
+  onclick: () => alert('Blasphemy!')
+},
+  'Hello Sinner!'
+)
+```
+
+### Stateless `s(() => ...)`
+
+[![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/32e1ada26743cc3d42b988a56f87b34e)
+
+The Stateless component accepts an object for attributes and an array of children.
+
+```js
+// Definition
+const sinner = s`button
+  p 10 15
+  fs 15
+  bc hotpink
+  br 4
+  border 1 solid
+  color white
+`
+
+// Usage
+const apostate = s(({ onclick, ...attrs }, children) =>
+  sinner({
     ...attrs,
     onclick: e => {
-      alert('I was clicked')
+      alert('Alert is blasphemy!')
       onclick(e)
     }
   },
     children
   )
 )
+```
 
-// Usage
-statelessWonderButton({
-  onclick: () => alert('Are you really using alert? Yuck!')
-},
-  'My wonderful button!'
+### Statefull `s(() => () => ...)`
+
+[![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/2bbf9b783cbacdb2feefb956ccd09109)
+
+The Stateful Component retains its state across redraws.
+
+```js
+// Definition
+const sinner = s`button
+  p 10 15
+  fs 15
+  bc hotpink
+  br 4
+  border 1 solid
+  color white
+`
+
+const example = s(() => {
+
+  let count = 0
+
+  return () => sinner({
+    onclick: () => count++
+  },
+    count === 0
+    ? 'You are sinless!'
+    : `You've committed ${count} sin${count > 1 ? "s" : ""}!`
+  )
+})
+```
+
+
+### Async `s(async () => )`
+
+[![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/4e3e517c8384a384de9b72a74665a7ea)
+
+
+The Async Component accepts an object that can handle the loading and error states. The `loading` key can be a sin element, component or function, the `error` key is a callback hook fired on failure.
+
+```js
+// Definition
+const judgement = s(
+  {
+    loading: sinner('Seeking Atonement...'),
+    error: e => sinner(`There was an error: ${e}`)
+  },
+  async () => {
+    await s.sleep(3000)
+    return async () => sinner('Sins Forgiven!')
+  }
 )
 ```
 
-## The Stateful Component `s(() => () => ...)`
 
-The Stateful Component retains its state across redraws.
-```js
-// Definition
-const wonderStateButton = s(() => {
-  let count = 0
-  return () => wonderButton({
-  onclick: () => count++
-  },
-  `My wonderful button was clicked ${count} time${0 == count || count > 1 ? "'s" : "" }!`
-  )
-})
+# CSS `s.css`
 
-// Usage
-s.mount(() => WonderStateButton)
-```
-The Async Component accepts an object that can handle the loading and error states.
-## The Async Component `s(async() => () => ...)`
-```js
-// Definition
-const wonderAsyncButton = s(
-  {loading: wonderButton('Fetching Data...'), error: e => wonderButton(`oh oh there was an error: ${e}`)},
-  async () => {
-    let users = []
-    users = await s.sleep(3000).then(_ => s.http('https://jsonplaceholder.typicode.com/users'))
-    return async ()=>  wonderButton('Data Fetched Successfully'
-  )
-})
-
-// Usage
-s.mount(() => wonderAsyncButton)
-```
-
-# Routing
-
-All routes that don't match a route on your server automatically serve your Sin-bundled frontend.
-
-You can then use `s.route` to match against the current url to render content conditionally.
-
-### `s.route`
-
-Sin includes the most `get out of your way` router possible. There is always a scoped router available in context which let's you implement routing (as nested as you like) — not being concerned about the mount point. Using `href` is highly encouraged and the default way of telling Sin to route away. Every sin `route` instance even has a sweet .toString method, so you can simply do `href: route + 'sub-page'`. You can also use `route.has()` if you want to highlight which route is active, and if that's too boring Sin sets an `[active]` attribute for you to use for styling.
-
-Ok, enough talk - here's an example
-
-```js
-s.mount(({ route }) => [
-  s`nav`(
-    ['/', '/murray', '/lysander', '/profile'].map(x =>
-      s`a
-        background ${ route.has(path) && 'lightblue' }
-      `({
-        href: '/' + x
-      },
-        x.slice(1) || 'Home'
-      )
-    )
-  ),
-  s`main`(
-    route({
-      '/': () => 'Welcome to the world',
-      '/:user': ({ user }) => 'You are checking out ' + user,
-      '/profile': () => 'The glory of you'
-    })
-  )
-])
-```
-
-### `target`
-
-For any ``s`a`({ href: "/my/route" }, ...)`` tag, Sin will automatically hook it into `history.pushState` routing.
-
-However, if you don't want this behavior (e.g to hit your `/oauth/github` backend route), just add a `target: '_self'` attribute to your anchor tag.
-
-## Simplifying and improving common tasks
-
-### HTML Elements, Id's & Classes
-
-Sin defaults to creating div elements if an HTML element type is not specified.
-
-```js
-s``('I am a div!'),
-s`div`('I am also a div!')
-```
-
-Add Id's `#` and Classes `.` right after the element type or at the start of the tagged template literal.
-
-```js
-s`button#wonderButton`('I have an ID of wi)
-```
-
-
-CSS styles start at the first white space or newline after HTML element type, id's and classes.
-
-```js
-s`span font-size: 16px; text-decoration: underline; color: pink;`(),
-s`span
-  font-size: 16px;
-  text-decoration: underline;
-  color: pink;
-`()
-```
-
-### Lean CSS
-
-`:` and `;` are optional for single line definitions. No more bloated syntax.
+Element styling can be expressed inline and allows for expressive cascades to be applied. The `:` and `;` are optional for single line definitions. No more bloated syntax.
 
 ```js
 s`span
@@ -278,57 +360,155 @@ s`span
 `()
 ```
 
-Important note: It's not possible to mix shorthand and standard styling conventions : and ; you will lose the lean sintax (shorthand, implict unit)
-```diff
-+  font-size 16
-+  fs 16
-+  font-size: 16;
--  fs: 16;
--  font-size: 16
--  font-size 16;
+> [!NOTE]
+> It's not possible to mix shorthand and standard styling conventions `:` and `;` you will lose the lean sintax (shorthand, implict unit)
+>
+> ```diff
+> +  font-size 16
+> +  fs 16
+> +  font-size: 16;
+> -  fs: 16;
+> -  font-size: 16
+> -  font-size 16;
+> ```
+
+
+### Resets `s.css.reset`
+
+To reduce browser inconsistencies you can use the opinionated css reset style rules when writing your global CSS.
+
+```js
+s.css.reset`
+  /* your global css here */
+`
 ```
 
-### CSS units
+<details>
+<summary>
+<strong>Sin Defaults</strong>
+</summary>
+<p>
+Sin applies a very minimal default CSS reset, that includes:
+</p>
 
-Sin will automatically add px as a unit if left out unless the relevant css property takes a unitless value.
+
+```css
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+input, button, textarea, select {
+  font: inherit;
+  text-transform: none;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  min-height: 100svh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+p {
+  line-height: 1.5;
+}
+
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+  vertical-align: middle;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+ol, ul, li {
+  list-style: none;
+}
+```
+
+</details>
+
+### Units
+
+Sin will automatically add `px` as a unit if left out unless the relevant css property takes a unitless value.
 
 ```js
 s`span
   font-size 16
-  text-decoration underline
-  color pink
+  width 200
+  height 600
 `()
 ```
 
-### CSS variables
 
-Convenient way to access your css variables
+### Variables
+
+Sin provides a convenient way to access and define CSS variabes. The `$` prefix keywords will render vars.
+
 ```css
 s.css`
-:root {
-  $red tomato
- }
- `
- ```
- ```js
- s`
-   $pink hotpink
- `(
+  :root {
+    $red tomato
+    $white #fff
+  }
+`
+```
 
-   s`button
-     bc $red
-     c $pink
-   `('red')
+We can reference, overwrite and even create variables on the element level:
+
+```js
+s`
+  $pink hotpink
+  $size 200
+`(
+  s`p
+    bc $white
+    c $pink
+    w $size
+  `('Paragraph has 200px width, font color hotpink and background white!')
  )
- ```
+```
 
-### CSS property shorthands
 
-The most popular CSS properties can be references by its initials.
-A few popular properties have overlapping initials, Sin choose to support the most commonly used.
+### Alias `s.css.alias({...})`
+
+The `s.css.alias` method allows you to define aliases for media queries that you can later use in your CSS:
+
+```js
+// Definition
+s.css.alias({
+  mobile: '@media (max-width: 767.98px)',
+  tablet: '@media (max-width: 1200px)',
+  desktop: '@media (min-width: 1500px)',
+  ios: '@supports (-webkit-touch-callout: none)'
+})
+
+// Usage
+s`
+  @mobile {
+   display none
+  }
+`('Not visible on mobile devices...')
+
+```
+
+### Shorthands
+
+The most popular CSS properties can be references by its initials. A few popular properties have overlapping initials, Sin choose to support the most commonly used.
 
 <details>
 <summary>See list of abbreviations</summary>
+
+
 | abbreviation | keyword |
 | ----- | ----- |
 | ai | align-items |
@@ -380,157 +560,114 @@ A few popular properties have overlapping initials, Sin choose to support the mo
 | ws | white-space |
 | w | width |
 | zi | z-index |
+
+
 </details>
 
-### CSS reset
-To reduce browser inconsistencies you can use Sin's opinionated css reset style rules when writing your global CSS, by adding `.reset` to `s.css`.
+# Routing
+
+Sin includes the most `get out of your way` router possible. There is always a scoped router available in context which let's you implement routing (as nested as you like) — not being concerned about the mount point. Using `href` is highly encouraged and the default way of telling Sin to route away. Every sin `route` instance even has a sweet .toString method, so you can simply do `href: route + 'sub-page'`. You can also use `route.has()` if you want to highlight which route is active, and if that's too boring Sin sets an `[active]` attribute for you to use for styling.
 
 ```js
-s.css.reset`
-  your global css here
-`
+s.mount(({ route }) => [
+  s`nav`(
+    ['/', '/murray', '/lysander', '/profile'].map(x =>
+      s`a
+        background ${ route.has(path) && 'lightblue' }
+      `({
+        href: '/' + x
+      },
+        x.slice(1) || 'Home'
+      )
+    )
+  ),
+  s`main`(
+    route({
+      '/': () => 'Welcome to the world',
+      '/:user': ({ user }) => 'You are checking out ' + user,
+      '/profile': () => 'The glory of you'
+    })
+  )
+])
 ```
 
-<details>
-  <summary>The CSS reset includes:</summary>
+### `target`
 
-  ```css
-  *, *::before, *::after {
-    box-sizing border-box
-  }
+For any ``s`a`({ href: "/my/route" }, ...)`` tag, Sin will automatically hook it into `history.pushState` routing. However, if you don't want this behavior (e.g to hit your `/oauth/github` backend route), just add a `target: '_self'` attribute to your anchor tag.
 
-  input, button, textarea, select {
-    font inherit
-    text-transform none
-  }
+# Live `s.live`
 
-  * {
-    margin 0
-    padding 0
-    overflow-wrap break-word
-    hyphens auto
-  }
-
-  body {
-    font-family system-ui, sans-serif
-  }
-
-  p {
-    line-height 1.5
-  }
-
-  img, svg, video, canvas, audio, iframe, embed, object {
-    display block
-    va middle
-  }
-
-  img, video {
-    max-width 100%
-    height auto
-  }
-
-  ol, ul, li {
-    list-style none
-  }
-
-  body {
-    min-height 100svh
-  }
-
-  body {
-    -webkit-font-smoothing antialiased
-    text-rendering optimizeLegibility
-  }
-  ```
-</details>
+The `s.live` method creates reactive streams that automatically update the UI when their values change. These streams are versatile, supporting numbers, strings, objects, and more. They can be observed, transformed, and used to drive dynamic behavior.
 
 
-### @ Media queries
+```js
+const stream = s.live()
+stream.value                                   // Current value of the stream
+stream.valueOf()                               // Coerce value for operations (e.g., arithmetic for numbers)
+stream.toJSON()                                // JSON serialization
+stream.toString()                              // String representation
+stream.get('')                                 // Derive a new stream from a property
+stream.get(((value) => {})                     // or function
+stream.set()                                   // Set the value directly or via a function
+stream.observe((new, old, detach) => {})       // Observe value changes, returns unsubscribe function
+stream.detach()                                // Detach all observers
+stream.reduce((acc, value, i) => {}, initial)  // Reduce values into a new stream
+stream.if(equals, isTrue, isFalse)             // Conditional value based on equality
+```
 
-You can define alias for media and later use them in your CSS
 
-```css
-s.css.alias({
-  mobile: '@media (max-width: 767.98px)',
-  tablet: '@media (max-width: 1200px)',
-  desktop: '@media (min-width: 1500px)',
-  ios: '@supports (-webkit-touch-callout: none)'
+# HTTP `s.http`
+
+The `s.http` method perform HTTP requests with minimal boilerplate. Built on top of XMLHttpRequest, it offers a promise-based interface for asynchronous operations, supporting common HTTP methods (GET, POST, PUT, PATCH, DELETE, HEAD) and customizable request configurations.
+
+```js
+const status = { loaded: 0, total: 0 }
+const x = (await s.http.put('/url', {
+  body: file,
+  responseType: 'text',
+  config: xhr => xhr.upload.addEventListener('progress', e => {
+    status.loaded = e.loaded
+    status.total = e.total
+    s.redraw()
+  })
+}).xhr).getResponseHeader('ETag').slice(1, -1)
+```
+
+### Request Methods
+
+```js
+s.http({})
+s.http('/url', {})
+s.http.get({})
+s.http.put({})
+s.http.post({})
+s.http.patch({})
+s.http.delete({})
+s.http.head({})
+```
+
+### Request Options
+
+All the standard configuration options for HTTP requests are avaiable, with additional sin specifics.
+
+```js
+s.http({
+  url: ''                   // Request URL, can also be defined as first argument
+  method: 'GET',            // HTTP method 'HEAD' | 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH'
+  redraw: true,             // Trigger redraw after resolution
+  responseType: 'json',     // '' | 'arraybuffer' | 'blob' | 'document' | 'json' | 'text'
+  query: {},                // Query parameters (default: {})
+  body: undefined,          // Request body data (default: undefined)
+  user: undefined,          // Username for HTTP authorization (default: undefined)
+  pass: undefined,          // Password for HTTP authorization (default: undefined, avoid due to plaintext)
+  headers: {},              // Request headers (default: {})
+  config: (xhr) => {},      // Custom XMLHttpRequest configuration
+  timeout: 0                // Request timeout in milliseconds (default: 0, no timeout)
 })
-
-s`
-  @mobile { display none }
-`('Not visible on mobile devices...')
-
 ```
 
 
-
-
-## Syntax
-
-### Tagged Template Literals
-
-Content here.
-
-### Functions
-
-Content here.
-
-### Closures
-
-Content here.
-
-### JavaScript (The Good Parts)
-
-Content here.
-
-## CSS
-
-### Lean
-
-Content here.
-
-### Shorthands
-
-Content here.
-
-### Variables
-
-Content here.
-
-### Reset
-
-Content here.
-
-### Animations
-
-Content here.
-
-
-
-## Events
-
-### Onclick
-
-Event handlers provide the event object and the current dom object as parameters
-
-```js
-s``(
-  {
-    onclick: (e, dom) => { }
-  }
-)
-```
-
-### s.on
-
-Content here.
-
-### DOM Lifecycle
-
-Content here.
-
-### s.animate
+# Animate `s.animate`
 
 ```js
 s`
@@ -547,234 +684,9 @@ s`
 ```
 
 
-## Components
-
-### Styled
-
-Content here.
-
-### Stateless
-
-Content here.
-
-### Stateful
-
-Content here.
-
-### Async
-
-Content here.
-
-### Not shure where to put this --- utils?
-
-Trust to render html string
+# Trust `s.trust`
 
 ```js
-  s.trust('<svg ....>')
-
+s.trust('')
 ```
 
-Adding properties to the document
-
-```js
-s.mount(({}, [], { doc }) => {
-  doc.title('My page title')
-  doc.lang('da')
-  doc.head([
-    s`link`({ rel: 'icon', href: '/favicon.ico', sizes: 'any' }),
-    s`meta`({ name: 'apple-mobile-web-app-capable', content: 'yes' })
-  ])
-})
-```
-
-## Component Lifecycle
-
-## Reload
-
-## Refresh
-
-## Redraw
-
-## Ignore
-
-## onremove
-
-
-## Routing
-
-### Context.route
-
-Content here.
-
-### Href
-
-Content here.
-
-### Recursive Nested Context
-
-Content here.
-
-### Lazy (Code Splitting)
-
-Content here.
-
-### Query Route.query
-
-Content here.
-
-
-
-## Project Structure
-
-### Index.js
-
-Content here.
-
-### +Index.js
-
-Content here.
-
-### Export Default S.mount (SSR)
-
-Content here.
-
-### Export Default Function(App) (Server Routing)
-
-Content here.
-
-### +Build
-
-Content here.
-
-### +Public
-
-Content here.
-
-
-
-## HTTP
-
-### S.http
-
-```js
-const x = await s.http(<url>)
-```
-
-### S.http[Method]
-
-
-post
-```js
-s.http.post(<url>, { body: { content } })
-```
-
-put/file upload
-```js
-const status = { loaded: 0, total: 0 }
-const x = (await s.http.put(<url>, {
-  body: file,
-  responseType: 'text',
-  config: xhr => xhr.upload.addEventListener('progress', e => {
-    status.loaded = e.loaded
-    status.total = e.total
-    s.redraw()
-  })
-}).xhr).getResponseHeader('ETag').slice(1, -1)
-```
-
-## CLI
-
-The Sin CLI uses features introduced in node.js version 20.10, so you need to use this environment for development. This is also required for production when using the built-in sin runtime.
-
-### Create
-
-Content here.
-
-### Dev
-
-#### --Live
-
-
-```js
-
-const wat = s.live(1)
-
-wat.observe(x => {
-  console.log('value updated:', x)
-})
-
-s.mount(() => s``(
-  s`button`(
-    {
-      onclick: () => wat(wat() + 1)
-    },
-    'update wat'
-  )
-))
-
-```
-
-
-```js
- let dog = s.live((localStorage.getItem('dog') || 'greyhound'))
-
- dog.observe(x => {
-    localStorage.setItem('dog', x)
- })
-
- s.mount(() => s``(
-   s`select`(
-     {
-       onchange: (x) => dog(x)
-     },
-     'chihuahua,bulldog,greyhound'.split(',').map(d =>
-       s`option`(
-         {
-           selected: d == dog()
-         },
-         d
-       )
-     )
-   )
- ))
-```
-
-### Start
-
-Content here.
-
-### Build
-
-Content here.
-
-### Generate
-
-Content here.
-
-### Install (Private Registry Proxy)
-
-Content here.
-
-### Acme
-
-Content here.
-
-### Version
-
-Content here.
-
-### Building
-
-Content here.
-
-
-
-## TEST
-
-### CLI Test
-
-Content here.
-
-### Sin/Test
-
-Content here.
