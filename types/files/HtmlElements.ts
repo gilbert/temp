@@ -21,9 +21,14 @@ export type Suffixed<T> = T extends `${infer Tag}${'.' | '#' | '['}${string}` ? 
  * > This will perform string operations and attempt to extract element names from
  * > selector Hyperscript expressions
  */
-export type HTMLTagElement<T extends string> = Has<
+export type HTMLTagElement<HTMLElementName extends string> = Has<
   HTMLElementTagNameMap,
-  T,
-  HTMLTagElementMap[T],
-  Has<HTMLElementTagNameMap, Suffixed<T>, HTMLTagElementMap[Suffixed<T>], HTMLElement>
+  HTMLElementName,
+  HTMLTagElementMap[HTMLElementName],
+  Has<
+    HTMLElementTagNameMap,
+    Suffixed<HTMLElementName>,
+    HTMLTagElementMap[Suffixed<HTMLElementName>],
+    HTMLElement
+  >
 >

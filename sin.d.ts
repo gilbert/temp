@@ -54,114 +54,6 @@ interface TagLiteral extends ReadonlyArray<string> {
 type Interpolate = any[];
 
 /**
- * CSS Vars type value exposed on `tag.vars`
- */
-type Vars = {
-    /**
-     * The CSS property name.
-     *
-     * > Will represent either the shorthand or native naming
-     */
-    property: string;
-    /**
-     * The CSS applied unit (defaults to `px`)
-     *
-     * > If property name does not expect a numeric value this will be empty string
-     *
-     * @default ''
-     */
-    unit: string;
-    /**
-     * The 0-based index occurence within the tagged literal expression
-     */
-    index: number;
-    /**
-     * Flags opacity transformation for CSS vars, which defaults to `false`.
-     * Value will be a function if an opacity modifier (e.g, `/50`) is detected.
-     *
-     * @default false
-     */
-    transform: false | ((x: number | string) => string);
-    /**
-     * Array of CSS function names (e.g, `['calc','translateY']` etc) that are
-     * applied to the CSS variable value, sliced from the parsing stack.
-     *
-     * @default []
-     */
-    fns: string[];
-};
-type CSS = {
-    /**
-     * CSS Style Sheet - Write classes and define cascade specifics.
-     *
-     * @example
-     * // 𓋹 Blessed be the vain and holy aesthetic
-     *
-     * s.css`
-     *  .dark {
-     *    color hotpink
-     *    background black
-     *  }
-     * `
-     */
-    (css: TagLiteral, ...interpolate: Interpolate): () => View;
-    (css: string): () => View;
-    /**
-     * Sets aliases for CSS media queries, feature supports or anything that is blocked scoped.
-     *
-     * @example
-     * // 𓋹 Decree the bounds and etch the queries
-     *
-     * s.css.alias({
-     *  mobile: '@media (max-width: 767px)',
-     *  tablet: '@media (max-width: 1200px)'
-     * });
-     *
-     */
-    alias: {
-        (id: string, as: string): string;
-        (alias: Record<string, string>): string;
-    };
-    /**
-     * Applies global CSS Resets and/or overwrites.
-     *
-     * > **PLEASE NOTE**
-     * >
-     * > Sin will apply a subset of normalisation resets
-     * > and merge with the provided cascades.
-     *
-     * @example
-     * // 𓋹 The sinners hand wipes clean the slate
-     *
-     * s.css.reset`
-     *  body {
-     *   ff Arial
-     *   fs 15
-     *  }
-     * `
-     */
-    reset: {
-        (css: TagLiteral, ...interpolate: Interpolate): void;
-        (css: string): void;
-    };
-    /**
-     * CSS custom unit control
-     *
-     * @example
-     *
-     * // Option 1 - key > value
-     * s.css.unit('n', (value, property) => (x * .25) + 'rem' )
-     *
-     * // Option 2 - as object
-     * s.css.unit({ n: (value, property) => (x * .25) + 'rem' })
-     */
-    unit: {
-        (id: string, fn: (value: string, property: string) => string): void;
-        (units: Record<string, (value: string, property: string) => string>): void;
-    };
-};
-
-/**
  * Child node [Primitive](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
  */
 type Primitive = string | number | boolean | null | undefined;
@@ -297,6 +189,299 @@ type View<T = any> = {
      */
     key: any;
 };
+
+/**
+ * CSS Vars type value exposed on `tag.vars`
+ */
+type Vars = {
+    /**
+     * The CSS property name.
+     *
+     * > Will represent either the shorthand or native naming
+     */
+    property: string;
+    /**
+     * The CSS applied unit (defaults to `px`)
+     *
+     * > If property name does not expect a numeric value this will be empty string
+     *
+     * @default ''
+     */
+    unit: string;
+    /**
+     * The 0-based index occurence within the tagged literal expression
+     */
+    index: number;
+    /**
+     * Flags opacity transformation for CSS vars, which defaults to `false`.
+     * Value will be a function if an opacity modifier (e.g, `/50`) is detected.
+     *
+     * @default false
+     */
+    transform: false | ((x: number | string) => string);
+    /**
+     * Array of CSS function names (e.g, `['calc','translateY']` etc) that are
+     * applied to the CSS variable value, sliced from the parsing stack.
+     *
+     * @default []
+     */
+    fns: string[];
+};
+type CSS = {
+    /**
+     * CSS Style Sheet - Write classes and define cascade specifics.
+     *
+     * @example
+     * // 𓋹 Blessed be the vain and holy aesthetic
+     *
+     * s.css`
+     *  .dark {
+     *    color hotpink
+     *    background black
+     *  }
+     * `
+     */
+    (css: TagLiteral, ...interpolate: Interpolate): () => View;
+    (css: string): () => View;
+    /**
+     * Sets aliases for CSS media queries, feature supports or anything that is blocked scoped.
+     *
+     * @example
+     * // 𓋹 Decree the bounds and etch the queries
+     *
+     * s.css.alias({
+     *  mobile: '@media (max-width: 767px)',
+     *  tablet: '@media (max-width: 1200px)'
+     * });
+     *
+     */
+    alias: {
+        (id: string, as: string): string;
+        (alias: Record<string, string>): string;
+    };
+    /**
+     * Applies global CSS Resets and/or overwrites.
+     *
+     * > **PLEASE NOTE**
+     * >
+     * > Sin will apply a subset of normalisation resets
+     * > and merge with the provided cascades.
+     *
+     * @example
+     * // 𓋹 The sinners hand wipes clean the slate
+     *
+     * s.css.reset`
+     *  body {
+     *   ff Arial
+     *   fs 15
+     *  }
+     * `
+     */
+    reset: {
+        (css: TagLiteral, ...interpolate: Interpolate): void;
+        (css: string): void;
+    };
+    /**
+     * CSS custom unit control
+     *
+     * @example
+     *
+     * // Option 1 - key > value
+     * s.css.unit('n', (value, property) => (x * .25) + 'rem' )
+     *
+     * // Option 2 - as object
+     * s.css.unit({ n: (value, property) => (x * .25) + 'rem' })
+     */
+    unit: {
+        (id: string, fn: (value: string, property: string) => string): void;
+        (units: Record<string, (value: string, property: string) => string>): void;
+    };
+};
+
+/**
+ * HTTP Parameter Options
+ */
+interface Params<T = {}> {
+    /**
+     * Request URL
+     *
+     * @default undefined
+     */
+    url: string | URL;
+    /**
+     * The request method
+     *
+     * @default 'GET'
+     */
+    method?: StringUnion<'HEAD' | 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH'>;
+    /**
+     * Whether or not to apply redraw upon request resolution.
+     *
+     * @default true
+     */
+    redraw?: boolean;
+    /**
+     * The XMLHttpRequest property responseType is an enumerated string value
+     * specifying the type of data contained in the response.
+     *
+     * @default ""
+     */
+    responseType?: StringUnion<"" | 'arraybuffer' | 'blob' | 'document' | 'json' | 'text'>;
+    /**
+     * JSON Content
+     *
+     * @deprecated
+     * @default 'application/json'
+     */
+    json?: string;
+    /**
+     * Query Parameters
+     *
+     * @default {}
+     */
+    query?: Record<string, string | number | boolean> | URLSearchParams;
+    /**
+     * The data to be serialized into the body (for other types of requests).
+     *
+     * @default undefined
+     */
+    body?: T;
+    /**
+     * A username for HTTP authorization.
+     *
+     * @default undefined
+     */
+    user?: string;
+    /**
+     * A password for HTTP authorization. This option is provided for XMLHttpRequest compatibility,
+     * but you should avoid using it because it sends the password in plain text over the network.
+     *
+     * @default undefined
+     */
+    pass?: string;
+    /**
+     * Request headers
+     *
+     * @default {}
+     */
+    headers?: Record<string, string>;
+    /**
+     * Exposes the underlying XMLHttpRequest object for low-level configuration and optional
+     * replacement (by returning a new XHR).
+     */
+    config?: (xhr: XMLHttpRequest) => void | XMLHttpRequest;
+    /**
+     * The amount of milliseconds a request can take before automatically being terminated.
+     *
+     * @default 0
+     */
+    timeout?: number;
+}
+/**
+ * HTTP request method functions
+ *
+ * @example
+ *
+ * s.http.get()
+ * s.http.post()
+ * s.http.put()
+ *
+ * // etc etc
+ */
+interface Methods {
+    /**
+     * HTTP GET Request
+     *
+     * @example
+     *
+     * s.http.get('/api/path', {});
+     */
+    get: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP POST Request
+     *
+     * @example
+     *
+     * s.http.post('/api/path', {});
+     */
+    post: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP PUT Request
+     *
+     * @example
+     *
+     * s.http.put('/api/path', {});
+     */
+    put: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP PATCH Request
+     *
+     * @example
+     *
+     * s.http.put('/api/path', {});
+     */
+    patch: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP DELETE Request
+     *
+     * @example
+     *
+     * s.http.delete('/api/path', {});
+     */
+    delete: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+    /**
+     * HTTP HEAD Request
+     *
+     * @example
+     *
+     * s.http.head('/api/path', {});
+     */
+    head: {
+        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
+        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
+    };
+}
+/**
+ * Function type/s for the `s.http` method, including `s.http.get`, `s.http.post` etc.
+ */
+interface Http extends Methods {
+    /**
+    * HTTP Request
+    *
+    * @example
+    *
+    * s.http('/api/path', {
+    *  method: 'GET',
+    *  redraw: true,
+    *  responseType: 'json',
+    *  json: 'application/json',
+    *  query: {},
+    *  body: {},
+    *  user: '',
+    *  pass: '',
+    *  headers: {},
+    *  timeout: 0,
+    *  config: (xhr) => {},
+    * })
+    */
+    <T = any>(url: string, params?: Omit<Params<T>, 'url'>): Promise<T>;
+    <T = any>(params?: Params<T>): Promise<T>;
+}
 
 /**
  * A reactive stream created by `s.live`, supporting any type.
@@ -524,7 +709,7 @@ type Suffixed<T> = T extends `${infer Tag}${'.' | '#' | '['}${string}` ? Tag : T
  * > This will perform string operations and attempt to extract element names from
  * > selector Hyperscript expressions
  */
-type HTMLTagElement<T extends string> = Has<HTMLElementTagNameMap, T, HTMLTagElementMap[T], Has<HTMLElementTagNameMap, Suffixed<T>, HTMLTagElementMap[Suffixed<T>], HTMLElement>>;
+type HTMLTagElement<HTMLElementName extends string> = Has<HTMLElementTagNameMap, HTMLElementName, HTMLTagElementMap[HTMLElementName], Has<HTMLElementTagNameMap, Suffixed<HTMLElementName>, HTMLTagElementMap[Suffixed<HTMLElementName>], HTMLElement>>;
 
 type ARIARole = StringUnion<"alert" | "alertdialog" | "application" | "article" | "banner" | "button" | "cell" | "checkbox" | "columnheader" | "combobox" | "complementary" | "contentinfo" | "definition" | "dialog" | "directory" | "document" | "figure" | "form" | "grid" | "gridcell" | "group" | "heading" | "img" | "link" | "list" | "listbox" | "listitem" | "main" | "mark" | "math" | "menu" | "menubar" | "menuitem" | "menuitemcheckbox" | "menuitemradio" | "navigation" | "note" | "option" | "presentation" | "progressbar" | "radio" | "radiogroup" | "region" | "row" | "rowgroup" | "rowheader" | "scrollbar" | "search" | "searchbox" | "separator" | "slider" | "spinbutton" | "status" | "suggestion" | "switch" | "tab" | "table" | "tablist" | "tabpanel" | "term" | "textbox" | "timer" | "toolbar" | "tooltip" | "tree" | "treegrid" | "treeitem">;
 /**
@@ -859,7 +1044,7 @@ interface BusyARIA {
 type SetNonNullable<BaseType, Keys extends keyof BaseType = keyof BaseType> = {
     [Key in keyof BaseType]: Key extends Keys ? NonNullable<BaseType[Key]> : BaseType[Key];
 };
-type EventHandler<T, E, A = any> = (this: T, event: SetNonNullable<Target<T, E>>, dom: T, attrs: A, children: Children, context: Context) => Void;
+type EventHandler<T, E, A = any> = (this: T, event: SetNonNullable<Target<T, E>>, dom: T, attrs: A, children: Children, context: Context$1) => Void;
 /**
  * Event DOM Target overrides - Ensures `event.target` returns HTMLElement.
  */
@@ -1561,33 +1746,45 @@ interface SecurityListeners<T extends HTMLElement> {
 }
 
 /**
+ * DOM Property Arguments
+ */
+type SinDOM<T extends HTMLElement, A extends {
+    [key: string]: any;
+}> = [
+    element?: T,
+    attributes?: A,
+    children?: Children[],
+    context?: Context$1
+];
+/**
  * Extends the {@link View} `attrs` to include sin specific attributes.
  * Called by the {@link Attrs} namespace interface entries.
  */
 interface SinAttributes<T extends HTMLElement> {
+    [key: string]: any;
     /**
      * DOM Element render callback. Dom is a creation lifcycle hook which
      * will call in the post rendering cycle of a sin view.
      *
      * > **TIP**
      * >
-     * > Attach any third-party libraries or tools for the element via `root`
+     * > Attach any third-party libraries or tools for the element via `element`
      *
      * @example
      *
      * s`button`({
-     *   dom: (root, attrs, children, context) => {
-     *     root.innerText = attrs.name
+     *   dataName: 'sinner'
+     *   dom: (element, attributes, children, context) => {
+     *     dom.innerText = attributes.dataName
      *   }
      * })
      */
-    dom?: ((element: T, attrs?: Attrs, children?: Children, context?: Context) => Promise<any> | any) | Array<(element: T, attrs?: Attrs, children?: Children, context?: Context) => Promise<any> | any>;
+    dom?: ((...params: SinDOM<T, this>) => any) | Array<((...params: SinDOM<T, this>) => any)>;
     /**
-      /**
-       * Waits for children using deferred removal
-       *
-       * @default false
-       */
+     * Waits for children using deferred removal
+     *
+     * @default false
+     */
     deferrable?: boolean;
     /**
      * The value used to map a DOM element to its respective item in an array of data.
@@ -1607,7 +1804,7 @@ type AutoCompleteUnion = StringUnion<'additional-name' | 'address-level1' | 'add
  * handling of tagged literals via {@link TemplateStringsArray} which prevents type
  * extraction and renders parse tag name analysis impossible.
  */
-interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, BusyARIA, FormARIA, InteractiveARIA, ModalARIA, ProgressARIA, StructuralARIA, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<T>, MediaListeners<T>, PointerListeners<T>, PopoverListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T> {
+interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<T>, MediaListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T>, FormARIA, BusyARIA, InteractiveARIA, ModalARIA, ProgressARIA, StructuralARIA {
     /**
      * - {@link InputAttributes}
      *
@@ -1727,7 +1924,7 @@ interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, BusyARIA,
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-autocomplete)
      */
-    autocomplete?: StringUnion<"on" | "off" | "additional-name" | "address-level1" | "address-level2" | "address-level3" | "address-level4" | "address-line1" | "address-line2" | "address-line3" | "bday" | "bday-year" | "bday-day" | "bday-month" | "billing" | "cc-additional-name" | "cc-csc" | "cc-exp" | "cc-exp-month" | "cc-exp-year" | "cc-family-name" | "cc-given-name" | "cc-name" | "cc-number" | "cc-type" | "country" | "country-name" | "current-password" | "email" | "family-name" | "fax" | "given-name" | "home" | "honorific-prefix" | "honorific-suffix" | "impp" | "language" | "mobile" | "name" | "new-password" | "nickname" | "organization" | "organization-title" | "pager" | "photo" | "postal-code" | "sex" | "shipping" | "street-address" | "tel-area-code" | "tel" | "tel-country-code" | "tel-extension" | "tel-local" | "tel-local-prefix" | "tel-local-suffix" | "tel-national" | "transaction-amount" | "transaction-currency" | "url" | "username" | "work">;
+    autocomplete?: AutoCompleteUnion;
     /**
      * **Available Attributes**
      *
@@ -3081,6 +3278,9 @@ interface Attributes<T extends HTMLElement> extends AriaAttrs, SinAttributes<T>,
      */
     writingsuggestions?: boolean | "true" | "false";
 }
+/**
+ * - `<a>`
+ */
 interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends Attributes<T>, SecurityListeners<T> {
     /**
      * {@link HTMLLinkElement}  →  {@link LinkAttributes}
@@ -3218,6 +3418,9 @@ interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends At
      */
     referrerpolicy?: string;
 }
+/**
+ * - `<style>`
+ */
 interface StyleAttributes<T extends HTMLStyleElement = HTMLStyleElement> extends Attributes<T> {
     /**
      * {@link HTMLStyleElement}  →  {@link StyleAttributes}
@@ -3250,6 +3453,9 @@ interface StyleAttributes<T extends HTMLStyleElement = HTMLStyleElement> extends
      */
     title?: string;
 }
+/**
+ * - `<blockquote>`
+ */
 interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends Attributes<T>, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLQuoteElement}  →  {@link QuoteAttributes}
@@ -3269,6 +3475,9 @@ interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends
      */
     role?: StringUnion<"blockquote" | "note" | "presentation">;
 }
+/**
+ * - `<ol>`
+ */
 interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>, StructuralARIA, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLOListElement}  →  {@link OListAttributes}
@@ -3327,6 +3536,9 @@ interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends
      */
     role?: StringUnion<"list" | "directory" | "menu" | "tablist" | "tree">;
 }
+/**
+ * - `<li>`
+ */
 interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>, StructuralARIA, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLLIElement}  →  {@link LIAttributes}
@@ -3348,6 +3560,9 @@ interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attribut
      */
     role?: StringUnion<"listitem" | "menuitem" | "option" | "tab" | "treeitem">;
 }
+/**
+ * - `<link>`
+ */
 interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> extends Attributes<T>, InteractiveARIA {
     /**
      * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
@@ -3452,6 +3667,9 @@ interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> exte
      */
     role?: StringUnion<"link" | "button" | "menuitem">;
 }
+/**
+ * - `<time>`
+ */
 interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLTimeElement}  →  {@link TimeAttributes}
@@ -3479,6 +3697,10 @@ interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends At
      */
     role?: StringUnion<"time">;
 }
+/**
+ * - `<del>`
+ * - `<ins>`
+ */
 interface ModAttributes<T extends HTMLModElement = HTMLModElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLModElement}  →  {@link ModAttributes}
@@ -3509,6 +3731,9 @@ interface ModAttributes<T extends HTMLModElement = HTMLModElement> extends Attri
      */
     role?: StringUnion<"insertion" | "deletion" | "presentation">;
 }
+/**
+ * - `<img>`
+ */
 interface ImageAttributes<T extends HTMLImageElement = HTMLImageElement> extends Attributes<T> {
     /**
      * {@link HTMLImageElement}  →  {@link ImageAttributes}
@@ -3671,6 +3896,9 @@ interface ImageAttributes<T extends HTMLImageElement = HTMLImageElement> extends
      */
     role?: StringUnion<"img" | "presentation">;
 }
+/**
+ * - `<iframe>`
+ */
 interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElement> extends Attributes<T>, BusyARIA {
     /**
      * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
@@ -3769,6 +3997,9 @@ interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElement> exte
      */
     role?: StringUnion<"application" | "document" | "presentation">;
 }
+/**
+ * - `<embed>`
+ */
 interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> extends Attributes<T>, BusyARIA {
     /**
      * {@link HTMLEmbedElement}  →  {@link EmbedAttributes}
@@ -3811,6 +4042,9 @@ interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> extends
      */
     role?: StringUnion<"application" | "presentation">;
 }
+/**
+ * - `<object>`
+ */
 interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> extends Attributes<T>, BusyARIA {
     /**
      * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
@@ -3877,6 +4111,9 @@ interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> exte
      */
     role?: StringUnion<"application" | "presentation">;
 }
+/**
+ * - `<video>`
+ */
 interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>, BusyARIA, VideoListeners<T>, DragListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLVideoElement}  →  {@link VideoAttributes}
@@ -3975,6 +4212,9 @@ interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends
      */
     role?: StringUnion<"application" | "presentation">;
 }
+/**
+ * - `<audio>`
+ */
 interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>, BusyARIA, MediaListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLAudioElement}  →  {@link AudioAttributes}
@@ -4075,6 +4315,9 @@ interface SourceAttributes<T extends HTMLSourceElement = HTMLSourceElement> exte
      */
     media?: string;
 }
+/**
+ * - `<track>`
+ */
 interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> extends Attributes<T>, TrackListeners<T> {
     /**
      * {@link HTMLTrackElement}  →  {@link TrackAttributes}
@@ -4117,6 +4360,9 @@ interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> extends
      */
     srcLang?: string;
 }
+/**
+ * - `<map>`
+ */
 interface MapAttributes<T extends HTMLMapElement = HTMLMapElement> extends Attributes<T> {
     /**
      * {@link HTMLMapElement}  →  {@link MapAttributes}
@@ -4135,6 +4381,9 @@ interface MapAttributes<T extends HTMLMapElement = HTMLMapElement> extends Attri
      */
     role?: StringUnion<"region" | "presentation">;
 }
+/**
+ * - `<area>`
+ */
 interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends Attributes<T>, InteractiveARIA {
     /**
      * {@link HTMLAreaElement}  →  {@link AreaAttributes}
@@ -4201,6 +4450,9 @@ interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends At
      */
     role?: StringUnion<"link" | "button">;
 }
+/**
+ * - `<table>`
+ */
 interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends Attributes<T>, StructuralARIA {
     /**
      * {@link HTMLTableElement}  →  {@link TableAttributes}
@@ -4219,6 +4471,9 @@ interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends
      */
     role?: StringUnion<"table" | "grid" | "treegrid">;
 }
+/**
+ * - `<col>`
+ */
 interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement> extends Attributes<T>, StructuralARIA {
     /**
      * {@link HTMLTableColElement}  →  {@link TableColAttributes}
@@ -4237,6 +4492,9 @@ interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement
      */
     role?: StringUnion<"columnheader">;
 }
+/**
+ * - `<cell>`
+ */
 interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElement> extends Attributes<T>, StructuralARIA {
     /**
      * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
@@ -4287,6 +4545,9 @@ interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElem
      */
     role?: StringUnion<"cell" | "gridcell" | "rowheader">;
 }
+/**
+ * - `<form>`
+ */
 interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>, FormARIA, FormListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLFormElement}  →  {@link FormAttributes}
@@ -4361,6 +4622,9 @@ interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends At
      */
     role?: StringUnion<"form" | "search">;
 }
+/**
+ * - `<label>`
+ */
 interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLLabelElement}  →  {@link LabelAttributes}
@@ -4371,6 +4635,9 @@ interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends
      */
     htmlFor?: string;
 }
+/**
+ * - `<input>`
+ */
 interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLInputElement}  →  {@link InputAttributes}
@@ -4629,6 +4896,9 @@ interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends
      */
     role?: StringUnion<"checkbox" | "combobox" | "radio" | "searchbox" | "slider" | "spinbutton" | "switch" | "textbox">;
 }
+/**
+ * - `<button>`
+ */
 interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>, InteractiveARIA, AnimationListeners<T> {
     /**
      * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
@@ -4719,6 +4989,9 @@ interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> exte
      */
     role?: StringUnion<"button" | "menuitem" | "menuitemcheckbox" | "menuitemradio">;
 }
+/**
+ * - `<select>`
+ */
 interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLSelectElement}  →  {@link SelectAttributes}
@@ -4785,6 +5058,9 @@ interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> exte
      */
     role?: StringUnion<"listbox" | "combobox">;
 }
+/**
+ * - `<optgroup>`
+ */
 interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroupElement> extends Attributes<T>, StructuralARIA {
     /**
      * {@link HTMLOptGroupElement}  →  {@link OptGroupAttributes}
@@ -4811,6 +5087,9 @@ interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroupElement
      */
     role?: StringUnion<"group">;
 }
+/**
+ * - `<option>`
+ */
 interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> extends Attributes<T>, InteractiveARIA {
     /**
      * {@link HTMLOptionElement}  →  {@link OptionAttributes}
@@ -4853,6 +5132,9 @@ interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> exte
      */
     role?: StringUnion<"option">;
 }
+/**
+ * - `<textarea>`
+ */
 interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>, InteractiveARIA, FormARIA, FormListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
@@ -4967,6 +5249,9 @@ interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement
      */
     role?: StringUnion<"textbox">;
 }
+/**
+ * - `<output>`
+ */
 interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLOutputElement}  →  {@link OutputAttributes}
@@ -5001,6 +5286,9 @@ interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> exte
      */
     role?: StringUnion<"status">;
 }
+/**
+ * - `<progress>`
+ */
 interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>, ProgressARIA, AnimationListeners<T> {
     /**
      * {@link HTMLProgressElement}  →  {@link ProgressAttributes}
@@ -5027,6 +5315,9 @@ interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement
      */
     role?: StringUnion<"progressbar">;
 }
+/**
+ * - `<meter>`
+ */
 interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>, ProgressARIA, AnimationListeners<T> {
     /**
      * {@link HTMLMeterElement}  →  {@link MeterAttributes}
@@ -5085,6 +5376,9 @@ interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends
      */
     role?: StringUnion<"progressbar" | "status">;
 }
+/**
+ * - `<fieldset>`
+ */
 interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLFieldSetElement}  →  {@link FieldSetAttributes}
@@ -5119,6 +5413,9 @@ interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement
      */
     role?: StringUnion<"group" | "presentation">;
 }
+/**
+ * - `<details>`
+ */
 interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>, InteractiveARIA, ModalARIA, DetailsListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLDetailsElement}  →  {@link DetailsAttributes}
@@ -5137,6 +5434,9 @@ interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> e
      */
     role?: StringUnion<"group" | "dialog">;
 }
+/**
+ * - `<dialog>`
+ */
 interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>, InteractiveARIA, ModalARIA, DialogListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLDialogElement}  →  {@link DialogAttributes}
@@ -5147,6 +5447,9 @@ interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> exte
      */
     role?: StringUnion<"dialog" | "alertdialog">;
 }
+/**
+ * - `<script>`
+ */
 interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElement> extends Attributes<T> {
     /**
      * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
@@ -5213,6 +5516,9 @@ interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElement> exte
      */
     nomodule?: string;
 }
+/**
+ * - `<canvas>`
+ */
 interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>, BusyARIA, CanvasListeners<T> {
     /**
      * {@link HTMLCanvasElement}  →  {@link CanvasAttributes}
@@ -5239,6 +5545,9 @@ interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> exte
      */
     role?: StringUnion<"application" | "presentation">;
 }
+/**
+ * - `<data>`
+ */
 interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLDataElement}  →  {@link DataAttributes}
@@ -5258,14 +5567,14 @@ interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends At
     role?: StringUnion<"term" | "presentation">;
 }
 
-type SinElement<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLElement ? HTMLAttributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : never;
+type SinElement<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : T extends HTMLElement ? HTMLAttributes<HTMLElement> : never;
 /**
  * Signature Arguments Expected
  */
 type Arguments<T = any> = [
     attrs: isInferred<T, any, T>,
     children: [...Children[]],
-    context: Context
+    context: Context$1
 ];
 /**
  * Partial Signature Arguments
@@ -5273,7 +5582,7 @@ type Arguments<T = any> = [
 type Signature<T = any> = Partial<[
     attrs: isInferred<T, any, Partial<T>>,
     children: Children,
-    context: Context
+    context: Context$1
 ]>;
 /**
  * Style Component Signature
@@ -5281,9 +5590,9 @@ type Signature<T = any> = Partial<[
  */
 type StyledSignature<T extends HTMLElement> = [
     attributes: SinElement<T>,
-    ...children: Children[]
+    ...children: Array<Children | StyledComponent<T>>
 ] | [
-    ...children: Children[]
+    ...children: Array<Children | StyledComponent<T>>
 ];
 /**
  * Styled Component Overloads
@@ -5295,13 +5604,15 @@ type StyledSignature<T extends HTMLElement> = [
 type StyledComponent<T extends HTMLElement = HTMLElement> = {
     /** Element with Attributes Signature */
     (...attibutes: Partial<StyledSignature<T>>): View;
-    /** Stateless Component Literal Signature */
+    /** Styled Component Literal Signature */
+    (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
+    /** Styled Component Children */
     (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
 };
 /**
  * Stateless Component Signature
  */
-type StatelessSignature<T = any> = (...args: Arguments<T>) => Children | StyledComponent;
+type StatelessSignature<T = any> = (...args: Arguments<T>) => Children | StyledComponent | Array<Children | StyledComponent>;
 /**
  * Stateless Component Overloads
  *
@@ -5316,10 +5627,6 @@ type StatelessComponent<T> = {
     /** Stateless Component children signature */
     (...children: Children[]): View;
 };
-/**
- * Stateful Utility Function
- */
-type Stateless<A = {}, C = Context> = (attrs: A, children?: Children, context?: C) => (attrs: A, children?: Children, context?: C) => View<A>;
 /**
  * Stateful Async Component Options
  *
@@ -5391,10 +5698,6 @@ type StatefullComponent<T> = {
     /** Statefull Component children signature */
     (...children: Children[]): View;
 };
-/**
- * Stateful Utility Function
- */
-type Statefull<A = {}, C = Context> = (attrs: A, children?: Children, context?: C) => (attrs: A, children?: Children, context?: C) => View<A>;
 /**
  * COMPONENTS
  *
@@ -5627,7 +5930,7 @@ interface Route {
 /**
  * Sin Component Context
  */
-type Context = {
+type Context$1 = {
     /**
      * Sin SSR (last modified date of `sin build`)
      */
@@ -5700,37 +6003,49 @@ type Context = {
 };
 
 /**
+ * DOM element argument type
+ */
+type DOM = HTMLElement | Element | {};
+/**
+ * Function type for the `s.mount` method.
+*/
+type Mount = {
+    (fn: (route: {
+        route: Route;
+    }) => Children): void;
+    (fn: <Attrs = {}>(attrs: Attrs, children: View[] | [], context: Context$1) => Children): void;
+    (fn: (children: View[] | [], context: Context$1) => Children): void;
+    (dom: DOM, fn: (attrs: any, children: View[] | [], context: Context$1) => Children): void;
+};
+
+/**
  * DOM Event handler
  */
-type On = {
-    <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
-    /**
-     * The DOM Element listener will be attached
-     */
-    target: T, 
-    /**
-     * The event name
-     */
-    event: K, 
-    /**
-     * The listener callback function
-     */
-    listener: (this: T, event: WindowEventMap[K]) => Void, 
-    /**
-     * Event Options
-     */
-    options?: boolean | AddEventListenerOptions): Void;
-};
+type On = <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
+/**
+ * The DOM Element listener will be attached
+ */
+target: T, 
+/**
+ * The event name
+ */
+event: K, 
+/**
+ * The listener callback function
+ */
+listener: (this: T, event?: WindowEventMap[K], dom?: T) => Void, 
+/**
+ * Event Options
+ */
+options?: boolean | AddEventListenerOptions) => () => Void;
 /**
  * Custom event handler with observer pattern support.
  */
-type Listener<T extends any[] = any[]> = {
+type Listener<T> = {
     /**
      * Triggers the event, calling all subscribed observers with the provided arguments.
      * Returns an array of return values from all observer functions
      *
-     * @param {...T} args - The arguments to pass to all observers
-     * @returns {any[]} An array of return values from all observer functions
      * @example
      *
      * const listen = s.event();
@@ -5738,7 +6053,7 @@ type Listener<T extends any[] = any[]> = {
      * listen.observe((x) => x * 2);
      * listen(5); // returns [10]
      */
-    (...args: T): any[];
+    (value: T): T[];
     /**
      * Adds an observer function to be called when the event is triggered.
      */
@@ -5755,7 +6070,7 @@ type Listener<T extends any[] = any[]> = {
          * event(1); // logs: 1
          * unsubscribe(); // removes observer
          */
-        (observer: (...args: T) => any): () => void;
+        (observer: (value: T) => void): () => void;
         /**
          * Subscribes a one-time observer that automatically unsubscribes after first trigger.
          * Returns a function which will unsubscribe the observer before it fires if called.
@@ -5768,7 +6083,7 @@ type Listener<T extends any[] = any[]> = {
          * event(1); // logs: 1
          * event(2); // no log (observer already removed)
          */
-        (observer: (...args: T) => any, once: true): () => void;
+        (observer: (value: T) => void, once: true): () => void;
     };
     /**
      * Gets an AbortSignal that can be used to monitor the events lifecycle.
@@ -5783,207 +6098,6 @@ type Listener<T extends any[] = any[]> = {
      */
     readonly signal: AbortSignal;
 };
-
-/**
- * DOM element argument type
- */
-type DOM = HTMLElement | Element | {};
-/**
- * Function type for the `s.mount` method.
-*/
-type Mount = {
-    (fn: (route: {
-        route: Route;
-    }) => Children): void;
-    (fn: <Attrs = {}>(attrs: Attrs, children: View[] | [], context: Context) => Children): void;
-    (fn: (children: View[] | [], context: Context) => Children): void;
-    (dom: DOM, fn: (attrs: any, children: View[] | [], context: Context) => Children): void;
-};
-
-/**
- * HTTP Parameter Options
- */
-interface Params<T = {}> {
-    /**
-     * Request URL
-     *
-     * @default undefined
-     */
-    url: string | URL;
-    /**
-     * The request method
-     *
-     * @default 'GET'
-     */
-    method?: StringUnion<'HEAD' | 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH'>;
-    /**
-     * Whether or not to apply redraw upon request resolution.
-     *
-     * @default true
-     */
-    redraw?: boolean;
-    /**
-     * The XMLHttpRequest property responseType is an enumerated string value
-     * specifying the type of data contained in the response.
-     *
-     * @default ""
-     */
-    responseType?: StringUnion<"" | 'arraybuffer' | 'blob' | 'document' | 'json' | 'text'>;
-    /**
-     * JSON Content
-     *
-     * @deprecated
-     * @default 'application/json'
-     */
-    json?: string;
-    /**
-     * Query Parameters
-     *
-     * @default {}
-     */
-    query?: Record<string, string | number | boolean> | URLSearchParams;
-    /**
-     * The data to be serialized into the body (for other types of requests).
-     *
-     * @default undefined
-     */
-    body?: T;
-    /**
-     * A username for HTTP authorization.
-     *
-     * @default undefined
-     */
-    user?: string;
-    /**
-     * A password for HTTP authorization. This option is provided for XMLHttpRequest compatibility,
-     * but you should avoid using it because it sends the password in plain text over the network.
-     *
-     * @default undefined
-     */
-    pass?: string;
-    /**
-     * Request headers
-     *
-     * @default {}
-     */
-    headers?: Record<string, string>;
-    /**
-     * Exposes the underlying XMLHttpRequest object for low-level configuration and optional
-     * replacement (by returning a new XHR).
-     */
-    config?: (xhr: XMLHttpRequest) => void | XMLHttpRequest;
-    /**
-     * The amount of milliseconds a request can take before automatically being terminated.
-     *
-     * @default 0
-     */
-    timeout?: number;
-}
-/**
- * HTTP request method functions
- *
- * @example
- *
- * s.http.get()
- * s.http.post()
- * s.http.put()
- *
- * // etc etc
- */
-interface Methods {
-    /**
-     * HTTP GET Request
-     *
-     * @example
-     *
-     * s.http.get('/api/path', {});
-     */
-    get: {
-        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
-        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
-    };
-    /**
-     * HTTP POST Request
-     *
-     * @example
-     *
-     * s.http.post('/api/path', {});
-     */
-    post: {
-        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
-        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
-    };
-    /**
-     * HTTP PUT Request
-     *
-     * @example
-     *
-     * s.http.put('/api/path', {});
-     */
-    put: {
-        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
-        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
-    };
-    /**
-     * HTTP PATCH Request
-     *
-     * @example
-     *
-     * s.http.put('/api/path', {});
-     */
-    patch: {
-        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
-        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
-    };
-    /**
-     * HTTP DELETE Request
-     *
-     * @example
-     *
-     * s.http.delete('/api/path', {});
-     */
-    delete: {
-        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
-        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
-    };
-    /**
-     * HTTP HEAD Request
-     *
-     * @example
-     *
-     * s.http.head('/api/path', {});
-     */
-    head: {
-        <T>(url: string, params?: Omit<Params<T>, 'method' | 'url'>): Promise<T>;
-        <T>(params?: Omit<Params<T>, 'method'>): Promise<T>;
-    };
-}
-/**
- * Function type/s for the `s.http` method, including `s.http.get`, `s.http.post` etc.
- */
-interface Http extends Methods {
-    /**
-    * HTTP Request
-    *
-    * @example
-    *
-    * s.http('/api/path', {
-    *  method: 'GET',
-    *  redraw: true,
-    *  responseType: 'json',
-    *  json: 'application/json',
-    *  query: {},
-    *  body: {},
-    *  user: '',
-    *  pass: '',
-    *  headers: {},
-    *  timeout: 0,
-    *  config: (xhr) => {},
-    * })
-    */
-    <T = any>(url: string, params?: Omit<Params<T>, 'url'>): Promise<T>;
-    <T = any>(params?: Params<T>): Promise<T>;
-}
 
 type Sin = Component & {
     /**
@@ -6054,7 +6168,7 @@ type Sin = Component & {
      *
      * sinned.observe('repent')
      */
-    event: <T extends any[] = any[]>(fn?: (...args: T) => any) => Listener<T>;
+    event: <T = any>(callback?: (value: T) => void) => Listener<T>;
     /**
      * CSS Methods for controlling the cascades
      */
@@ -6132,13 +6246,11 @@ type Sin = Component & {
      *
      * @example
      *
-     * const { dom } = s`button`('Click for atonement!');
-     *
-     * s.on(dom, 'click', (e) => {
-     *
-     *  // In the den of sin!
-     *
-     * }, { passive: true })
+     * s`pre`({
+     *  dom: s.on(window, 'keydown', (event, dom) => {
+     *    console.log(event, dom)
+     *  })
+     * });
      */
     on: On;
     /**
@@ -6163,19 +6275,21 @@ type Sin = Component & {
 
 declare global {
     namespace S {
-        export const Component: Component;
-        export const Http: Http;
-        export const Live: LiveStatic;
-        export const View: View;
-        export const Route: Route;
-        export const Mount: Mount;
-        export const Event: Listener;
-        export const On: On;
-        export const CSS: CSS;
-        export const Context: Context;
-        export type { Statefull, Stateless, EventHandler };
+        /**
+         * **🔥 sin.js component**
+         *
+         * TypeScript Utility for sin components
+         *
+         * @example
+         *
+         * S.Component<{ attrs }, { context }>
+         */
+        type Component<Attrs = {}, C = Context> = (attrs: Attrs, children?: Children, context?: C) => (attrs: Attrs, children?: Children, context?: C) => View<Attrs>;
     }
 }
+/**
+ * **🔥 sin.js**
+ */
 declare const s: Sin;
 
 export { s as default };

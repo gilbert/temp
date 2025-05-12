@@ -1,40 +1,38 @@
+import { Component } from "./Components";
 import type { Void } from "./Utilities";
 
 /**
  * DOM Event handler
  */
-export type On = {
-  <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
-    /**
-     * The DOM Element listener will be attached
-     */
-    target: T,
-    /**
-     * The event name
-     */
-    event: K,
-    /**
-     * The listener callback function
-     */
-    listener: (this: T, event: WindowEventMap[K]) => Void,
-    /**
-     * Event Options
-     */
-    options?: boolean | AddEventListenerOptions
+export type On = <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
+  /**
+   * The DOM Element listener will be attached
+   */
+  target: T,
+  /**
+   * The event name
+   */
+  event: K,
+  /**
+   * The listener callback function
+   */
+  listener: (this: T, event?: WindowEventMap[K], dom?: T) => Void,
+  /**
+   * Event Options
+   */
+  options?: boolean | AddEventListenerOptions
 
-  ): Void;
-}
+) => () => Void;
+
 
 /**
  * Custom event handler with observer pattern support.
  */
-export type Listener<T extends any[] = any[]> = {
+export type Listener<T> = {
   /**
    * Triggers the event, calling all subscribed observers with the provided arguments.
    * Returns an array of return values from all observer functions
    *
-   * @param {...T} args - The arguments to pass to all observers
-   * @returns {any[]} An array of return values from all observer functions
    * @example
    *
    * const listen = s.event();
@@ -42,7 +40,7 @@ export type Listener<T extends any[] = any[]> = {
    * listen.observe((x) => x * 2);
    * listen(5); // returns [10]
    */
-  (...args: T): any[];
+  (value: T): T[];
   /**
    * Adds an observer function to be called when the event is triggered.
    */
@@ -59,7 +57,7 @@ export type Listener<T extends any[] = any[]> = {
      * event(1); // logs: 1
      * unsubscribe(); // removes observer
      */
-    (observer: (...args: T) => any): () => void;
+    (observer: (value: T) => void): () => void;
     /**
      * Subscribes a one-time observer that automatically unsubscribes after first trigger.
      * Returns a function which will unsubscribe the observer before it fires if called.
@@ -72,7 +70,7 @@ export type Listener<T extends any[] = any[]> = {
      * event(1); // logs: 1
      * event(2); // no log (observer already removed)
      */
-    (observer: (...args: T) => any, once: true): () => void;
+    (observer: (value: T) => void, once: true): () => void;
   };
 
   /**

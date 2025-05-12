@@ -78,7 +78,7 @@ export type Sin = Component & {
    *
    * sinned.observe('repent')
    */
-  event: <T extends any[] = any[]>(fn?: (...args: T) => any) => Listener<T>;
+  event: <T = any>(callback?: (value: T) => void) => Listener<T>;
   /**
    * CSS Methods for controlling the cascades
    */
@@ -86,7 +86,7 @@ export type Sin = Component & {
   /**
    * CSS Animate utility
    */
-  animate: () => (defferable?: boolean) =>void
+  animate: () => (defferable?: boolean) => void
   /**
    * Sin Mount
    *
@@ -156,16 +156,13 @@ export type Sin = Component & {
    *
    * @example
    *
-   * const { dom } = s`button`('Click for atonement!');
-   *
-   * s.on(dom, 'click', (e) => {
-   *
-   *  // In the den of sin!
-   *
-   * }, { passive: true })
+   * s`pre`({
+   *  dom: s.on(window, 'keydown', (event, dom) => {
+   *    console.log(event, dom)
+   *  })
+   * });
    */
   on: On
-
   /**
    * Forgiving HTML or SVG strings into unescaped HTML or SVG.
    *

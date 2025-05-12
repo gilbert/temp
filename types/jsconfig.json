@@ -1,7 +1,9 @@
 {
   "include": [
-    "./test/index.js",
-    "./test/defs/*.d.ts"
+    "./test/javascript.js",
+    "./test/jsdocs.js",
+    "./test/typescript.js",
+    "./test/defs/*.d.ts",
   ],
   "compilerOptions": {
     "allowJs": true,

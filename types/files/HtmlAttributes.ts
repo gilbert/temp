@@ -28,33 +28,40 @@ import type {
 import { Children, View } from "./View";
 import { Context } from "./Context";
 
-
+/**
+ * DOM Property Arguments
+ */
+export type SinDOM<T extends HTMLElement, A extends { [key: string]: any }> = [
+  element?: T,
+  attributes?: A,
+  children?: Children[],
+  context?: Context
+]
 
 /**
  * Extends the {@link View} `attrs` to include sin specific attributes.
  * Called by the {@link Attrs} namespace interface entries.
  */
 export interface SinAttributes <T extends HTMLElement> {
+  [key: string]: any
   /**
    * DOM Element render callback. Dom is a creation lifcycle hook which
    * will call in the post rendering cycle of a sin view.
    *
    * > **TIP**
    * >
-   * > Attach any third-party libraries or tools for the element via `root`
+   * > Attach any third-party libraries or tools for the element via `element`
    *
    * @example
    *
    * s`button`({
-   *   dom: (root, attrs, children, context) => {
-   *     root.innerText = attrs.name
+   *   dataName: 'sinner'
+   *   dom: (element, attributes, children, context) => {
+   *     dom.innerText = attributes.dataName
    *   }
    * })
    */
-  dom?:
-  | ((element: T, attrs?: Attrs, children?: Children, context?: Context) => Promise<any> | any)
-  | Array<(element: T, attrs?: Attrs, children?: Children, context?: Context) => Promise<any> | any>;
-/**
+  dom?: ((...params: SinDOM<T, this>) => any) | Array<((...params: SinDOM<T, this>) => any)>;
   /**
    * Waits for children using deferred removal
    *
@@ -163,25 +170,23 @@ export type AutoCompleteUnion = StringUnion<
  * extraction and renders parse tag name analysis impossible.
  */
 export interface HTMLAttributes<T extends HTMLElement> extends
-  Attributes<T>,
-  BusyARIA,
-  FormARIA,
-  InteractiveARIA,
-  ModalARIA,
-  ProgressARIA,
-  StructuralARIA,
-  AnimationListeners<T>,
-  CanvasListeners<T>,
-  DetailsListeners<T>,
-  DialogListeners<T>,
-  DragListeners<T>,
-  FormListeners<T>,
-  MediaListeners<T>,
-  PointerListeners<T>,
-  PopoverListeners<T>,
-  SecurityListeners<T>,
-  TrackListeners<T>,
-  VideoListeners<T> {
+  Attributes<T>
+  , AnimationListeners<T>
+  , CanvasListeners<T>
+  , DetailsListeners<T>
+  , DialogListeners<T>
+  , DragListeners<T>
+  , FormListeners<T>
+  , MediaListeners<T>
+  , SecurityListeners<T>
+  , TrackListeners<T>
+  , VideoListeners<T>
+  , FormARIA
+  , BusyARIA
+  , InteractiveARIA
+  , ModalARIA
+  , ProgressARIA
+  , StructuralARIA {
   /**
    * - {@link InputAttributes}
    *
@@ -301,70 +306,7 @@ export interface HTMLAttributes<T extends HTMLElement> extends
    *
    * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Element/form#attr-autocomplete)
    */
-  autocomplete?: StringUnion<
-    | "on"
-    | "off"
-    | "additional-name"
-    | "address-level1"
-    | "address-level2"
-    | "address-level3"
-    | "address-level4"
-    | "address-line1"
-    | "address-line2"
-    | "address-line3"
-    | "bday"
-    | "bday-year"
-    | "bday-day"
-    | "bday-month"
-    | "billing"
-    | "cc-additional-name"
-    | "cc-csc"
-    | "cc-exp"
-    | "cc-exp-month"
-    | "cc-exp-year"
-    | "cc-family-name"
-    | "cc-given-name"
-    | "cc-name"
-    | "cc-number"
-    | "cc-type"
-    | "country"
-    | "country-name"
-    | "current-password"
-    | "email"
-    | "family-name"
-    | "fax"
-    | "given-name"
-    | "home"
-    | "honorific-prefix"
-    | "honorific-suffix"
-    | "impp"
-    | "language"
-    | "mobile"
-    | "name"
-    | "new-password"
-    | "nickname"
-    | "organization"
-    | "organization-title"
-    | "pager"
-    | "photo"
-    | "postal-code"
-    | "sex"
-    | "shipping"
-    | "street-address"
-    | "tel-area-code"
-    | "tel"
-    | "tel-country-code"
-    | "tel-extension"
-    | "tel-local"
-    | "tel-local-prefix"
-    | "tel-local-suffix"
-    | "tel-national"
-    | "transaction-amount"
-    | "transaction-currency"
-    | "url"
-    | "username"
-    | "work"
-  >;
+  autocomplete?: AutoCompleteUnion;
   /**
    * **Available Attributes**
    *
@@ -1262,7 +1204,8 @@ export interface HTMLAttributes<T extends HTMLElement> extends
   wrap?: StringUnion<"soft" | "hard">;
 }
 
-export interface Attributes<T extends HTMLElement> extends AriaAttrs
+export interface Attributes<T extends HTMLElement> extends
+  AriaAttrs
   , SinAttributes<T>
   , DOMListen<T>
   , PointerListeners<T>
@@ -1782,7 +1725,11 @@ export interface Attributes<T extends HTMLElement> extends AriaAttrs
   writingsuggestions?: boolean | "true" | "false";
 }
 
-export interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends Attributes<T>
+/**
+ * - `<a>`
+ */
+export interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends
+  Attributes<T>
   , SecurityListeners<T> {
   /**
    * {@link HTMLLinkElement}  →  {@link LinkAttributes}
@@ -1924,6 +1871,9 @@ export interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> ext
   referrerpolicy?: string;
 }
 
+/**
+ * - `<style>`
+ */
 export interface StyleAttributes<T extends HTMLStyleElement = HTMLStyleElement> extends Attributes<T> {
   /**
    * {@link HTMLStyleElement}  →  {@link StyleAttributes}
@@ -1957,6 +1907,9 @@ export interface StyleAttributes<T extends HTMLStyleElement = HTMLStyleElement> 
   title?: string;
 }
 
+/**
+ * - `<blockquote>`
+ */
 export interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends Attributes<T>
   , AnimationListeners<T>
   , DragListeners<T> {
@@ -1979,6 +1932,9 @@ export interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> 
   role?: StringUnion<"blockquote" | "note" | "presentation">;
 }
 
+/**
+ * - `<ol>`
+ */
 export interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>
   , StructuralARIA
   , AnimationListeners<T>
@@ -2047,6 +2003,9 @@ export interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> 
   role?: StringUnion<"list" | "directory" | "menu" | "tablist" | "tree">;
 }
 
+/**
+ * - `<li>`
+ */
 export interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>
   , StructuralARIA
   , AnimationListeners<T>
@@ -2072,6 +2031,9 @@ export interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends A
   role?: StringUnion<"listitem" | "menuitem" | "option" | "tab" | "treeitem">;
 }
 
+/**
+ * - `<div>`
+ */
 export interface DivAttributes<T extends HTMLElement = HTMLElement> extends Attributes<T>
   , StructuralARIA {
   /**
@@ -2084,6 +2046,9 @@ export interface DivAttributes<T extends HTMLElement = HTMLElement> extends Attr
   role?: StringUnion<"article" | "complementary" | "contentinfo" | "main" | "navigation" | "region" | "group">;
 }
 
+/**
+ * - `<link>`
+ */
 export interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> extends Attributes<T>, InteractiveARIA {
   /**
    * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
@@ -2189,6 +2154,9 @@ export interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElemen
   role?: StringUnion<"link" | "button" | "menuitem">;
 }
 
+/**
+ * - `<time>`
+ */
 export interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends Attributes<T>
   , AnimationListeners<T> {
   /**
@@ -2218,6 +2186,10 @@ export interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> ext
   role?: StringUnion<"time">;
 }
 
+/**
+ * - `<del>`
+ * - `<ins>`
+ */
 export interface ModAttributes<T extends HTMLModElement = HTMLModElement> extends Attributes<T>
   , AnimationListeners<T> {
   /**
@@ -2250,6 +2222,9 @@ export interface ModAttributes<T extends HTMLModElement = HTMLModElement> extend
   role?: StringUnion<"insertion" | "deletion" | "presentation">;
 }
 
+/**
+ * - `<img>`
+ */
 export interface ImageAttributes<T extends HTMLImageElement = HTMLImageElement> extends Attributes<T> {
   /**
    * {@link HTMLImageElement}  →  {@link ImageAttributes}
@@ -2420,6 +2395,9 @@ export interface ImageAttributes<T extends HTMLImageElement = HTMLImageElement> 
   role?: StringUnion<"img" | "presentation">;
 }
 
+/**
+ * - `<iframe>`
+ */
 export interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElement> extends Attributes<T>
   , BusyARIA {
   /**
@@ -2529,6 +2507,9 @@ export interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElemen
   role?: StringUnion<"application" | "document" | "presentation">;
 }
 
+/**
+ * - `<embed>`
+ */
 export interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> extends Attributes<T>
   , BusyARIA {
   /**
@@ -2573,6 +2554,9 @@ export interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> 
   role?: StringUnion<"application" | "presentation">;
 }
 
+/**
+ * - `<object>`
+ */
 export interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> extends Attributes<T>
   , BusyARIA {
   /**
@@ -2641,6 +2625,9 @@ export interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElemen
   role?: StringUnion<"application" | "presentation">;
 }
 
+/**
+ * - `<video>`
+ */
 export interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>
   , BusyARIA
   , VideoListeners<T>
@@ -2744,10 +2731,14 @@ export interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> 
   role?: StringUnion<"application" | "presentation">;
 }
 
+/**
+ * - `<audio>`
+ */
 export interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>
   , BusyARIA
   , MediaListeners<T>
   , AnimationListeners<T> {
+
   /**
    * {@link HTMLAudioElement}  →  {@link AudioAttributes}
    *
@@ -2849,6 +2840,9 @@ export interface SourceAttributes<T extends HTMLSourceElement = HTMLSourceElemen
   media?: string;
 }
 
+/**
+ * - `<track>`
+ */
 export interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> extends Attributes<T>
   , TrackListeners<T> {
   /**
@@ -2893,6 +2887,9 @@ export interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> 
   srcLang?: string;
 }
 
+/**
+ * - `<map>`
+ */
 export interface MapAttributes<T extends HTMLMapElement = HTMLMapElement> extends Attributes<T> {
   /**
    * {@link HTMLMapElement}  →  {@link MapAttributes}
@@ -2912,6 +2909,9 @@ export interface MapAttributes<T extends HTMLMapElement = HTMLMapElement> extend
   role?: StringUnion<"region" | "presentation">;
 }
 
+/**
+ * - `<area>`
+ */
 export interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends Attributes<T>, InteractiveARIA {
   /**
    * {@link HTMLAreaElement}  →  {@link AreaAttributes}
@@ -2979,6 +2979,9 @@ export interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> ext
   role?: StringUnion<"link" | "button">;
 }
 
+/**
+ * - `<table>`
+ */
 export interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends Attributes<T>, StructuralARIA {
   /**
    * {@link HTMLTableElement}  →  {@link TableAttributes}
@@ -2998,6 +3001,9 @@ export interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> 
   role?: StringUnion<"table" | "grid" | "treegrid">;
 }
 
+/**
+ * - `<col>`
+ */
 export interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement> extends Attributes<T>, StructuralARIA {
   /**
    * {@link HTMLTableColElement}  →  {@link TableColAttributes}
@@ -3017,6 +3023,9 @@ export interface TableColAttributes<T extends HTMLTableColElement = HTMLTableCol
   role?: StringUnion<"columnheader">;
 }
 
+/**
+ * - `<cell>`
+ */
 export interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElement> extends Attributes<T>, StructuralARIA {
   /**
    * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
@@ -3068,6 +3077,9 @@ export interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableC
   role?: StringUnion<"cell" | "gridcell" | "rowheader">;
 }
 
+/**
+ * - `<form>`
+ */
 export interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>
   , FormARIA
   , FormListeners<T>
@@ -3150,6 +3162,9 @@ export interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> ext
   role?: StringUnion<"form" | "search">;
 }
 
+/**
+ * - `<label>`
+ */
 export interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends Attributes<T>
   , AnimationListeners<T> {
   /**
@@ -3162,6 +3177,9 @@ export interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> 
   htmlFor?: string;
 }
 
+/**
+ * - `<input>`
+ */
 export interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>
   , InteractiveARIA
   , FormARIA
@@ -3526,6 +3544,9 @@ export interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> 
   >;
 }
 
+/**
+ * - `<button>`
+ */
 export interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>
   , InteractiveARIA
   , AnimationListeners<T> {
@@ -3623,6 +3644,9 @@ export interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElemen
   role?: StringUnion<"button" | "menuitem" | "menuitemcheckbox" | "menuitemradio">;
 }
 
+/**
+ * - `<select>`
+ */
 export interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>
   , InteractiveARIA
   , FormARIA
@@ -3694,6 +3718,9 @@ export interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElemen
   role?: StringUnion<"listbox" | "combobox">;
 }
 
+/**
+ * - `<optgroup>`
+ */
 export interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroupElement> extends Attributes<T>
   , StructuralARIA {
   /**
@@ -3722,6 +3749,9 @@ export interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroup
   role?: StringUnion<"group">;
 }
 
+/**
+ * - `<option>`
+ */
 export interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> extends Attributes<T>
   , InteractiveARIA {
   /**
@@ -3765,6 +3795,10 @@ export interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElemen
    */
   role?: StringUnion<"option">;
 }
+
+/**
+ * - `<textarea>`
+ */
 export interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>
   , InteractiveARIA
   , FormARIA
@@ -3884,6 +3918,9 @@ export interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextArea
   role?: StringUnion<"textbox">;
 }
 
+/**
+ * - `<output>`
+ */
 export interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> extends Attributes<T>
   , AnimationListeners<T> {
   /**
@@ -3920,6 +3957,9 @@ export interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElemen
   role?: StringUnion<"status">;
 }
 
+/**
+ * - `<progress>`
+ */
 export interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>
   , ProgressARIA
   , AnimationListeners<T> {
@@ -3949,6 +3989,9 @@ export interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgress
   role?: StringUnion<"progressbar">;
 }
 
+/**
+ * - `<meter>`
+ */
 export interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>
   , ProgressARIA
   , AnimationListeners<T> {
@@ -4010,6 +4053,9 @@ export interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> 
   role?: StringUnion<"progressbar" | "status">;
 }
 
+/**
+ * - `<fieldset>`
+ */
 export interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement> extends Attributes<T>
   , AnimationListeners<T> {
   /**
@@ -4046,6 +4092,9 @@ export interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSet
   role?: StringUnion<"group" | "presentation">;
 }
 
+/**
+ * - `<details>`
+ */
 export interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>
   , InteractiveARIA
   , ModalARIA
@@ -4069,6 +4118,9 @@ export interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsEle
   role?: StringUnion<"group" | "dialog">;
 }
 
+/**
+ * - `<dialog>`
+ */
 export interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>
   , InteractiveARIA
   , ModalARIA
@@ -4084,6 +4136,9 @@ export interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElemen
   role?: StringUnion<"dialog" | "alertdialog">;
 }
 
+/**
+ * - `<script>`
+ */
 export interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElement> extends Attributes<T> {
   /**
    * {@link HTMLScriptElement}  →  {@link ScriptAttributes}
@@ -4151,6 +4206,9 @@ export interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElemen
   nomodule?: string;
 }
 
+/**
+ * - `<canvas>`
+ */
 export interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>
   , BusyARIA
   , CanvasListeners<T> {
@@ -4180,6 +4238,9 @@ export interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElemen
   role?: StringUnion<"application" | "presentation">;
 }
 
+/**
+ * - `<data>`
+ */
 export interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends Attributes<T>
   , AnimationListeners<T> {
   /**

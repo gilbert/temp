@@ -42,8 +42,7 @@ import {
   TextAreaAttributes,
   TimeAttributes,
   TrackAttributes,
-  VideoAttributes,
-  SinAttributes,
+  VideoAttributes
 } from "./HtmlAttributes";
 
 type SinElement<T> =
@@ -86,8 +85,16 @@ type SinElement<T> =
   T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> :
   T extends HTMLDataElement ? DataAttributes<HTMLDataElement> :
   T extends HTMLUListElement ? Attributes<HTMLUListElement> :
-  T extends HTMLElement ? HTMLAttributes<HTMLElement> :
-  T extends HTMLBaseElement ? Attributes<HTMLElement> : never
+  T extends HTMLSpanElement ? Attributes<HTMLElement> :
+  T extends HTMLDivElement ? Attributes<HTMLElement> :
+  T extends HTMLHeadingElement ? Attributes<HTMLElement> :
+  T extends HTMLBodyElement ? Attributes<HTMLElement> :
+  T extends HTMLBRElement ? Attributes<HTMLElement> :
+  T extends HTMLHRElement ? Attributes<HTMLElement> :
+  T extends HTMLHeadElement ? Attributes<HTMLElement> :
+  T extends HTMLHtmlElement ? Attributes<HTMLElement> :
+  T extends HTMLBaseElement ? Attributes<HTMLElement> :
+  T extends HTMLElement ? HTMLAttributes<HTMLElement> : never
 
 /**
  * Signature Arguments Expected
@@ -118,9 +125,9 @@ export type Signature<T = any> = Partial<[
  */
 export type StyledSignature<T extends HTMLElement> = [
   attributes: SinElement<T>,
-  ...children: Children[]
+  ...children: Array<Children | StyledComponent<T>>
 ] | [
-  ...children: Children[]
+  ...children: Array<Children | StyledComponent<T>>
 ]
 
 /**
@@ -133,7 +140,9 @@ export type StyledSignature<T extends HTMLElement> = [
 export type StyledComponent<T extends HTMLElement = HTMLElement> = {
   /** Element with Attributes Signature */
   (...attibutes: Partial<StyledSignature<T>>): View;
-  /** Stateless Component Literal Signature */
+  /** Styled Component Literal Signature */
+  (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>
+  /** Styled Component Children */
   (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>
 }
 
@@ -147,6 +156,7 @@ export type StyledComponent<T extends HTMLElement = HTMLElement> = {
 export type StatelessSignature<T = any> = (...args: Arguments<T>) =>
   | Children
   | StyledComponent
+  | Array<Children | StyledComponent>
 
 /**
  * Stateless Component Overloads
