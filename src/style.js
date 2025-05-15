@@ -121,7 +121,7 @@ function shorthand(x) {
 }
 
 function propValue(r, x, v) {
-  return (r ? ';' : '') + (colon ? x : renderProp(x)) + ':' + v
+  return (r ? ';' : '') + (colon ? x : renderProp(x)) + ':' + v + (prev === 33 ? 'important' : '')
 }
 
 function renderProp(x) {
