@@ -34,9 +34,13 @@ export default function router(s, root, rootContext, parent) {
   route.parent = parent || route
   route.query = rootContext.query
   route.toString = route
-  route.has = x => (x = x.replace(root, '')) === '/'
-    ? (getPath(location) === root || (getPath(location) === '/' && root === ''))
-    : getPath(location).indexOf(cleanHref(root + '/' + x)) === 0
+  route.has = x => {
+    const path = getPath(location)
+    if ((x = x.replace(root, '')) === '/')
+      return (path === root || (path === '/' && root === ''))
+    const full = cleanHref(root + '/' + x)
+    return path.indexOf(full) === 0 && (path[full.length] === undefined || path[full.length] === '/')
+  }
 
   Object.defineProperty(route, 'path', {
     get() {
@@ -57,12 +61,12 @@ export default function router(s, root, rootContext, parent) {
   }
 
   function getPath(location, x = 0) {
-    return cleanSlash(s.route.prefix[0] === '#'
+    return decodeURIComponent(cleanSlash(s.route.prefix[0] === '#'
       ? location.hash.slice(s.route.prefix.length + x)
       : s.route.prefix[0] === '?'
         ? location.search.slice(s.route.prefix.length + x)
         : location.pathname.slice(s.route.prefix.length + x)
-    )
+    ))
   }
 
   async function reroute(path, { state, replace = false, redraw=true, scroll = true } = {}) {
