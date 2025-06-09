@@ -9,20 +9,16 @@ const prefix = 's'
     , vendorRegex = /^(ms|moz|webkit)[-A-Z]/i
     , div = doc.createElement('div')
     , unitsCache = new Map()
-    , aliasCache = {}
     , propCache = {}
     , unitCache = {}
 
+export const aliasCache = {}
 export const styleElement = x => style || (style = x || doc.querySelector('style.sin') || doc.createElement('style'))
 export const cssRules = () => style ? style.sheet.cssRules : []
 
 export const unit = (k, fn) => typeof fn === 'function'
   ? unitsCache.set(k.charCodeAt(0), fn)
   : Object.entries(k).forEach(([k, fn]) => unitsCache.set(k.charCodeAt(0), fn))
-
-export const alias = (k, v) => typeof v === 'string'
-  ? aliasCache['@' + k] = v
-  : Object.entries(k).forEach(([k, v]) => alias(k, v))
 
 const pxCache = {
   flex: '',

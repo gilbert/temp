@@ -4,7 +4,7 @@ import live from './live.js'
 import window from './window.js'
 import router from './router.js'
 import query from './query.js'
-import { unit, parse, alias, formatValue, styleElement } from './style.js'
+import { unit, parse, aliasCache, formatValue, styleElement } from './style.js'
 import {
   scrollRestore,
   isObservable,
@@ -139,6 +139,24 @@ const trusted = s(({ strings, values = [] }) => {
   const nodes = [...div.childNodes, document.createComment('trust')]
   return () => nodes
 })
+
+function alias (k, v) {
+  if (typeof v !== 'string')
+    return Object.entries(k).forEach(([k, v]) => alias(k, v))
+
+  aliasCache['@' + k] = v
+  let matches = null
+  Object.defineProperty(s.is, k, {
+    get() {
+      if (matches !== null)
+        return matches
+
+      const x = window.matchMedia(v.slice(v.indexOf('(')))
+      x.addEventListener('change', e => (matches = e.matches, s.redraw()))
+      return x.matches
+    }
+  })
+}
 
 function event(fn) {
   const observers = new Set(fn ? [fn] : [])
