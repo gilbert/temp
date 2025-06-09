@@ -63,6 +63,7 @@ export default class Request {
     this[$.head] = null
     this[$.ended] = null
     this[$.query] = null
+    this[$.attrs] = null
     this[$.length] = null
     this[$.status] = null
     this[$.corked] = false
@@ -71,8 +72,35 @@ export default class Request {
     this[$.aborted] = null
     this[$.headers] = null
     this[$.reading] = null
+    this[$.context] = null
     this[$.readable] = null
     this[$.writable] = null
+  }
+
+  get attrs() {
+    return this[$.attrs] !== null
+      ? this[$.attrs]
+      : this[$.attrs] = {}
+  }
+
+  set attrs(value) {
+    if (value === null || typeof value !== 'object')
+      throw new Error('r.attrs must be an object')
+
+    this[$.attrs] = value
+  }
+
+  get context() {
+    return this[$.context] !== null
+      ? this[$.context]
+      : this[$.context] = {}
+  }
+
+  set context(value) {
+    if (value === null || typeof value !== 'object')
+      throw new Error('r.context must be an object')
+
+    this[$.context] = value
   }
 
   onData(fn) {

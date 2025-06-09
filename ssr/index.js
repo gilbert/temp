@@ -38,7 +38,7 @@ const $uid = Symbol('uid')
 const defaultTimeout = 1000 * 60 * 2
 
 export { wrap }
-export default function(mount, serverAttrs = {}, serverContext = {}) {
+export default function(mount, serverAttrs = {}, serverContext = {}, browserAttrs, browserContext) {
   if (!mount)
     return {}
 
@@ -115,10 +115,24 @@ export default function(mount, serverAttrs = {}, serverContext = {}) {
       title: context.doc.title() || s.title,
       lang: context.doc.lang(),
       css, // perhaps remove classes according to names in html
-      html: (context.noscript || !mount ? '' : '<!--h-->') + x,
+      html: (context.noscript || !mount ? '' : hydration(browserAttrs, browserContext)) + x,
       head
     }
   })
+}
+
+function undefinedIfEmpty(x) {
+  for (const prop in x)
+    if (x.hasOwnProperty(prop))
+      return x
+}
+
+function hydration(a, c) {
+  const attrs = undefinedIfEmpty(a)
+  const context = undefinedIfEmpty(c)
+  return attrs || context
+    ? '<script h type="application/json">' + JSON.stringify({ context, attrs }) + '</script>'
+    : '<!--h-->'
 }
 
 function update(view, context) {

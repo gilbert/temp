@@ -265,7 +265,8 @@ function mount(dom, view, attrs = {}, context = {}) {
   dom[stackTrace] = new Error().stack
   s.scroll && scrollRestoration(context)
 
-  context.hydrating = shouldHydrate(dom.firstChild)
+  shouldHydrate(dom.firstChild, context, attrs)
+
   const doc = {
     head: context.hydrating ? noop : head,
     lang: s.live(document.documentElement.lang, x => document.documentElement.lang = x),
@@ -323,17 +324,28 @@ function head(x) {
   document.head.appendChild(dom)
 }
 
-function shouldHydrate(dom) {
-  const hydrate = dom && dom.nodeType === 8 && dom.data === 'h' && (dom.remove(), true)
-  if (hydrate) {
-    let node
-    const nodes = []
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_COMMENT)
-    while ((node = walker.nextNode()))
-      node.data === ',' && nodes.push(node)
-    nodes.forEach(x => x.remove())
+function shouldHydrate(dom, context, attrs) {
+  if (dom) {
+    if (dom.nodeType === 8 && dom.data === 'h') {
+      dom.remove()
+      context.hydrate = true
+    } else if (dom.nodeType === 1 && dom.tagName === 'SCRIPT' && dom.hasAttribute('h')) {
+      context.hydrate = true
+      const x = JSON.parse(dom.textContent)
+      Object.assign(context, x.context)
+      Object.assign(attrs, x.attrs)
+    }
   }
-  return hydrate
+
+  if (!context.hydrate)
+    return
+
+  let node
+  const nodes = []
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_COMMENT)
+  while ((node = walker.nextNode()))
+    node.data === ',' && nodes.push(node)
+  nodes.forEach(x => x.remove())
 }
 
 function redraw() {
