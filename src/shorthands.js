@@ -4,6 +4,8 @@ export default {
   ac: 'align-content',
   ar: 'aspect-ratio',
   b: 'bottom',
+  bg: 'background',
+  bf: 'backdrop-filter',
   bc: 'background-color',
   br: 'border-radius',
   bs: 'box-shadow',
