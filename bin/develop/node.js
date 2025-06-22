@@ -145,7 +145,7 @@ async function start() {
   config.script || node.on('message', x => {
     x.startsWith('started:')
       ? resolve(x.slice(8) === 'true')
-      : x.startsWith('watch:') && api.browser.watch(x.slice(6))
+      : x.startsWith('watch:') && api.browser.watch(fs.realpathSync(x.slice(6)))
   })
 
   node.on('close', async(code, signal) => {
