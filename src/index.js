@@ -152,7 +152,7 @@ function alias (k, v) {
         return matches
 
       const x = window.matchMedia(v.slice(v.indexOf('(')))
-      x.addEventListener('change', e => p(matches = e.matches, s.redraw()))
+      x.addEventListener('change', e => (matches = e.matches, s.redraw()))
       return matches = x.matches
     }
   })
