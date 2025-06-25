@@ -67,19 +67,39 @@ async function serve() {
 
     const x = await ssr(
       mount,
-      {},
-      { location: (r.headers.host ? 'http://' + r.headers.host : config.url) + r.url }
+      { ...r.attrs },
+      { location: (r.headers.host ? 'http://' + r.headers.host : config.url) + r.url, ...r.context },
+      r.attrs,
+      r.context
     )
 
     const html = wrap(x, {
       head,
-      body: config.noscript ? '' : '<script type=module defer src="/' + src + '"></script>'
+      body: config.noscript
+        ? ''
+        : '<script type=module defer src="/' + src + '"></script>'
     })
 
     r.end(html, x.status || 200, x.headers)
   })
 
   return onlyServer
+}
+
+function getObject(x) {
+  for (let prop in x) {
+    if (x.hasOwnProperty(prop))
+      return x
+  }
+}
+
+function isObjectEmpty(obj) {
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 async function build(r) {
