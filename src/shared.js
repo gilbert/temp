@@ -8,6 +8,12 @@ export const resolved = Promise.resolve()
 
 export const hasOwn = {}.hasOwnProperty
 
+export function tryCall(x) {
+  return typeof x === 'function'
+    ? x()
+    : x
+}
+
 export function cleanSlash(x) {
   return x && String(x).replace(/\/+/g, '/').replace(/(.)\/\*?$/, '$1')
 }

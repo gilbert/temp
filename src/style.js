@@ -1,5 +1,5 @@
 import window from './window.js'
-import { isFunction, snake, asCssVar, hasOwn, isObservable } from './shared.js'
+import { isFunction, stackTrace, snake, asCssVar, hasOwn, isObservable, tryCall } from './shared.js'
 import shorthands from './shorthands.js'
 
 let style
@@ -180,9 +180,7 @@ export function parse([xs, ...args], parent, nesting = 0, root = false) {
     x = xs[j + 1]
     if (j < args.length) {
       const before = xs[j].slice(valueStart)
-      let arg = args[j]
-      window.isServerSin && isFunction(arg) && !isObservable(arg) && (arg = '6invalidate')
-      if (cssVars && valueStart >= 0 && arg !== '6invalidate') {
+      if (cssVars && valueStart >= 0) {
         temp = prefix + Math.abs(hash).toString(31)
         vars[varName = '--' + temp + j] = { property: prop, fns: fn.slice(-1), unit: getUnit(prop, last(fn)), index: j, transform: cssVarAlpha !== -1 && getOpacityArg }
         value += before + 'var(' + varName + ')' + (cssVarAlpha === -1 ? '' : (cssVarAlpha = -1, ')'))
@@ -192,7 +190,7 @@ export function parse([xs, ...args], parent, nesting = 0, root = false) {
         vars[varName = temp + j] = { index: j }
         selectors.push('[' + varName + ']')
       } else {
-        const x = before + arg + getUnit(prop, last(fn))
+        const x = before + tryCall(args[j]) + getUnit(prop, last(fn))
         value += x
         for (let i = 0; i < x.length; i++)
           hash = Math.imul(31, hash) + x.charCodeAt(i) | 0
@@ -477,7 +475,7 @@ function getUnit(prop, fn = '') {
 }
 
 export function formatValue(v, { property, fns, unit, transform }) {
-  isFunction(v) && (v = v())
+  isFunction(v) && (v = window.isServerSin && !isObservable(v) ? '6iacvt' : v())
   transform && (v = transform(v))
   if (!v && v !== 0)
     return ''
