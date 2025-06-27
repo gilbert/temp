@@ -73,6 +73,9 @@ export default function router(s, root, rootContext, parent) {
     if (path === getPath(location) + location.search)
       return
 
+    if (s.is.server)
+      return (rootContext.doc.status(302), rootContext.doc.headers({ Location: s.route.prefix + path }))
+
     s.route.prefix[0] === '#'
       ? window.location.hash = s.route.prefix + path
       : s.route.prefix[0] === '?'
@@ -83,7 +86,7 @@ export default function router(s, root, rootContext, parent) {
 
     redraw && await s.redraw()
 
-    s.is.server || scroll === false || s.route.scroll === false
+    scroll === false || s.route.scroll === false
       ? s.route.scroll = undefined
       : scrollRestore()
   }
