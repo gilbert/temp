@@ -145,6 +145,10 @@ function alias (k, v) {
     return Object.entries(k).forEach(([k, v]) => alias(k, v))
 
   aliasCache['@' + k] = v
+
+  if (s.is.server)
+    return
+
   let matches = null
   Object.defineProperty(s.is, k, {
     get() {
