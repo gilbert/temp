@@ -1043,6 +1043,12 @@ function attributes(dom, view, context, tagName) {
   if (tagName === 'option' && !create && hasOwn.call(view.attrs, 'selected') && dom.selected !== view.attrs.selected)
     updateAttribute(dom, view.attrs, 'selected', dom.selected, view.attrs.selected, create, context)
 
+  if (hasOwn.call(view.attrs, 'srcset') && dom.srcset !== view.attrs.srcset)
+    updateAttribute(dom, view.attrs, 'srcset', dom.srcset, view.attrs.srcset, create, context)
+
+  if (hasOwn.call(view.attrs, 'src') && dom.src !== view.attrs.src)
+    updateAttribute(dom, view.attrs, 'src', dom.src, view.attrs.src, create, context)
+
   if (hasOwn.call(view.attrs, 'href') && (context.hydrating || !prev || prev.href !== view.attrs.href)) {
     value = view.attrs.href
     const internal = !String(value).match(/^([a-z]+:|\/\/)/) && !view.attrs.target && !view.attrs.download
