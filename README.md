@@ -27,7 +27,7 @@ Sin is a lightweight, reactive JavaScript framework designed to craft dynamic, p
 
 # Installation
 
-Sin is a (currently) private, accessible only with explicit authorization. The Sin CLI handles development, bundling, package management, and project generation. After installation, use the `sin` binary for all development tasks.
+Sin is (currently) private, accessible only with explicit authorization. The Sin CLI handles development, bundling, package management, and project generation, this means you don't need to use alternative managers such as npm or pnpm, because sin comes with package management feature built-in. After installation, use the `sin` binary for all development tasks.
 
 ```bash
 source <(curl -fsSL install.sinjs.com)
@@ -82,6 +82,26 @@ Sintax provides some basic support for sin, including Syntax highlighting for li
 
 - [Sintax](https://marketplace.visualstudio.com/items?itemName=sissel.sintax)
 
+### TypeScript
+
+Sin provides comprehensive TypeScript definitions that capture its flexible and dynamic architecture. Types provided within `sin.d.ts`  cover the numerous overloads for various component signatures, recursive types for nested children, and generics for attributes and contexts.
+
+```ts
+// Virtuals
+s('section', {}, ...[])                          // HyperScript auto-types Element
+s<HTMLElement>``({}, ...[])                      // Generics for Styled Components
+s<attrs, children>(({}, []) => [])               // Generics for Stateless Components
+s<attrs, children, context>(({}, [], {}) => [])  // Generics for Statefull Component
+
+// Utilities
+s.Component<HTMLElement, children>               // Styled Component Utility
+s.Component<attrs, children, context>            // Stateless and Statefull Utility
+s.Context<context>                               // Component Context Merge
+```
+
+> [!NOTE]
+> Sin's type definitions are designed for sin-specific usage and expand upon the `lib.dom.d.ts` variation. IntelliSense for attributes and elements apply precise type narrowing with JSDoc annotated descriptives and direct MDN references.
+
 ---
 
 # Table of Contents
@@ -113,10 +133,11 @@ Sintax provides some basic support for sin, including Syntax highlighting for li
   - [Methods](#request-methods)
   - [Options](#request-options)
 - [DOM Helpers](#dom-helpers)
+  - [is](#is-sisalias)
   - [on](#on-son)
+  - [p](#p)
   - [animate](#animate-sanimate)
 - [Trust](#trust-strust)
-
 
 ---
 
@@ -169,17 +190,15 @@ Element (vnode) attributes support HTML attribute properties. Sin resolves attri
 
 ### dom `{ dom: () => {} }`
 
-DOM Element render callback. Dom is a creation lifcycle hook which will call in the post rendering cycle of a sin view. You will attach third-party tools using this callback method.
+DOM Element render callback. Dom is a creation lifcycle hook which will call in the post rendering cycle of a sin view. You will attach third-party tools using this callback method, as it fires once the virtual node has been mounted, rendered and is ready.
 
 ```js
 s`div`({
   dom: (element, attributes, children, context) => {
-
     element      // -> <div> Element
     attributes   // -> element attributes
     children     // -> nested content
     context      // -> context reference
-
   }
 })
 ```
@@ -189,9 +208,9 @@ The `dom` key also accepts an array of handler functions which can be used to ch
 ```js
 s`div`({
   dom: [
-    (dom, attributes, children, context) => console.log(dom, attributes, children, context),
-    (dom, attributes, children, context) => console.log(dom, attributes, children, context),
-    (dom, attributes, children, context) => console.log(dom, attributes, children, context)
+    (dom, attributes, children, context) => p(dom, attributes, children, context),
+    (dom, attributes, children, context) => p(dom, attributes, children, context),
+    (dom, attributes, children, context) => p(dom, attributes, children, context)
   ]
 })
 ```
@@ -218,7 +237,7 @@ s`div`({
 
 ## Arguments
 
-In Sin, the `attrs`, `children`, and `context` arguments are fundamental to component creation and management, as they define the properties, content, and environment of components. Function signatures of sin components are comprised of 3 arguments. Each argument represents render specifics.
+In Sin, the `attrs`, `children`, and `state` arguments are fundamental to component creation and management, as they define the properties, content, and environment of components. Function signatures of sin components are comprised of 3 arguments. Each argument represents render specifics.
 
 ```js
 s((attrs, children, context) => [
@@ -230,7 +249,7 @@ s((attrs, children, context) => [
 
 ### attrs `{}`
 
-The `attrs` argument is a hashmap object. We use `attrs` as a blueprint for how a component behaves and appears, allowing you to define everything from standard HTML attributes to event handlers (e.g., onclick) and custom properties.
+The `attrs` argument is a hashmap object. We use `attrs` as a blueprint for how a component behaves and appears, allowing you to define everything from standard HTML attributes to event handlers (e.g., `onclick`) and custom properties.
 
 ```js
 const person = s(({ name = 'Eve', ...attrs }) => s`button`(attrs, name))
@@ -241,30 +260,44 @@ s.mount(() => [
 ])
 ```
 
+> [!NOTE]
+> When passing attributes, we usually spread `...attrs` on the receiving component and extract non-standard values from the hashmap.
+> Spreading attributes ensures properties are not applied directly as element attributes.
+>
+> **See this » [Flems Demonstration](https://flems.io/https://gist.github.com/panoply/ae2e0ae00b8695867c0f123d29f17e10)**
+
 ### children `[]`
 
-The `children` argument represents the nested content within a sin component, forming the heart of its compositional power and  UI hierarchies. It's a flexible, array-like structure that can include elements, primitive values (like strings or numbers), or arrays of other children.
+The `children` argument represents the nested content within a sin component, forming the heart of its compositional power and UI hierarchies. It's a flexible, array-like structure that can include elements, primitive values (like strings or numbers), or arrays of other children.
 
 ```js
 const people = s(({}, children) => s`ui`(children))
 
 s.mount(() => people(
   s`li`(person({ name: 'Adam' })),
+  s`li`('Eve'),
   s`li`(person({ onclick: () => alert('Apples?') }))
 ))
 ```
 
 ### context `{}`
 
-The context argument holds global accessible methods which can be used to interact with the broader application. It encapsulates utilities for document manipulation, client-side routing, lifecycle management, and redraw control.
+The context argument holds global accessible methods which can be used to interact with the broader application. It encapsulates utilities for document manipulation, client-side routing, lifecycle management, and redraw control. We can extend `context` on a per-component basis and use it as a shared as data or method binding reference that sub-components can access.
 
 ```js
-const people = s(({}, children) => s`ui`(children))
+const people = s(({}, children, context) => [
+  s`button`({ onclick: () => context.eat = !context.eat }, 'Eat the apple?')
+  s`ui`(children),
+  context.eat && s`h1`('Hell hath no fury!')
+])
 
-s.mount(({}, [], context) => {
+s.mount(({}, [], { doc, state }) => {
 
-  const { doc } = context
+  state.eat = false
+  state.name = 'xxx'
+  state.food = () => {}
 
+  // The doc key is readonly and represents the document
   doc.title('Garden of Eden')
   doc.lang('da')
   doc.head([
@@ -279,15 +312,23 @@ s.mount(({}, [], context) => {
 })
 ```
 
+> [!NOTE]
+> Treat the `context` as broader application reference and when possible, choose `attrs` for passing data
+> between components or consider inline variable using [DAFT](#daft) (default argument function thunk) expressions.
+
 ## Mounting `s.mount(...)`
 
 The mount method is used to render elements and components. By default, sin will mount to `document.body`, but you can provide a specific element. Mount can be used to construct the DOM for your application.
 
 ```js
+// Mounting to document.body
 s.mount(() => s`h1`('Hello Sinner'))
+
+// Mounting to a specific element
+s.mount(document.querySelector('#sinner') => s`h1`('Hello Sinner'))
 ```
 
-## Components
+# Components
 
 Sin revolves around components, which are the building blocks of your application. Components can be stateless, stateful, or asynchronous, and they support a variety of signatures. All components in Sin are made to allow overriding styles anywhere they are used.
 
@@ -359,11 +400,11 @@ const apostate = s(({ onclick, ...attrs }, children) =>
 )
 ```
 
-## Statefull Component `s(() => () => ...)`
+## Closure Component `s(() => () => ...)`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/2bbf9b783cbacdb2feefb956ccd09109)
 
-The Statefull Component retains its state across redraws. Statefull components expect function callback signatures and also allow for inline DAFT structures.
+The Closure Component is retains its state across redraws and expect a function callback return signature.
 
 ```js
 // Definition
@@ -390,27 +431,11 @@ const example = s(() => {
 })
 ```
 
-#### DAFT
-
-DAFT (Default Argument Function Thunk) is a signature pattern of statefull Sin components which can be used for scope-level variables expressed as default arguments.
-
-```js
-s((attrs, children, context) => () =>
-  s`h1`(
-    (
-      d = 'Default',
-      a = 'Argument',
-      f = 'Function',
-      t = 'Thunk'
-    ) => [
-      'Sin Has ',d,a,f,t
-    ]
-  )
-)
-```
+> [!NOTE]
+> You can access `attrs`, `children` and `state` arguments in the closure callback function. The arguments available to the callback can be used to avoid stale data references.
 
 
-## Async Component `s(async () => )`
+## Async Component `s({ loading, error }, async () => ...)`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/4e3e517c8384a384de9b72a74665a7ea)
 
@@ -431,7 +456,26 @@ const judgement = s(
 )
 ```
 
-## CSS `s.css`` `
+## DAFT
+
+DAFT (Default Argument Function Thunk) is a signature pattern of statefull Sin components which can be used for scope-level variables expressed as default arguments.
+
+```js
+s((attrs, children, context) => () =>
+  s`h1`(
+    (
+      d = 'Default',
+      a = 'Argument',
+      f = 'Function',
+      t = 'Thunk'
+    ) => [
+      'Sin Has ',d,a,f,t
+    ]
+  )
+)
+```
+
+# CSS
 
 Element styling can be expressed inline and allows for expressive cascades to be applied. The `:` and `;` are optional for single line definitions. No more bloated syntax.
 
@@ -440,7 +484,7 @@ s`span
   font-size 16px
   text-decoration underline
   color pink
-`()
+`
 ```
 
 > [!NOTE]
@@ -456,13 +500,23 @@ s`span
 > ```
 
 
-### Resets `s.css.reset`` `
+## Styles  ```s.css`` ```
+
+The `s.css` method can be used to define stylesheet/s and global styling that can be used anywhere in your application.
+
+```css
+s.css`
+  /* your global stylesheet here */
+`
+```
+
+## Resets ```s.css.reset`` ```
 
 To reduce browser inconsistencies you can use the opinionated css reset style rules when writing your global CSS.
 
 ```js
 s.css.reset`
-  /* your global css here */
+  /* your global reset here */
 `
 ```
 
@@ -525,9 +579,9 @@ ol, ul, li {
 
 </details>
 
-### Units
+## Units
 
-Sin will automatically add `px` as a unit if left out unless the relevant css property takes a unitless value.
+Sin will automatically add `px` as a unit when omitted, unless the relevant css property takes a unitless value.
 
 ```js
 s`span
@@ -538,7 +592,7 @@ s`span
 ```
 
 
-### Variables `$variable`
+## Variables `$variable`
 
 Sin provides a convenient way to access and define CSS variabes. The `$` prefix keywords will render vars.
 
@@ -551,7 +605,7 @@ s.css`
 `
 ```
 
-We can reference, overwrite and even create variables on the element level:
+We can reference, overwrite and even create variables on the component (element) level:
 
 ```js
 s`
@@ -566,10 +620,9 @@ s`
  )
 ```
 
+## Alias `s.css.alias({...})`
 
-### Alias `s.css.alias({...})`
-
-The `s.css.alias` method allows you to define aliases for media queries that you can later use in your CSS:
+The `s.css.alias` method allows you to define aliases for media queries that you can later use in your CSS. Aliases will also be made available to `s.is.*` and will reflect breakpoint changes via MatchMedia API.
 
 ```js
 // Definition
@@ -597,57 +650,59 @@ The most popular CSS properties can be references by its initials. A few popular
 <summary>See list of abbreviations</summary>
 
 
-| abbreviation | keyword |
-| ----- | ----- |
-| ai | align-items |
-| b | bottom |
-| bc | background-color |
-| br | border-radius |
-| bs | box-shadow |
-| bi | background-image |
-| c | color |
-| d | display |
-| fg | flex-grow |
-| fb | flex-basis |
-| f | float |
-| fd | flex-direction |
-| ff | font-family |
-| fs | font-size |
-| fw | font-weight |
-| g | gap |
-| ga | grid-area |
-| gg | grid-gap |
-| gta | grid-template-areas |
-| gtc | grid-template-columns |
-| gtr | grid-template-rows |
-| h | height |
-| jc | justify-content |
-| l | left |
-| lh | line-height |
-| ls | letter-spacing |
-| m | margin |
-| mb | margin-bottom |
-| ml | margin-left |
-| mr | margin-right |
-| mt | margin-top |
-| o | opacity |
-| p | padding |
-| pb | padding-bottom |
-| pl | padding-left |
-| pr | padding-right |
-| pt | padding-top |
-| pi | place-items |
-| pe | pointer-events |
-| r | right |
-| t | top |
-| ta | text-align |
-| td | text-decoration |
-| tt | text-transform |
-| ts | text-shadow |
-| us | user-select |
-| ws | white-space |
-| w | width |
-| zi | z-index |
+| abbreviation | keyword               |
+| ------------ | --------------------  |
+| ai           | align-items           |
+| b            | bottom                |
+| bc           | background-color      |
+| bg           | background            |
+| bf           | backdrop-filter       |
+| br           | border-radius         |
+| bs           | box-shadow            |
+| bi           | background-image      |
+| c            | color                 |
+| d            | display               |
+| fg           | flex-grow             |
+| fb           | flex-basis            |
+| f            | float                 |
+| fd           | flex-direction        |
+| ff           | font-family           |
+| fs           | font-size             |
+| fw           | font-weight           |
+| g            | gap                   |
+| ga           | grid-area             |
+| gg           | grid-gap              |
+| gta          | grid-template-areas   |
+| gtc          | grid-template-columns |
+| gtr          | grid-template-rows    |
+| h            | height                |
+| jc           | justify-content       |
+| l            | left                  |
+| lh           | line-height           |
+| ls           | letter-spacing        |
+| m            | margin                |
+| mb           | margin-bottom         |
+| ml           | margin-left           |
+| mr           | margin-right          |
+| mt           | margin-top            |
+| o            | opacity               |
+| p            | padding               |
+| pb           | padding-bottom        |
+| pl           | padding-left          |
+| pr           | padding-right         |
+| pt           | padding-top           |
+| pi           | place-items           |
+| pe           | pointer-events        |
+| r            | right                 |
+| t            | top                   |
+| ta           | text-align            |
+| td           | text-decoration       |
+| tt           | text-transform        |
+| ts           | text-shadow           |
+| us           | user-select           |
+| ws           | white-space           |
+| w            | width                 |
+| zi           | z-index               |
 
 
 </details>
@@ -758,7 +813,21 @@ s.http({
 
 Sin provides dom helper methods that can be used to improve interfacing on the element (vnode) level.
 
-## on `s.on(...)`
+### is `s.is.<alias>`
+
+The `s.is.*` object contains read-only getter/setter references assigned at runtime. Entries on `s.is` will return a `boolean` of either `true` or `false` and maintained internally by Sin.
+
+```js
+// Whether or not code is executing on server.
+s.is.server
+
+// All CSS Aliases are exposed on s.is
+s.is.mobile
+s.is.tablet
+s.is.desktop
+```
+
+### on `s.on(...)`
 
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/c662596e14c94ca238ea063754cfad9b)
@@ -776,7 +845,18 @@ s`pre`({
 })
 ```
 
-## animate `s.animate(...)`
+### `p(...)`
+
+Sin has `p()` available in globalThis context which is a great log helper. Unlike native `console.*` methods `p` is designed as a pass-through interceptor, so content gets returned.
+
+```js
+// Numbers called within p() will be returned and also logged to console
+
+const x = 333 + p(333) // x -> 666
+const v = p(x) / 2     // v -> 333
+```
+
+### animate `s.animate(...)`
 
 CSS Animation DOM helper utility
 
@@ -794,8 +874,7 @@ s`
 })
 ```
 
-
-## Trust `s.trust`
+# Trust ```s.trust`` ```
 
 Forgiving HTML or SVG strings into unescaped HTML or SVG.
 
@@ -803,4 +882,3 @@ Forgiving HTML or SVG strings into unescaped HTML or SVG.
 s.trust`<small>In the den of Sin</small>`   // Literal Expression
 s.trust(`<h1>Woe to the wicked!</h1>`)      // Function Expression
 ```
-
