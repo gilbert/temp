@@ -1,14 +1,13 @@
 import type { Doc } from "./Doc";
 import type { Route } from "./Route";
 
-/**
- * Sin Component Context
- */
-export type Context = {
+
+// Sin Component State Context
+export type Context<T = Record<string, any>> = T & {
   /**
    * Sin SSR (last modified date of `sin build`)
    */
-  readonly modified?: number;
+  readonly modified: number;
   /**
    * A boolean indicating whether or not component is hydrating
    */

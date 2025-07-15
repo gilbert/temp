@@ -1,41 +1,37 @@
-// @ts-nocheck
-
-import type { Statefull, Stateless } from './files/Components'
 import type { Sin } from './files/Sin'
-import type { View, Children } from './files/View';
-import type { EventHandler } from './files/HtmlEventListeners'
+import type { Children, View } from './files/View';
+import type { Context } from './files/Context';
+import type { SinNode, StyledComponent } from './files/Components';
 
 
-declare global {
-
-  namespace S {
-
-    /**
-     * **🔥 sin.js component**
-     *
-     * TypeScript Utility for sin components
-     *
-     * @example
-     *
-     * S.Component<{ attrs }, { context }>
-     */
-    export type Component<Attrs = {}, C = Context> = (
-        attrs: Attrs,
-        children?: Children,
-        context?: C
-    ) => (
-        attrs: Attrs,
-        children?: Children,
-        context?: C
-    ) => View<Attrs>
-
-  }
-
-}
-
-/**
- * **🔥 sin.js**
- */
 declare const s: Sin
+declare namespace s {
+
+  /**
+   * Component Context - TypeScript Utility
+   *
+   * @example
+   *
+   * const x: Context<{ x: string }>  // Merges Context
+   */
+  type Context<T> = T & import('./files/Context').Context
+
+  /**
+   * Sin Component - TypeScript Utility
+   *
+   * @example
+   *
+   * const x: s.Component;
+   * const x: s.Component<{}>;
+   * const x: s.Component<{}, []>;
+   * const x: s.Component<{}, [], {}>;
+   * const x: s.Component<HTMLElement>;
+   */
+  type Component<attrs = {}, children = [], context = {}> =
+    | ((attrs?: attrs) => SinNode)
+    | ((attrs?: attrs, ...children: children extends [] ? Children[] : children[]) => SinNode)
+    | ((attrs?: attrs, children?: children extends [] ? Children[] : children[], context?: Context<context>) => View)
+    | (attrs extends HTMLElement ? StyledComponent<attrs> : SinNode)
+}
 
 export default s

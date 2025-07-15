@@ -1,6 +1,6 @@
 import type { Children, View } from "./View";
-import { Context } from "./Context";
-import { Route } from "./Route";
+import type { Context } from "./Context";
+import type { Route } from "./Route";
 
 /**
  * DOM element argument type

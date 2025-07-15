@@ -1,9 +1,8 @@
 import type { TagLiteral as CSSLiteral, Interpolate } from "./Utilities";
 import type { Tag, View } from "./View";
 
-/**
- * CSS Vars type value exposed on `tag.vars`
- */
+
+// CSS Vars type value exposed on `tag.vars`
 export type Vars = {
   /**
    * The CSS property name.
@@ -36,7 +35,11 @@ export type Vars = {
    *
    * @default []
    */
-  fns: string[]
+  fns: string[];
+  /**
+   *  Arbitrary signature for dynamic CSS Variables `--vars`
+   */
+  [key: `--${string}`]: any;
 }
 
 export type CSS = {

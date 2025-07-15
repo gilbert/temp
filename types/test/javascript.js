@@ -234,7 +234,7 @@ event.signal.aborted
 // We can use generics on events and the generic type
 // will be passed through the instance
 
-const event2 = s.event<{ foo: string }>() // -> internal callback is optional
+const event2 = s.event() // -> internal callback is optional
 const dispose = event2.observe(value => value) // -> value is { foo: string }
 
 // Dispatch argument will adhere to the generic of event2
@@ -325,6 +325,115 @@ generic({
   foo: '',      // -> autocompletion applied
   // bar: true  // -> uncomment to validate
 })
+
+
+/* -------------------------------------------- */
+/* STATEFUL COMPONENTS                          */
+/* -------------------------------------------- */
+
+// Statefull component return a function and can use varying
+// arguments and closure values. Here we test synchronous variations
+
+const statefull_sync_1 = s(({ foo = '' }, [], { route }) => () => s``('foo'))
+const statefull_sync_2 = s(({}, [], { route }) => () => [])
+const statefull_sync_3 = s(({}, [], { route }) => () => s``)
+const statefull_sync_4 = s(({}, [], { route }) => () => '')
+const statefull_sync_5 = s(({}, [], { route }) => () => ['', s``(s`div`('xxx'))])
+
+// Statefull components can also be async in the sense that we
+// provide the first callback function an async signature
+
+const statefull_async_1 = s(async ({}, [], { route }) => () => s``('foo'))
+const statefull_async_2 = s(async ({}, [], { route }) => () => [])
+const statefull_async_3 = s(async ({}, [], { route }) => () => s``)
+const statefull_async_4 = s(async ({}, [], { route }) => () => '')
+const statefull_async_5 = s(async ({}, [], { route }) => () => ['', s``(s`div`('xxx'))])
+
+
+// We will now provide attrs to statefull components.
+// In most cases component attrs will be defaulted
+
+const stateless_attrs_1 = s(({
+  xxx = '',
+  num = 1000,
+  bool = false,
+  ...attrs
+}) =>
+  s``(
+    ''
+  )
+)
+
+const stateless_attrs_1 = s(({
+  xxx = '',
+  num = 1000,
+  bool = false,
+  ...attrs },
+  children,
+  context
+) =>
+  s``(
+    children
+  )
+)
+
+stateless_attrs_1({
+
+
+})
+
+const statefull_attrs_2 = s((
+  attrs,
+  children,
+  context
+) => ({
+  foo = '',
+  bar = 1000,
+  ...attrs
+}) =>
+  s``(
+    children
+  )
+
+)
+
+const stateless_attrs_3 = s(async ({
+  foo = '',
+  bar = 1000,
+  ...attrs
+ },
+ children
+) =>
+  s``(
+    children
+  )
+)
+
+const statefull_attrs_4 = s(async ({
+  foo = '',
+  bar = 1000,
+  ...attrs
+}, [], { doc }) => (attrs, children, context) => [])
+
+
+statefull_attrs_2`
+  bc blue
+`({
+
+})
+// The same logic will apply in the asynchronous statefull example
+
+statefull_attrs_2({
+  foo: '',
+  // bar: 2000
+})
+
+// We need to ensure that curried overloads will correctly obtain arguments as
+// they get passed down the chain.
+
+const statefull_chain_1 = s(async ({}, [], { route }) => (attrs, children) => [])
+const statefull_chain_2 = s(async ({}, [], { route }) => (attrs, children) => s``)
+
 
 /* -------------------------------------------- */
 /* ADDITONAL TESTING                            */

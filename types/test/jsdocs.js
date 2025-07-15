@@ -1,4 +1,18 @@
+import s from "../../sin"
+
 /**
- * @type {S.}
+ * @type {S.Component<Demo.Foo, { func: () => void }>}
  */
-const component = s()
+const component = s((attrs, children, context) => {
+
+  attrs.
+  context.
+
+})
+
+
+component({
+  label: '',
+  loading: true,
+
+})

@@ -41,7 +41,7 @@ s``({ id: 'test' }, 'hello world')
 // whereas HTMLLinkElement will expose href
 
 s<HTMLLinkElement>`a`({ href: '' })
-s<HTMLDivElement>`div`({ href: '' })
+s<HTMLDivElement>`div`({ href: '' }) // <- FAILS
 
 /* -------------------------------------------- */
 /* HYPERSCRIPT ELEMENTS                         */
@@ -56,14 +56,14 @@ s('section', ['example'])
 // Narrowing is possible with hyperscript syntacticals
 // We will not get href as an option on the span vnode
 
-s('span', { href: '' })
 s('a', { href: '' })
+s('span', { href: '' }) //       <- FAILS
 
 // HyperScript tag name mutation expression should succeed
 // <a> element will persist even with class names
 
-s('a.foo.bar', { href: '' })
-s('a#id', { href: '' })
+s('a.foo.bar', { href: '' }) //   <- PASS
+s('a#id', { href: '' }) //        <- PASS
 
 
 /* -------------------------------------------- */
@@ -308,15 +308,130 @@ ul([ s`li`, s`li` ])
 /* STATELESS COMPONENT                          */
 /* -------------------------------------------- */
 
+const stateless_sync_1 = s(() => s``)
+const stateless_sync_2 = s((attrs) => s``('xxx'))
+const stateless_sync_3 = s(({}, []) => [])
+const stateless_sync_4 = s(({}, children) => [ s`div`() ])
+const stateless_sync_5 = s(({ xxx = '', num = 1000, bool = false, ...attrs }, children) => [])
+const stateless_sync_6 = s(({}, []) => () => s``('foo'))
+
+stateless_sync_6` d block`({ x: 'xxx' })
+
+/* -------------------------------------------- */
+/* STATEFUL COMPONENTS                          */
+/* -------------------------------------------- */
+
+// Statefull component return a function and can use varying
+// arguments and closure values. Here we test synchronous variations
+
+const statefull_sync_1 = s((attrs, children, { route }) => () => s``('foo'))
+const statefull_sync_2 = s(({}, children, { route }) => () => [])
+const statefull_sync_3 = s((attrs, children, { route }) => () => s``)
+const statefull_sync_4 = s(({}, [], { route }) => () => '')
+const statefull_sync_5 = s(({}, [], { route }) => () => ['', s``(s`div`('xxx'))])
+
+// Statefull components can also be async in the sense that we
+// provide the first callback function an async signature
+
+const statefull_async_1 = s(async ({}, [], { route }) => () => s``('foo'))
+const statefull_async_2 = s(async ({}, [], { route }) => () => [])
+const statefull_async_3 = s(async ({}, [], { route }) => () => s``)
+const statefull_async_4 = s(async ({}, [], { route }) => () => '')
+const statefull_async_5 = s(async ({}, [], { route }) => () => ['', s``(s`div`('xxx'))])
+
+
+// We will now provide attrs to statefull components.
+// In most cases component attrs will be defaulted
+
+const statefull_attrs_1 = s(({ xxx = '', num = 1000, bool = false, ...attrs }) => [])
+const statefull_attrs_2 = s(async ({ foo = '', bar = 1000, ...attrs }) => () => [])
+const statefull_attrs_3 = s(async ({ foo = '', bar = 1000, ...attrs }, children) => () => [])
+const statefull_attrs_4 = s(async ({ foo = '', bar = 1000, ...attrs }, children, context) => () => [])
+
+// Both Async and Sync Statefull variations will auto-complete
+// exposing defaults
+
+statefull_attrs_1({
+ bool: true
+
+})
+
+statefull_attrs_2`
+  bc blue
+`({
+
+})
+
+
+// Lets chain statefull components as a curried expression
+
+const statefull_curried_1 = s(() => () => [])
+const statefull_curried_2 = s(() => (attrs, children) => [])
+const statefull_curried_3 = s(async () => ({}, children) => () => s``(children))
+
+// Generics accept attrs and context to be passed and
+// callbacks can be async. Generics will be passed down the curried chain.
+
+const statefull_curried_4 = s<{
+  a: string;
+  b?: string;
+  c?: string;
+}, [], { fun: any; }>(({ a }, [], { fun, doc }) => ({ b }) => {
+
+
+  // Context Reference
+
+  fun // -> () => void
+  doc // -> Doc
+
+  // Attrs Reference
+
+  a // -> string
+  b // -> string
+
+
+  return () => s``(
+    c // -> string
+  )
+
+})
+
+// We can digest curried expression and overwrite styling
+// but we need to ensure that our attrs generics still complete!
+
+statefull_curried_4`
+ bc blue
+`({
+
+  a: ''  //
+})
+
+const statefull_curried_5 = s<{
+  a: string;
+  b: string;
+  c: string;
+}, [], { fn: any }>(({ a }, [], { fn }) =>  async ({ b }, [], { doc }) => {
+
+
+  return [
+    s``('')
+  ]
+
+})
+
+
 // Stateless component structures are a function which
 // returns a styled component. Check the signature
 
-const section = s((attrs, children, context) => s`section`)
+const section = s((attrs, children) => s`section`('xxx'))
 
 // Generics on stateless components return the type of attrs
 // Here is where generic holds callback with generic object
 
-const generic = s<{ foo: string; bar: boolean }>(({
+const generic = s<{
+  foo?: string;
+  bar?: boolean
+}>(({
     foo = '',
     bar = false,
   ...attrs
@@ -331,8 +446,29 @@ const generic = s<{ foo: string; bar: boolean }>(({
 
 generic({
   foo: '',      // -> autocompletion applied
-  // bar: true  // -> uncomment to validate
+
 })
+
+
+/* -------------------------------------------- */
+/* DAFT                                         */
+/* -------------------------------------------- */
+
+const daft = s(({}, []) => s``(
+  (
+    foo: string = '',
+    bar: boolean = false,
+    baz: number = 1000,
+    qux: { x: string } = { x: 'xxx' }
+  ) =>
+    s``(
+      foo,
+      'hello',
+      'world',
+      bar ? baz : qux.x
+    )
+  )
+)
 
 /* -------------------------------------------- */
 /* ADDITONAL TESTING                            */
@@ -348,7 +484,7 @@ const b = s(({ prop = 'foo', ...attrs }) => s``(prop))
 
 b({ prop: 'bar' })
 
-const c = s(({ value }) => (attrs, children) => [ children, s`div`(value) ])
+const c = s(({ value = '', ...attrs }) => (attrs, children) => [ children, s`div`(value) ])
 
 c({ value: 'baz' }, 'qux')
 
@@ -356,10 +492,17 @@ const d = s(() => (attrs, children) => children)
 
 d([ s`h1`('hello'), s`h1`('world') ])
 
-const e = s((attrs, children, context) => (attrs, children, context) => s``());
+const e = s((attrs, children, context) => () => s``());
 
 // Usage with tagged template:
-e`bg red`({ a: 'Login', c: 200 }, s`h1`('xxx'));
+e`
+  bg red
+`({
+  a: 'Login',
+  c: 200
+},
+  s`h1`('xxx')
+);
 
 // Usage with direct invocation:
 e({ a: 'Login' }, 'Hello');

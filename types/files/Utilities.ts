@@ -1,12 +1,22 @@
 /**
  * Sin `attrs` generic type default
  */
-export type Attrs = {};
+export type Attrs = { [prop: string]: any };
 
 /**
  * Prevents Inference
  */
-export type NoInfer<T> = T extends infer U ? U : never;
+export type noInfer<T> = T extends infer U ? U : never;
+
+/**
+ * Returns Index signature or empty object `{}`
+ */
+export type isEmpty<T> = keyof T extends never ? { [key: string]: any } : {};
+
+/**
+ * Returns boolean `true` is type is `object` otherwise `false`
+ */
+export type isObject<T> = keyof T extends string ? true : T extends {} ? true : false
 
 /**
  * Returns boolean `true` is type is `null` otherwise `false`
@@ -53,6 +63,10 @@ export type ifNull<T, True, False> = isAny<T> extends true ? True : False
  */
 export type isInferred<T, True, False> = ifUnknown<T, True, ifNever<T, True, False>>
 
+/**
+ * Conditional Utility for checking `object` type
+ */
+export type ifObject<T, True, False> = keyof T extends string ? True : False;
 
 /**
  * Useful to flatten the type output to improve type hints shown in editors.
@@ -66,10 +80,20 @@ export type isInferred<T, True, False> = ifUnknown<T, True, ifNever<T, True, Fal
  */
 export type Simple<T> = {[KeyType in keyof T]: T[KeyType]} & {};
 
+
+/**
+ * Sync void type, uses 'unknown' for safer `any` - like (forces type checks)
+ */
+export type SyncVoid = void | unknown
+
+/**
+ * Promises resolving to sync voids
+ */
+export type AsyncVoid = Promise<SyncVoid>;  // Promises resolving to sync voids
 /**
  * Callback type for element events
  */
-export type Void = void | Promise<void> | Promise<any> | any;
+export type Void = SyncVoid | AsyncVoid
 
 /**
  * Allows literal unions to persist without sacraficing auto-complete
@@ -148,7 +172,7 @@ export type PickSignature<T> = { [K in keyof T as {} extends Record<K, unknown> 
  *
  * const sinner: Cast<Penance>;
  */
-export type Cast<T> = {[K in keyof T]: T[K]} & {};
+export type Cast<T> = { [K in keyof T]: T[K]} & {};
 
 /**
  * Sugar assignment of `TemplateStringsArray`
@@ -158,4 +182,9 @@ export interface TagLiteral extends ReadonlyArray<string> { readonly raw: readon
 /**
  * TagLiteral Interpolation
  */
-export type Interpolate = any[]
+export type Interpolate = unknown[];
+
+/**
+ * Promise shorthand
+ */
+export type P<T> = Promise<T> | T

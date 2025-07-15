@@ -54,7 +54,7 @@ export interface Params<T = {}> {
    *
    * @default undefined
    */
-  body?: T;
+  body?: T & { [key: string]: any };
   /**
    * A username for HTTP authorization.
    *

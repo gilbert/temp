@@ -1,5 +1,5 @@
 import type { Children, View } from "./View";
-import type { Interpolate, isInferred, TagLiteral } from "./Utilities";
+import type { P, Interpolate, TagLiteral, ifAny } from "./Utilities";
 import type { HTMLTagElement, Selector } from './HtmlElements'
 import type { Context } from "./Context";
 import {
@@ -96,53 +96,34 @@ type SinElement<T> =
   T extends HTMLBaseElement ? Attributes<HTMLElement> :
   T extends HTMLElement ? HTMLAttributes<HTMLElement> : never
 
-/**
- * Signature Arguments Expected
- */
-export type Arguments<T = any> = [
-  attrs: isInferred<T, any, T>,
-  children: [ ...Children[] ],
-  context: Context
-];
 
-/**
- * Partial Signature Arguments
- */
-export type Signature<T = any> = Partial<[
-  attrs: isInferred<T, any, Partial<T>>,
-  children: Children,
-  context: Context
-]>
+// Possible Component Returns
+export type SinNode =
+  | Children
+  | Children[]
+  | StyledComponent
+  | Array<Children | StyledComponent>
+  | []
+
+
+// Signature Arguments
+export type Arguments<attrs, children, context> = [ attrs: attrs, children: children[], context: context ];
 
 /* -------------------------------------------- */
 /* STYLED COMPONENT                             */
 /* -------------------------------------------- */
 
-
-/**
- * Style Component Signature
- *
- */
 export type StyledSignature<T extends HTMLElement> = [
-  attributes: SinElement<T>,
+  attributes?: SinElement<T>,
   ...children: Array<Children | StyledComponent<T>>
 ] | [
   ...children: Array<Children | StyledComponent<T>>
 ]
 
-/**
- * Styled Component Overloads
- *
- * @example
- * s``(attributes, [])
- * s('', attributes, [])
- */
 export type StyledComponent<T extends HTMLElement = HTMLElement> = {
   /** Element with Attributes Signature */
-  (...attibutes: Partial<StyledSignature<T>>): View;
+  <Attrs = {}>(...attibutes: Partial<StyledSignature<T>>): View<Attrs>;
   /** Styled Component Literal Signature */
-  (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>
-  /** Styled Component Children */
   (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>
 }
 
@@ -150,196 +131,141 @@ export type StyledComponent<T extends HTMLElement = HTMLElement> = {
 /* STATELESS                                    */
 /* -------------------------------------------- */
 
-/**
- * Stateless Component Signature
- */
-export type StatelessSignature<T = any> = (...args: Arguments<T>) =>
-  | Children
-  | StyledComponent
-  | Array<Children | StyledComponent>
+type StatelessSignature<attrs, children, context> =
+  | ((attrs?: attrs) => SinNode)
+  | ((attrs: attrs, children: children[], context?: context) => SinNode)
+  | ((attrs: attrs, children: children, context?: context) => SinNode)
 
-/**
- * Stateless Component Overloads
- *
- * @example
- * s(({}, [], {}) => s``)
- */
-export type StatelessComponent<T> = {
-  /** Stateless Component Literal Signature */
-  (tag: TagLiteral, ...interpolate: Interpolate): StatelessComponent<T>;
-  /** Stateless Component attrs Signature */
-  (...attrs: Signature<T>): View;
-  /** Stateless Component children signature */
-  (...children: Children[]): View;
+type StatelessComponents<attrs, children, context> = {
+  /** attrs only in stateless */
+  (attrs: attrs): View<attrs>;
+  /** Direct Signature with attrs and Varidiac children */
+  (attrs: attrs, ...children: children[]): View<attrs>;
+  /** Direct Signature with attrs, children and context */
+  (attrs: attrs, children: children[], context: context): View<attrs>;
+  /** Stateless component varidiac children */
+  (...children: children[]): View<attrs>;
+  /** Literal Signature for style overrides - last for overload resolution */
+  (tag: TagLiteral, ...interpolate: Interpolate): StatelessComponents<attrs, children, context>;
 };
 
-/**
- * Stateful Utility Function
- */
-export type Stateless<A = {}, C = Context> = (
-  attrs: A,
-  children?: Children,
-  context?: C
-) => (
-  attrs: A,
-  children?: Children,
-  context?: C
-) => View<A>
+export type StatelessComponent<
+  attrs,
+  children,
+  context
+> = StatelessComponents<
+  attrs,
+  children,
+  context
+> & StyledComponent;
 
 /* -------------------------------------------- */
 /* STATEFUL                                     */
 /* -------------------------------------------- */
 
-/**
- * Stateful Async Component Options
- *
- * @example
- * s({
- *   loading: s`h1`('Committing Sins!'),
- *   error: (e) => s`h1 c red`('Failed!')
- * }(async ({}, [], context) => {
- *
- *   await s.sleep(2000)
- *
- *   return s`h1`('Loki')
- * })
- */
-type StatefullAsync = {
+export type AsyncSignature<attrs, children, context> = [
   /**
-   * Render a loading dom element
-   *
-   * @example
-   * s(
-   *  {
-   *    loading: s`div`('patience...')
-   *  },
-   *  async () => {
-   *    // Perform some task...
-   *    await s.sleep(3000);
-   *
-   *    return () => s`h1`('Hello Sinner!')
-   *  }
-   * )
+   * Async Stateful Options
    */
-  loading?: Component
+  options: {
+    /**
+     * Render a loading dom element
+     *
+     * @example
+     * s(
+     *  {
+     *    loading: s`div`('patience...')
+     *  },
+     *  async () => {
+     *    // Perform some task...
+     *    await s.sleep(3000);
+     *
+     *    return () => s`h1`('Hello Sinner!')
+     *  }
+     * )
+     */
+    loading?: Components
+    /**
+     * Intercept throws or errors
+     *
+     * @example
+     * s(
+     *  {
+     *    loading: s`div`('patience...'),
+     *    error: e => s`h1 fc red`('There was an error ' + e)
+     *  },
+     *  async () => {
+     *    // Perform some task...
+     *    await s.sleep(3000);
+     *
+     *    return () => s`h1`('Hello Sinner!')
+     *  }
+     * )
+     */
+    error?: <Exception extends DOMException = any>(err: Exception) => Components
+  },
   /**
-   * Intercept throws or errors
-   *
-   * @example
-   * s(
-   *  {
-   *    loading: s`div`('patience...'),
-   *    error: e => s`h1 fc red`('There was an error ' + e)
-   *  },
-   *  async () => {
-   *    // Perform some task...
-   *    await s.sleep(3000);
-   *
-   *    return () => s`h1`('Hello Sinner!')
-   *  }
-   * )
+   * Component Rendering
    */
-  error?: <Exception extends DOMException = any>(err: Exception) => Component
-}
+  component: P<StatefullComponent<attrs, children, context>>
+]
 
-/**
- * Statefull Component Signature
- *
- * Accepts upto 3 curried callbacks
- */
-export type StatefullSignature<T = any> = (...attrs: Arguments<T>) => (...attrs: Arguments<T>) =>
-  | Children
-  | ((...attrs: Arguments<T>) => Children)
+// Statefull Signatures
+export type StatefullSignature<attrs, children, context> = (
+  ...args: Arguments<attrs, children, context>
+) => P<(...args: Arguments<attrs, children, context>) => P<SinNode>>;
 
-/**
- * Statefull Component Overloads
- *
- * @example
- * s(({}, [], {}) => ({}, [], {}) => s``)
- */
-export type StatefullComponent<T> = {
+// Statefull Components
+export type StatefullComponent<attrs, children, context> = {
   /** Literal Signature */
-  (tag: TagLiteral, ...interpolate: Interpolate): StatefullComponent<T>
-  /** Direct Signature */
-  (...attrs: Signature<T>): View;
-   /** Statefull Component children signature */
-  (...children: Children[]): View;
-};
-
-/**
- * Stateful Utility Function
- */
-export type Statefull<A = {}, C = Context> = (
-  attrs: A,
-  children?: Children,
-  context?: C
-) => (
-  attrs: A,
-  children?: Children,
-  context?: C
-) => View<A>
+  (tag: TagLiteral, ...interpolate: Interpolate): StatefullComponent<attrs, children, context>;
+  /** Direct Signature with attrs */
+  (attrs: attrs): View<attrs>
+  /** Direct Signature with attrs and children */
+  (attrs: attrs, ...children: children[]): View<attrs>
+  /** Direct Signature with attrs, children and context */
+  (attrs: attrs, children: children[], context: context): View<attrs>
+  /** Statefull Component children signature */
+  (...children: children[]): View<attrs>;
+}
 
 /* -------------------------------------------- */
 /* SIN COMPONENT OVERLOADS                      */
 /* -------------------------------------------- */
 
-/**
- * COMPONENTS
- *
- * @example
- *
- * // Literal Element Signatures
- * //
- * s`div`
- * s`div`('')
- * s`div`(null)
- * s`div`(1000)
- * s`ul`(s`li`('one'), s`li`('two'))
- * s`ul`([ s`li`('one'), s`li`('two') ])
- * s`a`({ href: '' }, 'link')
- * s`a`({ href: '' }, s`span`('link'))
- *
- * // HyperScript Element Signatures
- * //
- * s('div', '')
- * s('div', 1000)
- * s('ul', s('li', 'one'), s('li', 'two'))
- * s('ul', [ s('li', 'one'), s('li', 'two') ])
- * s('a', { href: '' }, 'link')
- * s('a', { href: '' }, s`span`('link'))
- *
- * // Component Function Signatures
- * //
- * s(() => s`div`)
- * s((attrs) => s`div`(''))
- * s((attrs, children) => children)
- * s((attrs, children, context) => [])
- * s((attrs, children, context) => (attrs, children, context) => [])
- *
- * // Component Curried Signatures
- * //
- * x = s`button`
- * x({ onclick: () => {} }, '')
- *
- * x = s(({ prop = 'foo', ...attrs }) => s``(prop))
- * x({ prop: 'bar' })
- *
- * x = s(({ value }) => ({}, children) => [ children, s`div`(value) ])
- * x({ value: 'baz' }, 'qux')
- *
- * x = s(() => ({}, children) => children)
- * x([ s`h1`('hello'), s`h1`('world') ])
- */
-export type Component = {
+// COMPONENTS
+//
+// Ensure the signatures follow this exact ordering
+//
+// 1. HyperScript Element Component
+// 2. Literal Element Component
+// 3. Statefull Component
+// 4. Async Component
+// 5. Stateless Component
+export interface Components {
   /** HyperScript signature for creating a sin view */
   <T extends Selector>(selector: T, ...attributes: StyledSignature<HTMLTagElement<T>>): View;
   /** Literal signature for creating a sin view */
   <T extends HTMLElement>(tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
-  /** Stateless component signature */
-  <T>(fn: StatefullSignature<T>): StatefullComponent<T>;
-  /** Async component signature */
-  <T>(options: StatefullAsync, fn: Promise<StatefullComponent<T>>): View;
   /** Statefull component signature */
-  <T>(fn: StatelessSignature<T>): StatelessComponent<T>;
+  <T = any, children = any, context = any>(
+    fn: ifAny<children,
+      StatefullSignature<T, Children, Context & context>,
+      StatefullSignature<T, children, Context & context>
+    >
+  ): ifAny<children,
+    StatefullComponent<T, Children, Context & context>,
+    StatefullComponent<T, children, Context & context>
+  >;
+  /** Stateless component signature */
+  <T = any, children = any, context = any>(
+    fn: ifAny<children,
+      StatelessSignature<T, Children, Context & context>,
+      StatelessSignature<T, children, Context & context>
+    >
+  ): ifAny<children,
+    StatelessComponent<T, Children, Context & context>,
+    StatelessComponent<T, children, Context & context>
+  >;
 }
 

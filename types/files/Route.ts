@@ -1,5 +1,5 @@
 import type { Attrs, StringUnion } from "./Utilities";
-import type { Component } from "./Components";
+import type { Components } from "./Components";
 import type { View } from "./View";
 
 /**
@@ -108,9 +108,9 @@ export type Query = {
  * Component Routes
  */
 declare type Routes<T extends Attrs = Attrs> = Record<`/${string}`,
-  | ((attrs: T & Record<string, string>) => Component | Component[])
-  | Component
-  | Component[]
+  | ((attrs: T & Record<string, string>) => Components | Components[])
+  | Components
+  | Components[]
 >
 
 /**

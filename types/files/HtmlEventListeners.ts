@@ -9,14 +9,13 @@ export type SetNonNullable<BaseType, Keys extends keyof BaseType = keyof BaseTyp
 };
 
 // Generic event handler type with non-optional arguments
-export type EventHandler<T, E, A = any> = (
-  this: T,
-  event: SetNonNullable<Target<T, E>>,
-  dom: T,
-  attrs: A,
-  children: Children,
-  context: Context
-) => Void;
+export type EventHandler<Dom, Event, Attrs = any> = (this: Dom, ...args: [
+  event?: SetNonNullable<Target<Dom, Event>>,
+  dom?: Dom,
+  attrs?: Attrs,
+  children?: Children,
+  state?: Context
+]) => Void;
 
 
 /**
@@ -270,7 +269,7 @@ export interface DOMListen<T extends HTMLElement> {
 }
 
 /**
- * Media-specific events (for <audio>, <video>)
+ * Media-specific events (for `<audio>`, `<video>`)
  */
 export interface MediaListeners<T extends HTMLElement> {
   /**
@@ -403,9 +402,9 @@ export interface MediaListeners<T extends HTMLElement> {
 }
 
 /**
- * Form-specific events (for <form>, <input>, <select>, <textarea>)
+ * Form-specific events (for `<form>`, `<input>`, `<select>`, `<textarea>`)
  */
-export interface FormListeners<T extends HTMLElement> {
+export interface FormListeners<T extends HTMLFormElement> {
   /**
    * Fires before an input element’s value is modified, allowing cancellation or modification of the input.
    *

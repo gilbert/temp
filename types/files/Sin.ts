@@ -5,16 +5,16 @@ import type { SinLive } from "./Live";
 import type { Mount } from "./Mount";
 import type { Route } from "./Route";
 import type { Children, Redraw, View } from "./View";
-import type { Component, StatelessComponent } from "./Components";
+import type { Components } from "./Components";
 import type { Listener, On } from "./Listeners";
 
 
-export type Sin = Component & {
+export type Sin = Components & {
   /**
    * Global Window Object
    */
   readonly window: Window & typeof globalThis;
- /**
+  /**
    * Scroll Restoration
    */
   readonly scroll: boolean;

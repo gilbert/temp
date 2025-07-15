@@ -1,7 +1,7 @@
 /**
  * A reactive stream created by `s.live`, supporting any type.
  */
-export interface Live<T> {
+export type Live<T> = {
   /**
    * Get the current value if called with no arguments, or set a new value and return it.
    *
@@ -127,17 +127,12 @@ export interface Live<T> {
     equals: T,
     a?: U,
     b?: V
-  ): [U, V] extends [undefined, undefined]
-    ? Live<boolean>
-    : [U] extends [undefined]
-    ? Live<boolean>
-    : Live<U | V>;
+  ): [U, V] extends [undefined, undefined] ? Live<boolean> : [U] extends [undefined] ? Live<boolean> : Live<U | V>;
 }
 
-/**
- * Static Live factory interface for any type, with numeric enhancement.
- */
-export interface LiveStatic {
+// Static Live factory interface for any type, with numeric enhancement.
+
+export type LiveStatic = {
   /**
    * Create a Live instance with an initial value and optional observers.
    * Returns Live<T> & T when T is a number for arithmetic support.
@@ -146,7 +141,10 @@ export interface LiveStatic {
    * const sin = s.live(0)
    * const name = s.live("loki")
    */
-  <T>(value: T, ...observers: ((newValue: T, oldValue: T, detach: () => void) => void)[]): T extends number ? Live<T> & T : Live<T>;
+  <T>(
+    value: T,
+    ...observers: ((newValue: T, oldValue: T, detach: () => void) => void)[]
+  ): T extends number ? Live<T> & T : Live<T>;
 
   /**
    * Create a Live instance from other Live instances and a computation.

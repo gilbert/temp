@@ -1,6 +1,11 @@
 import type { Vars } from "./CSS";
 
 /**
+ * DAFT - Default Argument Function Thunk
+ */
+export type Daft = (...args: any[]) => Child
+
+/**
  * Child node [Primitive](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
  */
 export type Primitive = string | number | boolean | null | undefined;
@@ -8,7 +13,7 @@ export type Primitive = string | number | boolean | null | undefined;
 /**
  * The child node of a component
  */
-export type Child = View | Primitive | Nodes
+export type Child = View | Primitive | Nodes | Daft | []
 
 /**
  * An array of {@link Children}
@@ -18,7 +23,7 @@ export interface Nodes extends Array<Children> {}
 /**
  * An array of nodes in a sin component
  */
-export type Children = Child | Nodes | []
+export type Children = Node | Daft | Child | Nodes | []
 
 /**
  * An array of nodes in a sin component
@@ -129,21 +134,21 @@ export type Tag = {
  *
  * s`button`('Hello Sinner!') // => View
  */
-export type View<T = any> = {
- /**
-  * Sin Children (child nodes)
-  */
- readonly children?: Children;
- /**
-  * Tag reference describing the syntactic markup on the node
-  */
- readonly tag?: Tag;
- /**
-  * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
-  */
- attrs: T;
- /**
-  * The value used to map a DOM element to its respective item in an array of data.
-  */
- key: any;
+export type View<T = {}> = {
+  /**
+   * Sin Children (child nodes)
+   */
+  readonly children?: Children;
+  /**
+   * Tag reference describing the syntactic markup on the node
+   */
+  readonly tag?: Tag;
+  /**
+   * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
+   */
+  attrs: T;
+  /**
+   * The value used to map a DOM element to its respective item in an array of data.
+   */
+  key: any;
 }

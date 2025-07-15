@@ -1,15 +1,7 @@
+import type { Children, View } from "./View";
+import type { Context } from "./Context";
 import type { Attrs, StringUnion} from "./Utilities";
-import type {
-  AriaAttrs,
-  BusyARIA,
-  FormARIA,
-  InteractiveARIA,
-  ModalARIA,
-  ProgressARIA,
-  StructuralARIA,
-  ARIARole
-} from "./HtmlAriaAttributes";
-
+import type { ARIA } from "./HtmlAriaAttributes";
 import type {
   AnimationListeners,
   CanvasListeners,
@@ -25,8 +17,7 @@ import type {
   DOMListen,
   VideoListeners
 } from './HtmlEventListeners'
-import { Children, View } from "./View";
-import { Context } from "./Context";
+
 
 /**
  * DOM Property Arguments
@@ -176,17 +167,17 @@ export interface HTMLAttributes<T extends HTMLElement> extends
   , DetailsListeners<T>
   , DialogListeners<T>
   , DragListeners<T>
-  , FormListeners<T>
+  , FormListeners<HTMLFormElement>
   , MediaListeners<T>
   , SecurityListeners<T>
   , TrackListeners<T>
   , VideoListeners<T>
-  , FormARIA
-  , BusyARIA
-  , InteractiveARIA
-  , ModalARIA
-  , ProgressARIA
-  , StructuralARIA {
+  , ARIA.Form
+  , ARIA.Busy
+  , ARIA.Interactive
+  , ARIA.Modal
+  , ARIA.Progress
+  , ARIA.Structural {
   /**
    * - {@link InputAttributes}
    *
@@ -1205,7 +1196,7 @@ export interface HTMLAttributes<T extends HTMLElement> extends
 }
 
 export interface Attributes<T extends HTMLElement> extends
-  AriaAttrs
+  ARIA.Attrs
   , SinAttributes<T>
   , DOMListen<T>
   , PointerListeners<T>
@@ -1605,7 +1596,7 @@ export interface Attributes<T extends HTMLElement> extends
    *
    * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/role)
    */
-  role?: ARIARole;
+  role?: ARIA.Role;
   /**
    * {@link HTMLElement}  →  {@link Attributes}
    *
@@ -1936,7 +1927,7 @@ export interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> 
  * - `<ol>`
  */
 export interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>
-  , StructuralARIA
+  , ARIA.Structural
   , AnimationListeners<T>
   , DragListeners<T> {
   /**
@@ -2007,7 +1998,7 @@ export interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> 
  * - `<li>`
  */
 export interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>
-  , StructuralARIA
+  , ARIA.Structural
   , AnimationListeners<T>
   , DragListeners<T> {
   /**
@@ -2035,7 +2026,7 @@ export interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends A
  * - `<div>`
  */
 export interface DivAttributes<T extends HTMLElement = HTMLElement> extends Attributes<T>
-  , StructuralARIA {
+  , ARIA.Structural {
   /**
    * {@link HTMLDivElement}  →  {@link DivAttributes}
    *
@@ -2049,7 +2040,7 @@ export interface DivAttributes<T extends HTMLElement = HTMLElement> extends Attr
 /**
  * - `<link>`
  */
-export interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> extends Attributes<T>, InteractiveARIA {
+export interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> extends Attributes<T>, ARIA.Interactive {
   /**
    * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
    *
@@ -2399,7 +2390,7 @@ export interface ImageAttributes<T extends HTMLImageElement = HTMLImageElement> 
  * - `<iframe>`
  */
 export interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElement> extends Attributes<T>
-  , BusyARIA {
+  , ARIA.Busy {
   /**
    * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
    *
@@ -2511,7 +2502,7 @@ export interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElemen
  * - `<embed>`
  */
 export interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> extends Attributes<T>
-  , BusyARIA {
+  , ARIA.Busy {
   /**
    * {@link HTMLEmbedElement}  →  {@link EmbedAttributes}
    *
@@ -2558,7 +2549,7 @@ export interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> 
  * - `<object>`
  */
 export interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> extends Attributes<T>
-  , BusyARIA {
+  , ARIA.Busy {
   /**
    * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
    *
@@ -2629,7 +2620,7 @@ export interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElemen
  * - `<video>`
  */
 export interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>
-  , BusyARIA
+  , ARIA.Busy
   , VideoListeners<T>
   , DragListeners<T>
   , AnimationListeners<T> {
@@ -2735,7 +2726,7 @@ export interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> 
  * - `<audio>`
  */
 export interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>
-  , BusyARIA
+  , ARIA.Busy
   , MediaListeners<T>
   , AnimationListeners<T> {
 
@@ -2912,7 +2903,7 @@ export interface MapAttributes<T extends HTMLMapElement = HTMLMapElement> extend
 /**
  * - `<area>`
  */
-export interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends Attributes<T>, InteractiveARIA {
+export interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends Attributes<T>, ARIA.Interactive {
   /**
    * {@link HTMLAreaElement}  →  {@link AreaAttributes}
    *
@@ -2982,7 +2973,7 @@ export interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> ext
 /**
  * - `<table>`
  */
-export interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends Attributes<T>, StructuralARIA {
+export interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends Attributes<T>, ARIA.Structural {
   /**
    * {@link HTMLTableElement}  →  {@link TableAttributes}
    *
@@ -3004,7 +2995,7 @@ export interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> 
 /**
  * - `<col>`
  */
-export interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement> extends Attributes<T>, StructuralARIA {
+export interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement> extends Attributes<T>, ARIA.Structural {
   /**
    * {@link HTMLTableColElement}  →  {@link TableColAttributes}
    *
@@ -3026,7 +3017,7 @@ export interface TableColAttributes<T extends HTMLTableColElement = HTMLTableCol
 /**
  * - `<cell>`
  */
-export interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElement> extends Attributes<T>, StructuralARIA {
+export interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElement> extends Attributes<T>, ARIA.Structural {
   /**
    * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
    *
@@ -3081,7 +3072,7 @@ export interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableC
  * - `<form>`
  */
 export interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>
-  , FormARIA
+  , ARIA.Form
   , FormListeners<T>
   , AnimationListeners<T> {
   /**
@@ -3181,9 +3172,9 @@ export interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> 
  * - `<input>`
  */
 export interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>
-  , InteractiveARIA
-  , FormARIA
-  , FormListeners<T>
+  , ARIA.Interactive
+  , ARIA.Form
+  , FormListeners<HTMLFormElement>
   , AnimationListeners<T>
   , DragListeners<T> {
   /**
@@ -3548,7 +3539,7 @@ export interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> 
  * - `<button>`
  */
 export interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>
-  , InteractiveARIA
+  , ARIA.Interactive
   , AnimationListeners<T> {
   /**
    * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
@@ -3648,9 +3639,9 @@ export interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElemen
  * - `<select>`
  */
 export interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>
-  , InteractiveARIA
-  , FormARIA
-  , FormListeners<T>
+  , ARIA.Interactive
+  , ARIA.Form
+  , FormListeners<HTMLFormElement>
   , AnimationListeners<T> {
   /**
    * {@link HTMLSelectElement}  →  {@link SelectAttributes}
@@ -3722,7 +3713,7 @@ export interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElemen
  * - `<optgroup>`
  */
 export interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroupElement> extends Attributes<T>
-  , StructuralARIA {
+  , ARIA.Structural {
   /**
    * {@link HTMLOptGroupElement}  →  {@link OptGroupAttributes}
    *
@@ -3753,7 +3744,7 @@ export interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroup
  * - `<option>`
  */
 export interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> extends Attributes<T>
-  , InteractiveARIA {
+  , ARIA.Interactive {
   /**
    * {@link HTMLOptionElement}  →  {@link OptionAttributes}
    *
@@ -3800,9 +3791,9 @@ export interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElemen
  * - `<textarea>`
  */
 export interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>
-  , InteractiveARIA
-  , FormARIA
-  , FormListeners<T>
+  , ARIA.Interactive
+  , ARIA.Form
+  , FormListeners<HTMLFormElement>
   , AnimationListeners<T> {
   /**
    * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
@@ -3961,7 +3952,7 @@ export interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElemen
  * - `<progress>`
  */
 export interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>
-  , ProgressARIA
+  , ARIA.Progress
   , AnimationListeners<T> {
   /**
    * {@link HTMLProgressElement}  →  {@link ProgressAttributes}
@@ -3993,7 +3984,7 @@ export interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgress
  * - `<meter>`
  */
 export interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>
-  , ProgressARIA
+  , ARIA.Progress
   , AnimationListeners<T> {
   /**
    * {@link HTMLMeterElement}  →  {@link MeterAttributes}
@@ -4096,8 +4087,8 @@ export interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSet
  * - `<details>`
  */
 export interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>
-  , InteractiveARIA
-  , ModalARIA
+  , ARIA.Interactive
+  , ARIA.Modal
   , DetailsListeners<T>
   , AnimationListeners<T> {
   /**
@@ -4122,8 +4113,8 @@ export interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsEle
  * - `<dialog>`
  */
 export interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>
-  , InteractiveARIA
-  , ModalARIA
+  , ARIA.Interactive
+  , ARIA.Modal
   , DialogListeners<T>
   , AnimationListeners<T> {
   /**
@@ -4210,7 +4201,7 @@ export interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElemen
  * - `<canvas>`
  */
 export interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>
-  , BusyARIA
+  , ARIA.Busy
   , CanvasListeners<T> {
   /**
    * {@link HTMLCanvasElement}  →  {@link CanvasAttributes}

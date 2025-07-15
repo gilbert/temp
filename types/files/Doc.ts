@@ -1,6 +1,5 @@
 import type { View, Children } from "./View";
 import type { Live } from "./Live";
-import type { Attrs } from "./Utilities";
 
 /**
  * Sin Doc
