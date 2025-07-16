@@ -1,4 +1,4 @@
-import s from '../../sin'
+import s from 'sin'
 
 /* -------------------------------------------- */
 /* LITERAL ELEMENTS                             */
@@ -313,7 +313,7 @@ const stateless_sync_2 = s((attrs) => s``('xxx'))
 const stateless_sync_3 = s(({}, []) => [])
 const stateless_sync_4 = s(({}, children) => [ s`div`() ])
 const stateless_sync_5 = s(({ xxx = '', num = 1000, bool = false, ...attrs }, children) => [])
-const stateless_sync_6 = s(({}, []) => () => s``('foo'))
+const stateless_sync_6 = s(({ x = '' }, []) => () => s``('foo'))
 
 stateless_sync_6` d block`({ x: 'xxx' })
 
@@ -321,62 +321,62 @@ stateless_sync_6` d block`({ x: 'xxx' })
 /* STATEFUL COMPONENTS                          */
 /* -------------------------------------------- */
 
-// Statefull component return a function and can use varying
+// Stateful component return a function and can use varying
 // arguments and closure values. Here we test synchronous variations
 
-const statefull_sync_1 = s((attrs, children, { route }) => () => s``('foo'))
-const statefull_sync_2 = s(({}, children, { route }) => () => [])
-const statefull_sync_3 = s((attrs, children, { route }) => () => s``)
-const statefull_sync_4 = s(({}, [], { route }) => () => '')
-const statefull_sync_5 = s(({}, [], { route }) => () => ['', s``(s`div`('xxx'))])
+const Stateful_sync_1 = s((attrs, children, { route }) => () => s``('foo'))
+const Stateful_sync_2 = s(({}, children, { route }) => () => [])
+const Stateful_sync_3 = s((attrs, children, { route }) => () => s``)
+const Stateful_sync_4 = s(({}, [], { route }) => () => '')
+const Stateful_sync_5 = s(({}, [], { route }) => () => ['', s``(s`div`('xxx'))])
 
-// Statefull components can also be async in the sense that we
+// Stateful components can also be async in the sense that we
 // provide the first callback function an async signature
 
-const statefull_async_1 = s(async ({}, [], { route }) => () => s``('foo'))
-const statefull_async_2 = s(async ({}, [], { route }) => () => [])
-const statefull_async_3 = s(async ({}, [], { route }) => () => s``)
-const statefull_async_4 = s(async ({}, [], { route }) => () => '')
-const statefull_async_5 = s(async ({}, [], { route }) => () => ['', s``(s`div`('xxx'))])
+const Stateful_async_1 = s(async ({}, [], { route }) => () => s``('foo'))
+const Stateful_async_2 = s(async ({}, [], { route }) => () => [])
+const Stateful_async_3 = s(async ({}, [], { route }) => () => s``)
+const Stateful_async_4 = s(async ({}, [], { route }) => () => '')
+const Stateful_async_5 = s(async ({}, [], { route }) => () => ['', s``(s`div`('xxx'))])
 
 
-// We will now provide attrs to statefull components.
+// We will now provide attrs to Stateful components.
 // In most cases component attrs will be defaulted
 
-const statefull_attrs_1 = s(({ xxx = '', num = 1000, bool = false, ...attrs }) => [])
-const statefull_attrs_2 = s(async ({ foo = '', bar = 1000, ...attrs }) => () => [])
-const statefull_attrs_3 = s(async ({ foo = '', bar = 1000, ...attrs }, children) => () => [])
-const statefull_attrs_4 = s(async ({ foo = '', bar = 1000, ...attrs }, children, context) => () => [])
+const Stateful_attrs_1 = s(({ xxx = '', num = 1000, bool = false, ...attrs }) => [])
+const Stateful_attrs_2 = s(async ({ foo = '', bar = 1000, ...attrs }) => () => [])
+const Stateful_attrs_3 = s(async ({ foo = '', bar = 1000, ...attrs }, children) => () => [])
+const Stateful_attrs_4 = s(async ({ foo = '', bar = 1000, ...attrs }, children, context) => () => [])
 
-// Both Async and Sync Statefull variations will auto-complete
+// Both Async and Sync Stateful variations will auto-complete
 // exposing defaults
 
-statefull_attrs_1({
+Stateful_attrs_1({
  bool: true
 
 })
 
-statefull_attrs_2`
+Stateful_attrs_2`
   bc blue
 `({
 
 })
 
 
-// Lets chain statefull components as a curried expression
+// Lets chain Stateful components as a curried expression
 
-const statefull_curried_1 = s(() => () => [])
-const statefull_curried_2 = s(() => (attrs, children) => [])
-const statefull_curried_3 = s(async () => ({}, children) => () => s``(children))
+const Stateful_curried_1 = s(() => () => [])
+const Stateful_curried_2 = s(() => (attrs, children) => [])
+const Stateful_curried_3 = s(async () => ({}, children) => () => s``(children))
 
 // Generics accept attrs and context to be passed and
 // callbacks can be async. Generics will be passed down the curried chain.
 
-const statefull_curried_4 = s<{
+const Stateful_curried_4 = s<{
   a: string;
   b?: string;
   c?: string;
-}, [], { fun: any; }>(({ a }, [], { fun, doc }) => ({ b }) => {
+}, [], { fun: () => {}; }>(({ a }, [], { fun, doc }) => ({ b }) => {
 
 
   // Context Reference
@@ -399,14 +399,14 @@ const statefull_curried_4 = s<{
 // We can digest curried expression and overwrite styling
 // but we need to ensure that our attrs generics still complete!
 
-statefull_curried_4`
+Stateful_curried_4`
  bc blue
 `({
 
   a: ''  //
 })
 
-const statefull_curried_5 = s<{
+const Stateful_curried_5 = s<{
   a: string;
   b: string;
   c: string;
@@ -492,7 +492,7 @@ const d = s(() => (attrs, children) => children)
 
 d([ s`h1`('hello'), s`h1`('world') ])
 
-const e = s((attrs, children, context) => () => s``());
+const e = s((attrs, children, context) => () => s``(children));
 
 // Usage with tagged template:
 e`

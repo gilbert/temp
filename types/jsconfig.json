@@ -1,15 +1,19 @@
 {
   "include": [
-    "./test/javascript.js",
-    "./test/jsdocs.js",
-    "./test/typescript.js",
-    "./test/defs/*.d.ts",
+    "./test/*.ts",
+    "./test/*.js",
+    "./test/*.d.ts",
+  ],
+  "exclude": [
+    "./files/*"
   ],
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
-    "typeRoots": [
-      "./test/defs"
-    ]
+    "paths": {
+      "sin": [
+        "./../sin.d.ts"
+      ]
+    }
   }
 }

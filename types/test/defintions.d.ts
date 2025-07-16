@@ -1,5 +1,7 @@
 
+import s from 'sin'
 
+const x: s.Child
 
 export const Tabs: {
   /**
@@ -35,7 +37,7 @@ export const Button: s.Component<{
    *
    * @default null
    */
-  tooltip?: string | string[] | s.Component
+  tooltip?: string | s.Component
   /**
    * Toggle loading state
    *
