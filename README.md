@@ -55,9 +55,9 @@ GITHUB_TOKEN=xxx sin i porsager/sin
 
 > Obtain the GITHUB_TOKEN from Rasmus or one of us in the [discord](https://discord.gg/PQAsXkRGkp).
 
-### Forked Linking
+### Linking Forks
 
-Forks of sin from `porsager/sin` can be used as global links.
+Forks of sin from `porsager/sin` can be used as global links. Refer to the [Package Manager](#package-manager) section for more information on dependency management with sin.
 
 ```bash
 sin link sin
@@ -65,7 +65,7 @@ sin link sin
 
 ### Project Structure
 
-Sin projects use a default structure and when leveraging the sin CLI, projects should adhere to this directory layout.
+Sin projects use a default structure and when leveraging the [Sin CLI](#cli), projects should adhere to the following directory layout.
 
 ```bash
 ├── +             # Server Side Scripting
@@ -78,25 +78,31 @@ Sin projects use a default structure and when leveraging the sin CLI, projects s
 
 ### VSCode Extension
 
-Sintax provides some basic support for sin, including Syntax highlighting for literal styles and ile icons.
+Sintax provides some basic on-going support for sin, including Syntax highlighting for literal styles (CSS) and file icons. You can install the vscode extension via the marketplace.
 
 - [Sintax](https://marketplace.visualstudio.com/items?itemName=sissel.sintax)
 
-### TypeScript
+### TypeScript Usage
 
-Sin provides comprehensive TypeScript definitions that capture its flexible and dynamic architecture. Types provided within `sin.d.ts`  cover the numerous overloads for various component signatures, recursive types for nested children, and generics for attributes and contexts.
+Sin provides comprehensive TypeScript definitions that capture its flexible and dynamic architecture. You can provide types as generics (`s<{}, [], {}>`) to the `s` function or use annotation typing with the `s.Component<{},[],{}>` utility for component occurences. The [`sin.d.ts`](/sin.d.ts) declaration file contains the entire type system for Sin and will be automatically detected by the TypeScript Language Server in text editors.
 
 ```ts
-// Virtuals
-s('section', {}, ...[])                          // HyperScript auto-types Element
-s<HTMLElement>``({}, ...[])                      // Generics for Styled Components
-s<attrs, children>(({}, []) => [])               // Generics for Stateless Components
-s<attrs, children, context>(({}, [], {}) => [])  // Generics for Statefull Component
+import s from 'sin'
 
-// Utilities
-s.Component<HTMLElement, children>               // Styled Component Utility
-s.Component<attrs, children, context>            // Stateless and Statefull Utility
-s.Context<context>                               // Component Context Merge
+s('section', {}, ...[])                         // HyperScript auto-types Element
+s<HTMLElement>``({}, ...[])                     // Generics for Styled Components
+s<attrs, children>(({}, []) => [])              // Generics for Stateless Components
+s<attrs, children, context>(({},[],{}) => [])   // Generics for Stateful Component
+s.Component<HTMLElement>                        // Styled Component Utility
+s.Component<attrs, children, context>           // Stateless and Stateful Utility
+s.Context<{}>                                   // Merges Component Context
+s.View<{}>                                      // Merges attrs in Component View
+s.Nodes                                         // Sin Component Nodes
+s.Node                                          // Sin Component Node
+s.Child                                         // Sin Component Child
+s.Children                                      // Sin Component Childrem
+s.Daft                                          // Sin Component DAFT
+s.Primitive                                     // Sin Component Primitives
 ```
 
 > [!NOTE]
@@ -104,7 +110,7 @@ s.Context<context>                               // Component Context Merge
 
 ---
 
-# Table of Contents
+# Table Of Contents
 
 - [Elements](#elements)
 - [Attributes](#attributes)
@@ -119,7 +125,7 @@ s.Context<context>                               // Component Context Merge
 - [Components](#components)
   - [Styled](#styled-component-s)
   - [Stateless](#stateless-component-s--)
-  - [Statefull](#statefull-component-s----)
+  - [Stateful](#Stateful-component-s----)
   - [Async](#async-component-sasync---)
 - [CSS](#css-scss)
   - [reset](#resets-scssreset)
@@ -138,7 +144,12 @@ s.Context<context>                               // Component Context Merge
   - [p](#p)
   - [animate](#animate-sanimate)
 - [Trust](#trust-strust)
-
+- [CLI](#cli)
+- [Package Manager](#package-manager)
+  - [Dependency Management](#dependency-management)
+- [Testing Framework](#testing-framework)
+    - [Writing Tests](#writing-tests)
+    - [Running Tests](#running-tests)
 ---
 
 # ```s`` ```
@@ -458,7 +469,7 @@ const judgement = s(
 
 ## DAFT
 
-DAFT (Default Argument Function Thunk) is a signature pattern of statefull Sin components which can be used for scope-level variables expressed as default arguments.
+DAFT (Default Argument Function Thunk) is a signature pattern of Stateful Sin components which can be used for scope-level variables expressed as default arguments.
 
 ```js
 s((attrs, children, context) => () =>
@@ -742,21 +753,23 @@ For any ``s`a`({ href: "/my/route" }, ...)`` tag, Sin will automatically hook it
 
 The `s.live` method creates reactive streams that automatically update the UI when their values change. These streams are versatile, supporting numbers, strings, objects, and more. They can be observed, transformed, and used to drive dynamic behavior.
 
-
 ```js
-const stream = s.live()
-stream.value                                   // Current value of the stream
-stream.valueOf()                               // Coerce value for operations (e.g., arithmetic for numbers)
-stream.toJSON()                                // JSON serialization
-stream.toString()                              // String representation
-stream.get('')                                 // Derive a new stream from a property
-stream.get(((value) => {})                     // or function
-stream.set()                                   // Set the value directly or via a function
-stream.observe((new, old, detach) => {})       // Observe value changes, returns unsubscribe function
-stream.detach()                                // Detach all observers
-stream.reduce((acc, value, i) => {}, initial)  // Reduce values into a new stream
-stream.if(equals, isTrue, isFalse)             // Conditional value based on equality
+const live = s.live()
+live.value                                   // Current value of the stream
+live.valueOf()                               // Coerce value for operations (e.g., arithmetic for numbers)
+live.toJSON()                                // JSON serialization
+live.toString()                              // String representation
+live.get('')                                 // Derive a new a stream from a property
+live.get(((value) => {})                     // or function
+live.set()                                   // Set the value directly or via a function
+live.observe((new, old, detach) => {})       // Observe value changes, returns unsubscribe function
+live.detach()                                // Detach all observers
+live.reduce((acc, value, i) => {}, initial)  // Reduce values into a new stream
+live.if(equals, isTrue, isFalse)             // Conditional value based on equality
 ```
+
+> [!WARNING]
+> Use `s.live` with consideration and avoid composing streams with large or complex datasets to prevent performance bottlenecks and putting strain on the auto-redraw system.
 
 
 ## HTTP `s.http`
@@ -882,3 +895,63 @@ Forgiving HTML or SVG strings into unescaped HTML or SVG.
 s.trust`<small>In the den of Sin</small>`   // Literal Expression
 s.trust(`<h1>Woe to the wicked!</h1>`)      // Function Expression
 ```
+
+# CLI
+
+Each installation of sin ships with an all-in-one command-line interface. The Sin CLI is designed to accelerate web development using a unified, dependency-free high-performance toolkit. Its built-in features reduce reliance on third-party solutions and provide you with all the necessary tooling to create powerfull web applications using sin.
+
+### Whats Included
+
+- Project Generation
+- Development Sever
+- HOT Module Reloading
+- Package Management
+- Testing Framework
+
+> Development leverages the devtools protocol and sin ships with chromium extension enhancements.
+
+## Testing Framework
+
+Sin provides testing framework through its `sin/test` module. The testing system leverages tagged template literals, allowing you to write expressive and readable JavaScript test cases that are evaluated by the sin `test` binary.
+
+### Writing Tests
+
+The test module exports a default function that uses syntax you're familar with to define test cases. This approach allows you to write JavaScript code that can be dynamically evaluated by the sin test binary. Each test case returns an array containing the **actual** and **expected** outputs for comparison.
+
+```js
+import s from 'sin';
+import t from 'sin/test';
+
+t`Example`(() => {
+  const actual = '<h1>actual</h1>';
+  const expect = s.trust`<h1>expect</h1>`;
+  return [actual, expect];
+});
+```
+
+### Running Tests
+
+Sin provides a simple command-line interface to execute your tests using the test binary. You can run tests in a specific file or execute them in a headless browser for testing browser-specific functionality.
+
+```bash
+sin test <path>             # Executes all tests within the specified file
+sin test <path> --headless  # Executes tests in a headless browser environment.
+```
+
+## Package Manager
+
+Sin ships with a high-performance, low-level package management solution integrated directly into the `sin` binary for dependency and project management. You can use sin to install, link, and remove dependencies from the NPM registry or within your local project mono-repository.
+
+### Dependency Management
+
+Dependencies can be managed via the command-line. You can install modules globally, as development dependencies using the standard `-g, --save-dev` flags as you do with NPM.
+
+```bash
+sin install <package> --flags  # Install a package from the NPM registry
+sin remove  <package> --flags  # Remove an installed package from your project
+sin link    <package> --flags  # Symlinks a local package in your project
+sin unlink  <package> --flags  # Removes a linked package within your project
+```
+
+> Sin generates a `sin.lock` file in the root of your project which contains lock references for dependency management.
+
