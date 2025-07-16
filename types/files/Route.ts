@@ -1,6 +1,6 @@
 import type { Attrs, StringUnion } from "./Utilities";
 import type { Components } from "./Components";
-import type { View } from "./View";
+import type { Children, View } from "./View";
 
 /**
  * History state attrs reference
@@ -107,7 +107,7 @@ export type Query = {
 /**
  * Component Routes
  */
-declare type Routes<T extends Attrs = Attrs> = Record<`/${string}`,
+export type Routes<T extends Attrs = Attrs> = Record<`/${string}`,
   | ((attrs: T & Record<string, string>) => Components | Components[])
   | Components
   | Components[]
@@ -141,7 +141,7 @@ export interface Route {
    *  ],
    * })
    */
-  <T extends Attrs = Attrs>(routes: Routes<T>, options?: Options): View;
+  <T extends Attrs = Attrs>(routes: Routes<T>, options?: Options): View<Attrs>;
   /**
    * Returns the current URL pathname (route)
    *

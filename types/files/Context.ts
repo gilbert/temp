@@ -1,9 +1,16 @@
 import type { Doc } from "./Doc";
 import type { Route } from "./Route";
+import { ifAny, isAny, isInferred, OmitIndexSignature } from "./Utilities";
 
-
-// Sin Component State Context
-export type Context<T = Record<string, any>> = T & {
+/**
+ * Component Context - TypeScript Utility
+ *
+ * @example
+ *
+ * const x: Context<{ x: string }>
+ */
+export type Context<T = {}> = T & {
+  [key: string]: unknown;
   /**
    * Sin SSR (last modified date of `sin build`)
    */
@@ -15,15 +22,15 @@ export type Context<T = Record<string, any>> = T & {
   /**
    * References `window.location`
    */
-  location: Pick<globalThis.Window, 'location'>;
+  readonly location: Pick<globalThis.Window, 'location'>;
   /**
    * Document Methods
    */
-  doc: Doc
+  readonly doc: Doc
   /**
    * Route Control
    */
-  route: Route
+  readonly route: Route
   /**
    * Called when component is removed or destroyed.
    *
@@ -33,7 +40,7 @@ export type Context<T = Record<string, any>> = T & {
    *
    * section.onremove() => console.log('Forgiven')
    */
-  onremove: (cb: () => void) => void;
+  readonly onremove: (cb: () => void) => void;
   /**
    * Exclude component from global redraws. Expects a `boolean` parameter!
    *
@@ -44,7 +51,7 @@ export type Context<T = Record<string, any>> = T & {
    * s(({},[], { ignore }) => ignore(true))   // Component is ignored during redraw
    * s(({},[], { ignore }) => ignore(false))  // Component applies redraw (default)
    */
-  ignore: (enable: boolean) => void;
+  readonly ignore: (enable: boolean) => void;
   /**
    * Re-initializes the component and redraws without removal.
    *
@@ -54,7 +61,7 @@ export type Context<T = Record<string, any>> = T & {
    *
    * s(({}, [], { refresh }) => refresh())
    */
-  refresh: () => void;
+  readonly refresh: () => void;
   /**
    * Reloads the component, similar to updating `key` reference.
    *
@@ -64,7 +71,7 @@ export type Context<T = Record<string, any>> = T & {
    *
    * s(({}, [], { reload }) => reload())
    */
-  reload: () => void;
+  readonly reload: () => void;
   /**
    * Synchronous Redraw on the component level
    *
@@ -72,5 +79,5 @@ export type Context<T = Record<string, any>> = T & {
    *
    * s(({}, [], { redraw }) => redraw())
    */
-  redraw: () => Promise<void>;
+  readonly redraw: () => Promise<void>;
 }

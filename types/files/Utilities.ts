@@ -69,6 +69,11 @@ export type isInferred<T, True, False> = ifUnknown<T, True, ifNever<T, True, Fal
 export type ifObject<T, True, False> = keyof T extends string ? True : False;
 
 /**
+ * Omit index signatures present in an object
+ */
+export type OmitIndexSignature<T> = { [K in keyof T as {} extends Record<K, unknown> ? never : K]: T[K]; };
+
+/**
  * Useful to flatten the type output to improve type hints shown in editors.
  *
  * @example
@@ -79,7 +84,6 @@ export type ifObject<T, True, False> = keyof T extends string ? True : False;
  * Simple<A & B>
  */
 export type Simple<T> = {[KeyType in keyof T]: T[KeyType]} & {};
-
 
 /**
  * Sync void type, uses 'unknown' for safer `any` - like (forces type checks)
@@ -188,3 +192,4 @@ export type Interpolate = unknown[];
  * Promise shorthand
  */
 export type P<T> = Promise<T> | T
+

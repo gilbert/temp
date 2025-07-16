@@ -1,7 +1,7 @@
-import type { Children, View } from "./View";
-import type { P, Interpolate, TagLiteral, ifAny } from "./Utilities";
+import type { P, Interpolate, TagLiteral, Attrs, isInferred, OmitIndexSignature } from "./Utilities";
 import type { HTMLTagElement, Selector } from './HtmlElements'
 import type { Context } from "./Context";
+import type { Children, View } from "./View";
 import {
   Attributes,
   AnchorAttributes,
@@ -44,6 +44,10 @@ import {
   TrackAttributes,
   VideoAttributes
 } from "./HtmlAttributes";
+
+import { s } from "../index";
+
+export type Components = typeof s
 
 type SinElement<T> =
   T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> :
@@ -93,36 +97,60 @@ type SinElement<T> =
   T extends HTMLHRElement ? Attributes<HTMLElement> :
   T extends HTMLHeadElement ? Attributes<HTMLElement> :
   T extends HTMLHtmlElement ? Attributes<HTMLElement> :
-  T extends HTMLBaseElement ? Attributes<HTMLElement> :
-  T extends HTMLElement ? HTMLAttributes<HTMLElement> : never
-
+  T extends HTMLBaseElement ? Attributes<HTMLElement> : HTMLAttributes<HTMLElement>
 
 // Possible Component Returns
-export type SinNode =
+export type Varidiac =
   | Children
   | Children[]
   | StyledComponent
   | Array<Children | StyledComponent>
   | []
 
-
 // Signature Arguments
-export type Arguments<attrs, children, context> = [ attrs: attrs, children: children[], context: context ];
+export type Arguments<T, U, V> = [
+  // Attrs can be inferred or default to {}
+  attrs: isInferred<T, Attrs, T>,
+  // Varidiac Children will spread
+  children: U extends any[] ? [...U, Children ] : U[],
+  // Context can be merged
+  context: keyof V extends never ? Context<{}> : Context<V>
+];
+
+
+export type Signatures<T, U, V> = {
+  // Styled Component Signatures
+  (tag: TagLiteral, ...interpolate: Interpolate): Signatures<T, U, V>;
+  // Attrs Component Signature
+  (attrs: isInferred<T, {}, T>): View<T>;
+  // Attrs with Varidiac Children Component Signature
+  (attrs: isInferred<T, {}, T>, ...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
+  // Attrs with Children and Context Component Signature
+  (attrs: isInferred<T, {}, T>, children: U extends [] ? Children[] : U, context?: V): View<T>;
+  // Varidiac Children Component Signature
+  (...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
+};
+
+export type StatelessSignature<T, U, V> = (...x: Arguments<T, U, V>) => Varidiac;
+export type StatelessComponent<T, U, V> = Signatures<T, U, V>
+
+export type StatefulSignature<T, U, V> = (...x: Arguments<T, U, V>) => P<(...x: Arguments<T, U, V>) => P<Varidiac>>;
+export type StatefulComponent<T, U, V> = Signatures<T, U, V>
 
 /* -------------------------------------------- */
 /* STYLED COMPONENT                             */
 /* -------------------------------------------- */
 
-export type StyledSignature<T extends HTMLElement> = [
+export type StyledSignature<T extends HTMLElement> = Partial<[
   attributes?: SinElement<T>,
   ...children: Array<Children | StyledComponent<T>>
 ] | [
   ...children: Array<Children | StyledComponent<T>>
-]
+]>
 
 export type StyledComponent<T extends HTMLElement = HTMLElement> = {
   /** Element with Attributes Signature */
-  <Attrs = {}>(...attibutes: Partial<StyledSignature<T>>): View<Attrs>;
+  <A = {}>(...attibutes: StyledSignature<T>): View<A>;
   /** Styled Component Literal Signature */
   (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>
 }
@@ -130,34 +158,6 @@ export type StyledComponent<T extends HTMLElement = HTMLElement> = {
 /* -------------------------------------------- */
 /* STATELESS                                    */
 /* -------------------------------------------- */
-
-type StatelessSignature<attrs, children, context> =
-  | ((attrs?: attrs) => SinNode)
-  | ((attrs: attrs, children: children[], context?: context) => SinNode)
-  | ((attrs: attrs, children: children, context?: context) => SinNode)
-
-type StatelessComponents<attrs, children, context> = {
-  /** attrs only in stateless */
-  (attrs: attrs): View<attrs>;
-  /** Direct Signature with attrs and Varidiac children */
-  (attrs: attrs, ...children: children[]): View<attrs>;
-  /** Direct Signature with attrs, children and context */
-  (attrs: attrs, children: children[], context: context): View<attrs>;
-  /** Stateless component varidiac children */
-  (...children: children[]): View<attrs>;
-  /** Literal Signature for style overrides - last for overload resolution */
-  (tag: TagLiteral, ...interpolate: Interpolate): StatelessComponents<attrs, children, context>;
-};
-
-export type StatelessComponent<
-  attrs,
-  children,
-  context
-> = StatelessComponents<
-  attrs,
-  children,
-  context
-> & StyledComponent;
 
 /* -------------------------------------------- */
 /* STATEFUL                                     */
@@ -207,65 +207,81 @@ export type AsyncSignature<attrs, children, context> = [
   /**
    * Component Rendering
    */
-  component: P<StatefullComponent<attrs, children, context>>
+  component: P<StatefulComponent<attrs, children, context>>
 ]
 
-// Statefull Signatures
-export type StatefullSignature<attrs, children, context> = (
-  ...args: Arguments<attrs, children, context>
-) => P<(...args: Arguments<attrs, children, context>) => P<SinNode>>;
+//export type StatelessSignature<T, U, V> = (...args: Arguments<T, U, V>) => Varidiac
 
-// Statefull Components
-export type StatefullComponent<attrs, children, context> = {
-  /** Literal Signature */
-  (tag: TagLiteral, ...interpolate: Interpolate): StatefullComponent<attrs, children, context>;
-  /** Direct Signature with attrs */
-  (attrs: attrs): View<attrs>
-  /** Direct Signature with attrs and children */
-  (attrs: attrs, ...children: children[]): View<attrs>
-  /** Direct Signature with attrs, children and context */
-  (attrs: attrs, children: children[], context: context): View<attrs>
-  /** Statefull Component children signature */
-  (...children: children[]): View<attrs>;
-}
+// export type StatelessComponent<T, U, V> = {
+//   /** attrs only in stateless */
+//   (attrs: isInferred<T, {}, T>): View<T>;
+//   /** Direct Signature with attrs and Varidiac children */
+//   (attrs: isInferred<T, {}, T>, ...children: U[]): View<T>;
+//   /** Direct Signature with attrs, children and context */
+//   (attrs: isInferred<T, {}, T>, children: U[], context?: V): View<T>;
+//   /** Stateless component varidiac children */
+//   (...children: U[]): View<T>;
+//   /** Literal Signature for style overrides - last for overload resolution */
+//   (tag: TagLiteral, ...interpolate: Interpolate): StatelessComponent<T, U, V>;
+// };
 
-/* -------------------------------------------- */
-/* SIN COMPONENT OVERLOADS                      */
-/* -------------------------------------------- */
+// Stateful Signatures
+// export type StatefulSignature<T, U, V> = (
+//   ...args: Arguments<T, U, V>
+// ) => P<(
+//   ...args: Arguments<T, U, V>
+// ) => P<Varidiac>>;
 
-// COMPONENTS
-//
-// Ensure the signatures follow this exact ordering
-//
-// 1. HyperScript Element Component
-// 2. Literal Element Component
-// 3. Statefull Component
-// 4. Async Component
-// 5. Stateless Component
-export interface Components {
-  /** HyperScript signature for creating a sin view */
-  <T extends Selector>(selector: T, ...attributes: StyledSignature<HTMLTagElement<T>>): View;
-  /** Literal signature for creating a sin view */
-  <T extends HTMLElement>(tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
-  /** Statefull component signature */
-  <T = any, children = any, context = any>(
-    fn: ifAny<children,
-      StatefullSignature<T, Children, Context & context>,
-      StatefullSignature<T, children, Context & context>
-    >
-  ): ifAny<children,
-    StatefullComponent<T, Children, Context & context>,
-    StatefullComponent<T, children, Context & context>
-  >;
-  /** Stateless component signature */
-  <T = any, children = any, context = any>(
-    fn: ifAny<children,
-      StatelessSignature<T, Children, Context & context>,
-      StatelessSignature<T, children, Context & context>
-    >
-  ): ifAny<children,
-    StatelessComponent<T, Children, Context & context>,
-    StatelessComponent<T, children, Context & context>
-  >;
-}
+// Stateful Components
+// export type StatefulComponent<T, U, V> = {
+//   /** Styled Signature for Stateless Components */
+//   (tag: TagLiteral, ...interpolate: Interpolate): StatefulComponent<T, U, V>
+//   /** Attrs Signature for Stateful or Styled Components */
+//   (attrs: isInferred<T, {}, T>): View<T>
+//   /** Attrs and Varidiac Children for Stateless or Stateful Components */
+//   (attrs: isInferred<T, {}, T>, ...children: U[]): View<T>
+//   /** Attrs, Children[] and Context for Stateless or Stateful Components */
+//   (attrs: isInferred<T, {}, T>, children: U[], context?: V): View<T>;
+//   /** Varidiac Children for Stateless or Stateful Components */
+//   (...children: U[]): View<T>;
+// }
+
+
+type InferComponent<S> = S extends StatelessSignature<infer T, infer U, infer V>
+  ? StatelessComponent<T, U, V>
+  : S extends StatefulSignature<infer T, infer U, infer V>
+    ? StatefulComponent<T, U, V>
+    : never;
+
+// Updated Component: infers specific type; falls back to union if ambiguous
+export type Component<T = {}, U = [], V = {}> = T extends HTMLElement
+  ? StyledComponent<T> : InferComponent<(...args: Arguments<T, U, V>) => any> extends never
+  ? StatelessComponent<T, U, V> | StatefulComponent<T, U, V>
+  : InferComponent<(...args: Arguments<T, U, V>) => any>;
+
+// export type Component<T = {}, U = [], V = {}> = T extends HTMLElement
+//   ? StyledComponent<T>
+//   : StatelessComponent<T, U, V> | StatefulComponent<T, U, V>;
+/**
+ * Component - TypeScript Utility
+ *
+ * @example
+ *
+ * const x: s.Component<{}, [], {}>;
+ */
+// export type Component<T = {}, U = [], V = {}> = T extends HTMLElement ? StyledComponent<T> : {
+//   /** Attrs Signature for Stateful or Styled Components */
+//   (attrs: isInferred<T, {}, T>): View<T>
+//   /** Attrs and Varidiac Children for Stateless or Stateful Components */
+//   (attrs: isInferred<T, {}, T>, ...children: U[]): View<T>
+//   /** Attrs, Children[] and Context for Stateless or Stateful Components */
+//   (attrs: isInferred<T, {}, T>, children: U[], context?: V): View<T>;
+//     /** Attrs, Children[] and Context for Stateless or Stateful Components */
+//   (attrs: isInferred<T, {}, T>, children: U, context?: V): View<T>;
+//   /** Varidiac Children for Stateless or Stateful Components */
+//   (...children: U[]): View<T>;
+//   /** Styled Signature for Stateless Components */
+//   (tag: TagLiteral, ...interpolate: Interpolate): StatelessComponent<T, U, V> | StatefulComponent<T, U, V>
+// }
+
 

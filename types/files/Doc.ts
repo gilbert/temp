@@ -1,5 +1,5 @@
-import type { View, Children } from "./View";
 import type { Live } from "./Live";
+import type { Children, View } from "./View";
 
 /**
  * Sin Doc

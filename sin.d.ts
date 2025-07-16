@@ -5,13 +5,29 @@ type Attrs = {
     [prop: string]: any;
 };
 /**
- * Returns boolean `true` is type is `any` otherwise `false`
+ * Returns boolean `true` is type is `null` otherwise `false`
  */
-type isAny<T> = 0 extends 1 & NoInfer<T> ? true : false;
+type isNull<T> = [T] extends [null] ? true : false;
 /**
- * Conditional Utility for checking `any` Type
+ * Returns boolean `true` is type is `never` otherwise `false`
  */
-type ifAny<T, True, False> = isAny<T> extends true ? True : False;
+type isNever<T> = [T] extends [never] ? true : false;
+/**
+ * Returns boolean `true` is type is `unknown` otherwise `false`
+ */
+type isUnknown<T> = unknown extends T ? isNull<T> extends false ? true : false : false;
+/**
+ * Conditional Utility for checking `unknown` Type
+ */
+type ifUnknown<T, True, False> = isUnknown<T> extends true ? True : False;
+/**
+ * Conditional Utility for checking `unknown` Type
+ */
+type ifNever<T, True, False> = isNever<T> extends true ? True : False;
+/**
+ * Conditional Utility for checking whether `never` or `unknown` Type
+ */
+type isInferred<T, True, False> = ifUnknown<T, True, ifNever<T, True, False>>;
 /**
  * Sync void type, uses 'unknown' for safer `any` - like (forces type checks)
  */
@@ -50,260 +66,6 @@ type Interpolate = unknown[];
  * Promise shorthand
  */
 type P<T> = Promise<T> | T;
-
-type Vars = {
-    /**
-     * The CSS property name.
-     *
-     * > Will represent either the shorthand or native naming
-     */
-    property: string;
-    /**
-     * The CSS applied unit (defaults to `px`)
-     *
-     * > If property name does not expect a numeric value this will be empty string
-     *
-     * @default ''
-     */
-    unit: string;
-    /**
-     * The 0-based index occurence within the tagged literal expression
-     */
-    index: number;
-    /**
-     * Flags opacity transformation for CSS vars, which defaults to `false`.
-     * Value will be a function if an opacity modifier (e.g, `/50`) is detected.
-     *
-     * @default false
-     */
-    transform: false | ((x: number | string) => string);
-    /**
-     * Array of CSS function names (e.g, `['calc','translateY']` etc) that are
-     * applied to the CSS variable value, sliced from the parsing stack.
-     *
-     * @default []
-     */
-    fns: string[];
-    /**
-     *  Arbitrary signature for dynamic CSS Variables `--vars`
-     */
-    [key: `--${string}`]: any;
-};
-type CSS = {
-    /**
-     * CSS Style Sheet - Write classes and define cascade specifics.
-     *
-     * @example
-     * // 𓋹 Blessed be the vain and holy aesthetic
-     *
-     * s.css`
-     *  .dark {
-     *    color hotpink
-     *    background black
-     *  }
-     * `
-     */
-    (css: TagLiteral, ...interpolate: Interpolate): () => View;
-    (css: string): () => View;
-    /**
-     * Sets aliases for CSS media queries, feature supports or anything that is blocked scoped.
-     *
-     * @example
-     * // 𓋹 Decree the bounds and etch the queries
-     *
-     * s.css.alias({
-     *  mobile: '@media (max-width: 767px)',
-     *  tablet: '@media (max-width: 1200px)'
-     * });
-     *
-     */
-    alias: {
-        (id: string, as: string): string;
-        (alias: Record<string, string>): string;
-    };
-    /**
-     * Applies global CSS Resets and/or overwrites.
-     *
-     * > **PLEASE NOTE**
-     * >
-     * > Sin will apply a subset of normalisation resets
-     * > and merge with the provided cascades.
-     *
-     * @example
-     * // 𓋹 The sinners hand wipes clean the slate
-     *
-     * s.css.reset`
-     *  body {
-     *   ff Arial
-     *   fs 15
-     *  }
-     * `
-     */
-    reset: {
-        (css: TagLiteral, ...interpolate: Interpolate): void;
-        (css: string): void;
-    };
-    /**
-     * CSS custom unit control
-     *
-     * @example
-     *
-     * // Option 1 - key > value
-     * s.css.unit('n', (value, property) => (x * .25) + 'rem' )
-     *
-     * // Option 2 - as object
-     * s.css.unit({ n: (value, property) => (x * .25) + 'rem' })
-     */
-    unit: {
-        (id: string, fn: (value: string, property: string) => string): void;
-        (units: Record<string, (value: string, property: string) => string>): void;
-    };
-};
-
-/**
- * DAFT - Default Argument Function Thunk
- */
-type Daft = (...args: any[]) => Child;
-/**
- * Child node [Primitive](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
- */
-type Primitive = string | number | boolean | null | undefined;
-/**
- * The child node of a component
- */
-type Child = View | Primitive | Nodes | Daft | [];
-/**
- * An array of {@link Children}
- */
-interface Nodes extends Array<Children> {
-}
-/**
- * An array of nodes in a sin component
- */
-type Children = Node | Daft | Child | Nodes | [];
-/**
- * An array of nodes in a sin component
- */
-type Node = Nodes | string | number | boolean;
-/**
- * Children of a component
- */
-type Redraw = {
-    /**
-     * Asynchronous Redraws
-     */
-    (): void;
-    /**
-     * Force Redraw
-     */
-    force(): void;
-};
-/**
- * Component view instance `{ tag }` interface
- */
-type Tag = {
-    /**
-     * The `nodeName` of a DOM element, as per the markup case.
-     *
-     * @example
-     *
-     * const node = s`button`('Vain is the pride of the wicked');
-     *
-     * console.log(node.tag.name) // 'button'
-     */
-    readonly name: string;
-    /**
-     * The elements attribute `id=""` value
-     *
-     * @default
-     * ''
-     *
-     * @example
-     *
-     * const node = s`#sinner`('Seek Atonement');
-     *
-     * console.log(node.tag.id) // 'sinner'
-     */
-    readonly id: string;
-    /**
-     * The elements attribute `class=""` value. This value will
-     * hold reference to the CSS class name passed or sin shorthand
-     * expressions hash values.
-     *
-     * @default
-     * ''
-     *
-     * @example
-     *
-     * const a = s`a.xxx`('Lustful Intent');
-     * const b = s`a bc red`('Immorality');
-     *
-     * console.log(a.tag.classes) // 'xxx'
-     * console.log(b.tag.classes) // 's1n666' (hashed value)
-     */
-    readonly classes: string;
-    /**
-     * The `parent` tag reference.
-     *
-     * @default undefined
-     */
-    readonly parent: undefined | Tag;
-    /**
-     * Holds the raw tag template literal parameters
-     *
-     * > **NOTE**
-     * >
-     * > This is a readonly value that is primarily for internal usage
-     * > and has been derived from the parsing stack.
-     *
-     * @default
-     * [] // empty array when no interpolation
-     *
-     * @example
-     *
-     * const { tag } = s`h1 color ${'red'} h ${666}`('Sinner!');
-     *
-     * console.log(tag.args) // ['red', 666]
-     */
-    readonly args: any[];
-    /**
-     * Corresponding CSS Variables expressed in the tagged literal.
-     *
-     * > **NOTE**
-     * >
-     * > This is a readonly value that is primarily for internal usage
-     * > and has been derived from the parsing stack.
-     *
-     * @default
-     * {} // empty object if no vars
-     */
-    readonly vars: Record<`--${string}`, Vars>;
-};
-/**
- * Sin components will return a View interface
- *
- * @example
- *
- * s`button`('Hello Sinner!') // => View
- */
-type View<T = {}> = {
-    /**
-     * Sin Children (child nodes)
-     */
-    readonly children?: Children;
-    /**
-     * Tag reference describing the syntactic markup on the node
-     */
-    readonly tag?: Tag;
-    /**
-     * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
-     */
-    attrs: T;
-    /**
-     * The value used to map a DOM element to its respective item in an array of data.
-     */
-    key: any;
-};
 
 /**
  * A reactive stream created by `s.live`, supporting any type.
@@ -449,6 +211,247 @@ type LiveStatic = {
     from<U>(...args: [...streams: Live<any>[], fn: (...values: any[]) => U]): U extends number ? Live<U> & U : Live<U>;
 };
 
+type Vars = {
+    /**
+     * The CSS property name.
+     *
+     * > Will represent either the shorthand or native naming
+     */
+    property: string;
+    /**
+     * The CSS applied unit (defaults to `px`)
+     *
+     * > If property name does not expect a numeric value this will be empty string
+     *
+     * @default ''
+     */
+    unit: string;
+    /**
+     * The 0-based index occurence within the tagged literal expression
+     */
+    index: number;
+    /**
+     * Flags opacity transformation for CSS vars, which defaults to `false`.
+     * Value will be a function if an opacity modifier (e.g, `/50`) is detected.
+     *
+     * @default false
+     */
+    transform: false | ((x: number | string) => string);
+    /**
+     * Array of CSS function names (e.g, `['calc','translateY']` etc) that are
+     * applied to the CSS variable value, sliced from the parsing stack.
+     *
+     * @default []
+     */
+    fns: string[];
+    /**
+     *  Arbitrary signature for dynamic CSS Variables `--vars`
+     */
+    [key: `--${string}`]: any;
+};
+type CSS = {
+    /**
+     * CSS Style Sheet - Write classes and define cascade specifics.
+     *
+     * @example
+     * // 𓋹 Blessed be the vain and holy aesthetic
+     *
+     * s.css`
+     *  .dark {
+     *    color hotpink
+     *    background black
+     *  }
+     * `
+     */
+    (css: TagLiteral, ...interpolate: Interpolate): () => View;
+    (css: string): () => View;
+    /**
+     * Sets aliases for CSS media queries, feature supports or anything that is blocked scoped.
+     *
+     * @example
+     * // 𓋹 Decree the bounds and etch the queries
+     *
+     * s.css.alias({
+     *  mobile: '@media (max-width: 767px)',
+     *  tablet: '@media (max-width: 1200px)'
+     * });
+     *
+     */
+    alias: {
+        (id: string, as: string): string;
+        (alias: Record<string, string>): string;
+    };
+    /**
+     * Applies global CSS Resets and/or overwrites.
+     *
+     * > **PLEASE NOTE**
+     * >
+     * > Sin will apply a subset of normalisation resets
+     * > and merge with the provided cascades.
+     *
+     * @example
+     * // 𓋹 The sinners hand wipes clean the slate
+     *
+     * s.css.reset`
+     *  body {
+     *   ff Arial
+     *   fs 15
+     *  }
+     * `
+     */
+    reset: {
+        (css: TagLiteral, ...interpolate: Interpolate): void;
+        (css: string): void;
+    };
+    /**
+     * CSS custom unit control
+     *
+     * @example
+     *
+     * // Option 1 - key > value
+     * s.css.unit('n', (value, property) => (x * .25) + 'rem' )
+     *
+     * // Option 2 - as object
+     * s.css.unit({ n: (value, property) => (x * .25) + 'rem' })
+     */
+    unit: {
+        (id: string, fn: (value: string, property: string) => string): void;
+        (units: Record<string, (value: string, property: string) => string>): void;
+    };
+};
+
+/**
+ * Component Nodes
+ *
+ * An array of {@link Children}
+ */
+interface Nodes extends Array<Children> {
+}
+/**
+ * DAFT - Default Argument Function Thunk
+ */
+type Daft = <T = any>(...args: T[]) => Child;
+/**
+ * Child node [Primitive](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).
+ */
+type Primitive = string | number | boolean | null | undefined;
+/**
+ * Component Children
+ */
+type Children = Node | Daft | Child | Nodes;
+/**
+ * The child node of a component
+ */
+type Child = View | Primitive | Nodes | Daft;
+/**
+ * Component Node
+ *
+ * An array of nodes in a sin component
+ */
+type Node = Nodes | string | number | boolean;
+/**
+ * Sin components will return a View interface
+ *
+ * @example
+ *
+ * s`button`('Hello Sinner!') // => View
+ */
+type View<T = {}> = {
+    /**
+     * Sin Children (child nodes)
+     */
+    readonly children: Children;
+    /**
+     * Tag reference describing the syntactic markup on the node
+     */
+    readonly tag: {
+        /**
+         * The `nodeName` of a DOM element, as per the markup case.
+         *
+         * @example
+         *
+         * const node = s`button`('Vain is the pride of the wicked');
+         *
+         * console.log(node.tag.name) // 'button'
+         */
+        readonly name: string;
+        /**
+         * The elements attribute `id=""` value
+         *
+         * @default
+         * ''
+         *
+         * @example
+         *
+         * const node = s`#sinner`('Seek Atonement');
+         *
+         * console.log(node.tag.id) // 'sinner'
+         */
+        readonly id: string;
+        /**
+         * The elements attribute `class=""` value. This value will
+         * hold reference to the CSS class name passed or sin shorthand
+         * expressions hash values.
+         *
+         * @default
+         * ''
+         *
+         * @example
+         *
+         * const a = s`a.xxx`('Lustful Intent');
+         * const b = s`a bc red`('Immorality');
+         *
+         * console.log(a.tag.classes) // 'xxx'
+         * console.log(b.tag.classes) // 's1n666' (hashed value)
+         */
+        readonly classes: string;
+        /**
+         * The `parent` tag reference.
+         *
+         * @default undefined
+         */
+        readonly parent: View['tag'];
+        /**
+         * Holds the raw tag template literal parameters
+         *
+         * > **NOTE**
+         * >
+         * > This is a readonly value that is primarily for internal usage
+         * > and has been derived from the parsing stack.
+         *
+         * @default
+         * [] // empty array when no interpolation
+         *
+         * @example
+         *
+         * const { tag } = s`h1 color ${'red'} h ${666}`('Sinner!');
+         *
+         * console.log(tag.args) // ['red', 666]
+         */
+        readonly args: any[];
+        /**
+         * Corresponding CSS Variables expressed in the tagged literal.
+         *
+         * > **NOTE**
+         * >
+         * > This is a readonly value that is primarily for internal usage
+         * > and has been derived from the parsing stack.
+         *
+         * @default
+         * {} // empty object if no vars
+         */
+        readonly vars: Record<`--${string}`, Vars>;
+    };
+    /**
+     * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
+     */
+    readonly attrs: T;
+    /**
+     * The value used to map a DOM element to its respective item in an array of data.
+     */
+    readonly key: any;
+};
+
 /**
  * Sin Doc
  */
@@ -509,357 +512,582 @@ type Doc = {
 };
 
 /**
- * Extended type reference of {@link HTMLElementTagNameMap} to support unknown keys
+ * Route handler options argument type
+ *
+ * @example
+ *
+ * s.route({ '/': () => [] }, {
+ *   replace: false,
+ *   scroll: true,
+ *   state: {}
+ * })
  */
-interface HTMLTagElementMap extends HTMLElementTagNameMap {
-    [tag: string]: HTMLElement;
+type Options<State = {}> = {
+    /**
+     * History pushState replace
+     *
+     * @default false
+     */
+    replace?: boolean;
+    /**
+     * Scroll restoration
+     *
+     * @default true
+     */
+    scroll?: boolean;
+    /**
+     * History pushState state object
+     *
+     * @default {}
+     */
+    state?: State;
+};
+/**
+ * Route `query` value interface
+ *
+ * @example
+ *
+ * s.route.query // Route.Query
+ */
+type Query = {
+    /**
+     * Get a query parameter value
+     *
+     * @example
+     *
+     * // ?garden=eden&fruit=apple
+     *
+     * s.route.query.get('fruit') // => apple
+     */
+    get: (key: string) => string | null;
+    /**
+     * Set a query parameter value
+     *
+     * @example
+     *
+     * // ?garden=eden
+     *
+     * s.route.query.set('garden', 'eden')
+     */
+    set: <T extends string | number | boolean>(key: string, value: T) => void;
+    /**
+     * Replaces query parameters. Accepts object or string
+     *
+     * @example
+     *
+     * // ?adam=male&eve=female
+     *
+     * s.route.query.replace({
+     *   adam: 'male',
+     *   eve: 'female',
+     * })
+     */
+    replace: <T extends Record<string, string | number | boolean> | string>(params: T) => URLSearchParams;
+    /**
+     * Clear/remove the query parameters from URL
+     *
+     * @example
+     *
+     * s.route.query.clear()
+     */
+    clear: () => void;
+};
+/**
+ * Component Routes
+ */
+type Routes<T extends Attrs = Attrs> = Record<`/${string}`, ((attrs: T & Record<string, string>) => Components | Components[]) | Components | Components[]>;
+/**
+ * Function type for the `s.route` method and `{ route }` instance/s.
+ */
+interface Route {
+    /**
+     * Visit route
+     *
+     * @example
+     *
+     * s.route('/sinner')
+     */
+    (route: string): void;
+    /**
+     * Route Handler
+     *
+     * @example
+     *
+     * s.route({
+     *  // Component
+     *  '/sin-component': s`main`([
+     *    s`h1`('Hail the wicked!')
+     *  ]),
+     *  // Function
+     *  '/sin-function': () => [
+     *    s`section`('Joyous Blasphemy')
+     *  ],
+     * })
+     */
+    <T extends Attrs = Attrs>(routes: Routes<T>, options?: Options): View<Attrs>;
+    /**
+     * Returns the current URL pathname (route)
+     *
+     * @example
+     *
+     * s.route.path // -> '/'
+     */
+    readonly path: string;
+    /**
+     * Pathmode prefixing used to define hashbang routing
+     *
+     * @default ''
+     */
+    prefix: StringUnion<'' | '#!'>;
+    /**
+     * Query Parameter utilities
+     */
+    query: Query;
+    /**
+     * The parent route instance.
+     *
+     * @example
+     *
+     * s.route.parent.path // -> /a/b > /a is parent
+     */
+    parent: Route;
+    /**
+     * The root route handler (alias of `s.route`)
+     *
+     * @example
+     *
+     * s.root // => Route
+     */
+    root: Route;
+    /**
+     * Whether or not the provided string is a pathname of the URL
+     *
+     * @example
+     *
+     * // Pathname: /sinner/loki
+     *
+     * s.route.has('loki') // -> true;
+     * s.route.has('sin') // -> false;
+     */
+    has(path: string): boolean;
+    /**
+     * Returns the current URL pathname (route)
+     *
+     * @example
+     *
+     * s.toString() // -> '/'
+     */
+    toString(): string;
+}
+
+/**
+ * Component Context - TypeScript Utility
+ *
+ * @example
+ *
+ * const x: Context<{ x: string }>
+ */
+type Context<T = {}> = T & {
+    [key: string]: unknown;
+    /**
+     * Sin SSR (last modified date of `sin build`)
+     */
+    readonly modified: number;
+    /**
+     * A boolean indicating whether or not component is hydrating
+     */
+    readonly hydrating: boolean;
+    /**
+     * References `window.location`
+     */
+    readonly location: Pick<globalThis.Window, 'location'>;
+    /**
+     * Document Methods
+     */
+    readonly doc: Doc;
+    /**
+     * Route Control
+     */
+    readonly route: Route;
+    /**
+     * Called when component is removed or destroyed.
+     *
+     * @example
+     *
+     * const section = s`section`('Penance Required!');
+     *
+     * section.onremove() => console.log('Forgiven')
+     */
+    readonly onremove: (cb: () => void) => void;
+    /**
+     * Exclude component from global redraws. Expects a `boolean` parameter!
+     *
+     * > By default, components will redraw.
+     *
+     * @example
+     *
+     * s(({},[], { ignore }) => ignore(true))   // Component is ignored during redraw
+     * s(({},[], { ignore }) => ignore(false))  // Component applies redraw (default)
+     */
+    readonly ignore: (enable: boolean) => void;
+    /**
+     * Re-initializes the component and redraws without removal.
+     *
+     * > Use `refresh()` to update stateful data without killing the component.
+     *
+     * @example
+     *
+     * s(({}, [], { refresh }) => refresh())
+     */
+    readonly refresh: () => void;
+    /**
+     * Reloads the component, similar to updating `key` reference.
+     *
+     * > Use `reload()` to crucify and resurrect the component.
+     *
+     * @example
+     *
+     * s(({}, [], { reload }) => reload())
+     */
+    readonly reload: () => void;
+    /**
+     * Synchronous Redraw on the component level
+     *
+     * @example
+     *
+     * s(({}, [], { redraw }) => redraw())
+     */
+    readonly redraw: () => Promise<void>;
+};
+
+type ARIARole = StringUnion<"alert" | "alertdialog" | "application" | "article" | "banner" | "button" | "cell" | "checkbox" | "columnheader" | "combobox" | "complementary" | "contentinfo" | "definition" | "dialog" | "directory" | "document" | "figure" | "form" | "grid" | "gridcell" | "group" | "heading" | "img" | "link" | "list" | "listbox" | "listitem" | "main" | "mark" | "math" | "menu" | "menubar" | "menuitem" | "menuitemcheckbox" | "menuitemradio" | "navigation" | "note" | "option" | "presentation" | "progressbar" | "radio" | "radiogroup" | "region" | "row" | "rowgroup" | "rowheader" | "scrollbar" | "search" | "searchbox" | "separator" | "slider" | "spinbutton" | "status" | "suggestion" | "switch" | "tab" | "table" | "tablist" | "tabpanel" | "term" | "textbox" | "timer" | "toolbar" | "tooltip" | "tree" | "treegrid" | "treeitem">;
+/**
+ * Base ARIA attributes applicable to all HTML elements.
+ */
+interface ARIAAttrs {
+    /**
+     * Defines a role for an element to enhance accessibility.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
+     */
+    role?: ARIARole;
+    /**
+     * Provides a label for an element.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label)
+     */
+    ariaLabel?: string;
+    /**
+     * Identifies elements that label this one.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-labelledby)
+     */
+    ariaLabelledBy?: string;
+    /**
+     * Describes the element in detail.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-description)
+     */
+    ariaDescription?: string;
+    /**
+     * Identifies elements providing a description.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-describedby)
+     */
+    ariaDescribedBy?: string;
+    /**
+     * Indicates if an element is hidden from assistive tech.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden)
+     */
+    ariaHidden?: boolean | "true" | "false";
+    /**
+     * Specifies how live updates are announced.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-live)
+     */
+    ariaLive?: StringUnion<"off" | "assertive" | "polite">;
+    /**
+     * Indicates if an update is atomic (all or none).
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-atomic)
+     */
+    ariaAtomic?: boolean | "true" | "false";
+    /**
+     * Identifies elements this one controls.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-controls)
+     */
+    ariaControls?: string;
+    /**
+     * Identifies elements owned by this one.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-owns)
+     */
+    ariaOwns?: string;
+    /**
+     * Suggests a navigation flow to assistive tech.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-flowto)
+     */
+    ariaFlowTo?: string;
+    /**
+     * Lists keyboard shortcuts for the element.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-keyshortcuts)
+     */
+    ariaKeyShortcuts?: string;
+    /**
+     * Provides a human-readable role description.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-roledescription)
+     */
+    ariaRoleDescription?: string;
+    /**
+     * Supplies a braille label for accessibility.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-braillelabel)
+     */
+    ariaBrailleLabel?: string;
+    /**
+     * Describes the role for braille devices.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-brailleroledescription) */
+    ariaBrailleRoleDescription?: string;
 }
 /**
- * Literal union of {@link HTMLElementTagNameMap} keys
+ * ARIA attributes for interactive elements (e.g., buttons, links, inputs).
  */
-type Selector = StringUnion<keyof HTMLElementTagNameMap>;
+interface ARIAInteractive {
+    /**
+     * Identifies the active descendant element.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-activedescen
+     dant) */
+    ariaActiveDescendant?: string;
+    /**
+     * Indicates if the element is disabled.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-disabled)
+     */
+    ariaDisabled?: boolean | "true" | "false";
+    /**
+     * Shows if the element is expanded or collapsed.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-expanded)
+     */
+    ariaExpanded?: boolean | "true" | "false";
+    /**
+     * Indicates the element has a popup.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-haspopup)
+     */
+    ariaHasPopup?: boolean | StringUnion<"false" | "true" | "menu" | "listbox" | "tree" | "grid" | "dialog">;
+    /**
+     * Shows if a toggle is pressed.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-pressed)
+     */
+    ariaPressed?: boolean | StringUnion<"false" | "mixed" | "true">;
+    /**
+     * Indicates a checked state (e.g., checkbox).
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-checked)
+     */
+    ariaChecked?: boolean | StringUnion<"false" | "mixed" | "true">;
+    /**
+     * Shows if the element is selected.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-selected)
+     */
+    ariaSelected?: boolean | "true" | "false";
+    /**
+     * Marks the element as invalid.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-invalid)
+     */
+    ariaInvalid?: boolean | StringUnion<"false" | "true" | "grammar" | "spelling">;
+    /**
+     * Identifies an error message element.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-errormessage)
+     */
+    ariaErrorMessage?: string;
+    /**
+     * Indicates if the element is required.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-required)
+     */
+    ariaRequired?: boolean | "true" | "false";
+    /**
+     * Shows if the element is grabbed (drag-and-drop).
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-grabbed)
+     */
+    ariaGrabbed?: boolean | "true" | "false";
+    /**
+     * Defines the drop effect for drag-and-drop.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-dropeffect)
+     */
+    ariaDropEffect?: StringUnion<"none" | "copy" | "execute" | "link" | "move" | "popup">;
+}
 /**
- * Suffixed tag name extraction
+ * ARIA attributes for structural elements (e.g., tables, lists, grids).
  */
-type Suffixed<T> = T extends `${infer Tag}${'.' | '#' | '['}${string}` ? Tag : T;
+interface ARIAStructural {
+    /**
+     * Specifies the hierarchical level (e.g., headings).
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-level)
+     */
+    ariaLevel?: number | `${number}`;
+    /**
+     * Indicates position in a set.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-posinset)
+     */
+    ariaPosInSet?: number | `${number}`;
+    /**
+     * Defines the total size of a set.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-setsize)
+     */
+    ariaSetSize?: number | `${number}`;
+    /**
+     * Specifies the total number of columns.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-colcount)
+     */
+    ariaColCount?: number | `${number}`;
+    /**
+     * Indicates the column index.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-colindex)
+     */
+    ariaColIndex?: number | `${number}`;
+    /**
+     * Defines the number of columns spanned.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-colspan)
+     */
+    ariaColSpan?: number | `${number}`;
+    /**
+     * Specifies the total number of rows.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-rowcount)
+     */
+    ariaRowCount?: number | `${number}`;
+    /**
+     * Indicates the row index.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-rowindex)
+     */
+    ariaRowIndex?: number | `${number}`;
+    /**
+     * Defines the number of rows spanned.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-rowspan)
+     */
+    ariaRowSpan?: number | `${number}`;
+    /**
+     * Specifies sorting direction.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-sort)
+     */
+    ariaSort?: StringUnion<"none" | "ascending" | "descending" | "other">;
+}
 /**
- * Returns a HTML Element from {@link HTMLElementTagNameMap}
- *
- * > This will perform string operations and attempt to extract element names from
- * > selector Hyperscript expressions
+ * ARIA attributes for form-like or input elements (e.g., inputs, textareas).
  */
-type HTMLTagElement<HTMLElementName extends string> = Has<HTMLElementTagNameMap, HTMLElementName, HTMLTagElementMap[HTMLElementName], Has<HTMLElementTagNameMap, Suffixed<HTMLElementName>, HTMLTagElementMap[Suffixed<HTMLElementName>], HTMLElement>>;
-
-declare namespace ARIA {
-    type Role = StringUnion<"alert" | "alertdialog" | "application" | "article" | "banner" | "button" | "cell" | "checkbox" | "columnheader" | "combobox" | "complementary" | "contentinfo" | "definition" | "dialog" | "directory" | "document" | "figure" | "form" | "grid" | "gridcell" | "group" | "heading" | "img" | "link" | "list" | "listbox" | "listitem" | "main" | "mark" | "math" | "menu" | "menubar" | "menuitem" | "menuitemcheckbox" | "menuitemradio" | "navigation" | "note" | "option" | "presentation" | "progressbar" | "radio" | "radiogroup" | "region" | "row" | "rowgroup" | "rowheader" | "scrollbar" | "search" | "searchbox" | "separator" | "slider" | "spinbutton" | "status" | "suggestion" | "switch" | "tab" | "table" | "tablist" | "tabpanel" | "term" | "textbox" | "timer" | "toolbar" | "tooltip" | "tree" | "treegrid" | "treeitem">;
+interface ARIAForm {
     /**
-     * Base ARIA attributes applicable to all HTML elements.
+     * Describes autocomplete behavior.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-autocomplete)
      */
-    interface Attrs {
-        /**
-         * Defines a role for an element to enhance accessibility.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles)
-         */
-        role?: Role;
-        /**
-         * Provides a label for an element.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-label)
-         */
-        ariaLabel?: string;
-        /**
-         * Identifies elements that label this one.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-labelledby)
-         */
-        ariaLabelledBy?: string;
-        /**
-         * Describes the element in detail.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-description)
-         */
-        ariaDescription?: string;
-        /**
-         * Identifies elements providing a description.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-describedby)
-         */
-        ariaDescribedBy?: string;
-        /**
-         * Indicates if an element is hidden from assistive tech.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden)
-         */
-        ariaHidden?: boolean | "true" | "false";
-        /**
-         * Specifies how live updates are announced.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-live)
-         */
-        ariaLive?: StringUnion<"off" | "assertive" | "polite">;
-        /**
-         * Indicates if an update is atomic (all or none).
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-atomic)
-         */
-        ariaAtomic?: boolean | "true" | "false";
-        /**
-         * Identifies elements this one controls.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-controls)
-         */
-        ariaControls?: string;
-        /**
-         * Identifies elements owned by this one.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-owns)
-         */
-        ariaOwns?: string;
-        /**
-         * Suggests a navigation flow to assistive tech.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-flowto)
-         */
-        ariaFlowTo?: string;
-        /**
-         * Lists keyboard shortcuts for the element.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-keyshortcuts)
-         */
-        ariaKeyShortcuts?: string;
-        /**
-         * Provides a human-readable role description.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-roledescription)
-         */
-        ariaRoleDescription?: string;
-        /**
-         * Supplies a braille label for accessibility.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-braillelabel)
-         */
-        ariaBrailleLabel?: string;
-        /**
-         * Describes the role for braille devices.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-brailleroledescription) */
-        ariaBrailleRoleDescription?: string;
-    }
+    ariaAutoComplete?: StringUnion<"none" | "inline" | "list" | "both">;
     /**
-     * ARIA attributes for interactive elements (e.g., buttons, links, inputs).
+     * Indicates if the element supports multiple lines.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-multiline)
      */
-    interface Interactive {
-        /**
-         * Identifies the active descendant element.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-activedescen
-         dant) */
-        ariaActiveDescendant?: string;
-        /**
-         * Indicates if the element is disabled.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-disabled)
-         */
-        ariaDisabled?: boolean | "true" | "false";
-        /**
-         * Shows if the element is expanded or collapsed.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-expanded)
-         */
-        ariaExpanded?: boolean | "true" | "false";
-        /**
-         * Indicates the element has a popup.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-haspopup)
-         */
-        ariaHasPopup?: boolean | StringUnion<"false" | "true" | "menu" | "listbox" | "tree" | "grid" | "dialog">;
-        /**
-         * Shows if a toggle is pressed.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-pressed)
-         */
-        ariaPressed?: boolean | StringUnion<"false" | "mixed" | "true">;
-        /**
-         * Indicates a checked state (e.g., checkbox).
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-checked)
-         */
-        ariaChecked?: boolean | StringUnion<"false" | "mixed" | "true">;
-        /**
-         * Shows if the element is selected.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-selected)
-         */
-        ariaSelected?: boolean | "true" | "false";
-        /**
-         * Marks the element as invalid.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-invalid)
-         */
-        ariaInvalid?: boolean | StringUnion<"false" | "true" | "grammar" | "spelling">;
-        /**
-         * Identifies an error message element.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-errormessage)
-         */
-        ariaErrorMessage?: string;
-        /**
-         * Indicates if the element is required.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-required)
-         */
-        ariaRequired?: boolean | "true" | "false";
-        /**
-         * Shows if the element is grabbed (drag-and-drop).
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-grabbed)
-         */
-        ariaGrabbed?: boolean | "true" | "false";
-        /**
-         * Defines the drop effect for drag-and-drop.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-dropeffect)
-         */
-        ariaDropEffect?: StringUnion<"none" | "copy" | "execute" | "link" | "move" | "popup">;
-    }
+    ariaMultiLine?: boolean | "true" | "false";
     /**
-     * ARIA attributes for structural elements (e.g., tables, lists, grids).
+     * Provides a placeholder hint.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-placeholder)
      */
-    interface Structural {
-        /**
-         * Specifies the hierarchical level (e.g., headings).
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-level)
-         */
-        ariaLevel?: number | `${number}`;
-        /**
-         * Indicates position in a set.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-posinset)
-         */
-        ariaPosInSet?: number | `${number}`;
-        /**
-         * Defines the total size of a set.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-setsize)
-         */
-        ariaSetSize?: number | `${number}`;
-        /**
-         * Specifies the total number of columns.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-colcount)
-         */
-        ariaColCount?: number | `${number}`;
-        /**
-         * Indicates the column index.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-colindex)
-         */
-        ariaColIndex?: number | `${number}`;
-        /**
-         * Defines the number of columns spanned.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-colspan)
-         */
-        ariaColSpan?: number | `${number}`;
-        /**
-         * Specifies the total number of rows.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-rowcount)
-         */
-        ariaRowCount?: number | `${number}`;
-        /**
-         * Indicates the row index.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-rowindex)
-         */
-        ariaRowIndex?: number | `${number}`;
-        /**
-         * Defines the number of rows spanned.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-rowspan)
-         */
-        ariaRowSpan?: number | `${number}`;
-        /**
-         * Specifies sorting direction.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-sort)
-         */
-        ariaSort?: StringUnion<"none" | "ascending" | "descending" | "other">;
-    }
+    ariaPlaceholder?: string;
     /**
-     * ARIA attributes for form-like or input elements (e.g., inputs, textareas).
+     * Marks the element as read-only.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-readonly)
      */
-    interface Form {
-        /**
-         * Describes autocomplete behavior.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-autocomplete)
-         */
-        ariaAutoComplete?: StringUnion<"none" | "inline" | "list" | "both">;
-        /**
-         * Indicates if the element supports multiple lines.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-multiline)
-         */
-        ariaMultiLine?: boolean | "true" | "false";
-        /**
-         * Provides a placeholder hint.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-placeholder)
-         */
-        ariaPlaceholder?: string;
-        /**
-         * Marks the element as read-only.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-readonly)
-         */
-        ariaReadOnly?: boolean | "true" | "false";
-        /**
-         * Indicates if multiple items can be selected.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-multiselectable)
-         */
-        ariaMultiSelectable?: boolean | "true" | "false";
-        /**
-         * Specifies the element’s orientation.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-orientation)
-         */
-        ariaOrientation?: StringUnion<"horizontal" | "vertical">;
-    }
+    ariaReadOnly?: boolean | "true" | "false";
     /**
-     * ARIA attributes for progress or measurement elements (e.g., progress, meter).
+     * Indicates if multiple items can be selected.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-multiselectable)
      */
-    interface Progress {
-        /**
-         * Defines the maximum value.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-valuemax)
-         */
-        ariaValueMax?: number | `${number}`;
-        /**
-         * Defines the minimum value.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-valuemin)
-         */
-        ariaValueMin?: number | `${number}`;
-        /**
-         * Specifies the current value.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-valuenow)
-         */
-        ariaValueNow?: number | `${number}`;
-        /**
-         * Provides a text representation of the value.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-valuetext)
-         */
-        ariaValueText?: string;
-    }
+    ariaMultiSelectable?: boolean | "true" | "false";
     /**
-     * ARIA attributes for modal or dialog-like elements.
+     * Specifies the element’s orientation.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-orientation)
      */
-    interface Modal {
-        /**
-         * Indicates if the element is modal.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-modal)
-         */
-        ariaModal?: boolean | "true" | "false";
-    }
+    ariaOrientation?: StringUnion<"horizontal" | "vertical">;
+}
+/**
+ * ARIA attributes for progress or measurement elements (e.g., progress, meter).
+ */
+interface ARIAProgress {
     /**
-     * ARIA attributes for elements with busy states (e.g., loading content).
+     * Defines the maximum value.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-valuemax)
      */
-    interface Busy {
-        /**
-         * Indicates the element is being updated.
-         *
-         * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-busy)
-         */
-        ariaBusy?: boolean | "true" | "false";
-    }
+    ariaValueMax?: number | `${number}`;
+    /**
+     * Defines the minimum value.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-valuemin)
+     */
+    ariaValueMin?: number | `${number}`;
+    /**
+     * Specifies the current value.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-valuenow)
+     */
+    ariaValueNow?: number | `${number}`;
+    /**
+     * Provides a text representation of the value.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-valuetext)
+     */
+    ariaValueText?: string;
+}
+/**
+ * ARIA attributes for modal or dialog-like elements.
+ */
+interface ARIAModal {
+    /**
+     * Indicates if the element is modal.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-modal)
+     */
+    ariaModal?: boolean | "true" | "false";
+}
+/**
+ * ARIA attributes for elements with busy states (e.g., loading content).
+ */
+interface ARIABusy {
+    /**
+     * Indicates the element is being updated.
+     *
+     * [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-busy)
+     */
+    ariaBusy?: boolean | "true" | "false";
 }
 
 type SetNonNullable<BaseType, Keys extends keyof BaseType = keyof BaseType> = {
@@ -870,7 +1098,7 @@ type EventHandler<Dom, Event, Attrs = any> = (this: Dom, ...args: [
     dom?: Dom,
     attrs?: Attrs,
     children?: Children,
-    state?: Context
+    context?: Context
 ]) => Void;
 /**
  * Event DOM Target overrides - Ensures `event.target` returns HTMLElement.
@@ -1631,7 +1859,7 @@ type AutoCompleteUnion = StringUnion<'additional-name' | 'address-level1' | 'add
  * handling of tagged literals via {@link TemplateStringsArray} which prevents type
  * extraction and renders parse tag name analysis impossible.
  */
-interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<HTMLFormElement>, MediaListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T>, ARIA.Form, ARIA.Busy, ARIA.Interactive, ARIA.Modal, ARIA.Progress, ARIA.Structural {
+interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<HTMLFormElement>, MediaListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T>, ARIAForm, ARIABusy, ARIAInteractive, ARIAModal, ARIAProgress, ARIAStructural {
     /**
      * - {@link InputAttributes}
      *
@@ -2609,7 +2837,7 @@ interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, Animation
      */
     wrap?: StringUnion<"soft" | "hard">;
 }
-interface Attributes<T extends HTMLElement> extends ARIA.Attrs, SinAttributes<T>, DOMListen<T>, PointerListeners<T>, PopoverListeners<T> {
+interface Attributes<T extends HTMLElement> extends ARIAAttrs, SinAttributes<T>, DOMListen<T>, PointerListeners<T>, PopoverListeners<T> {
     [attribute: string]: any;
     /**
      * {@link HTMLElement}  →  {@link Attributes}
@@ -2986,7 +3214,7 @@ interface Attributes<T extends HTMLElement> extends ARIA.Attrs, SinAttributes<T>
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/HTML/Global_attributes/role)
      */
-    role?: ARIA.Role;
+    role?: ARIARole;
     /**
      * {@link HTMLElement}  →  {@link Attributes}
      *
@@ -3305,7 +3533,7 @@ interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends
 /**
  * - `<ol>`
  */
-interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>, ARIA.Structural, AnimationListeners<T>, DragListeners<T> {
+interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>, ARIAStructural, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLOListElement}  →  {@link OListAttributes}
      *
@@ -3366,7 +3594,7 @@ interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends
 /**
  * - `<li>`
  */
-interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>, ARIA.Structural, AnimationListeners<T>, DragListeners<T> {
+interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>, ARIAStructural, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLLIElement}  →  {@link LIAttributes}
      *
@@ -3390,7 +3618,7 @@ interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attribut
 /**
  * - `<link>`
  */
-interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> extends Attributes<T>, ARIA.Interactive {
+interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> extends Attributes<T>, ARIAInteractive {
     /**
      * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
      *
@@ -3726,7 +3954,7 @@ interface ImageAttributes<T extends HTMLImageElement = HTMLImageElement> extends
 /**
  * - `<iframe>`
  */
-interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElement> extends Attributes<T>, ARIA.Busy {
+interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElement> extends Attributes<T>, ARIABusy {
     /**
      * {@link HTMLIFrameElement}  →  {@link IFrameAttributes}
      *
@@ -3827,7 +4055,7 @@ interface IFrameAttributes<T extends HTMLIFrameElement = HTMLIFrameElement> exte
 /**
  * - `<embed>`
  */
-interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> extends Attributes<T>, ARIA.Busy {
+interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> extends Attributes<T>, ARIABusy {
     /**
      * {@link HTMLEmbedElement}  →  {@link EmbedAttributes}
      *
@@ -3872,7 +4100,7 @@ interface EmbedAttributes<T extends HTMLEmbedElement = HTMLEmbedElement> extends
 /**
  * - `<object>`
  */
-interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> extends Attributes<T>, ARIA.Busy {
+interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> extends Attributes<T>, ARIABusy {
     /**
      * {@link HTMLObjectElement}  →  {@link ObjectAttributes}
      *
@@ -3941,7 +4169,7 @@ interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> exte
 /**
  * - `<video>`
  */
-interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>, ARIA.Busy, VideoListeners<T>, DragListeners<T>, AnimationListeners<T> {
+interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>, ARIABusy, VideoListeners<T>, DragListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLVideoElement}  →  {@link VideoAttributes}
      *
@@ -4042,7 +4270,7 @@ interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends
 /**
  * - `<audio>`
  */
-interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>, ARIA.Busy, MediaListeners<T>, AnimationListeners<T> {
+interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>, ARIABusy, MediaListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLAudioElement}  →  {@link AudioAttributes}
      *
@@ -4211,7 +4439,7 @@ interface MapAttributes<T extends HTMLMapElement = HTMLMapElement> extends Attri
 /**
  * - `<area>`
  */
-interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends Attributes<T>, ARIA.Interactive {
+interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends Attributes<T>, ARIAInteractive {
     /**
      * {@link HTMLAreaElement}  →  {@link AreaAttributes}
      *
@@ -4280,7 +4508,7 @@ interface AreaAttributes<T extends HTMLAreaElement = HTMLAreaElement> extends At
 /**
  * - `<table>`
  */
-interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends Attributes<T>, ARIA.Structural {
+interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends Attributes<T>, ARIAStructural {
     /**
      * {@link HTMLTableElement}  →  {@link TableAttributes}
      *
@@ -4301,7 +4529,7 @@ interface TableAttributes<T extends HTMLTableElement = HTMLTableElement> extends
 /**
  * - `<col>`
  */
-interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement> extends Attributes<T>, ARIA.Structural {
+interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement> extends Attributes<T>, ARIAStructural {
     /**
      * {@link HTMLTableColElement}  →  {@link TableColAttributes}
      *
@@ -4322,7 +4550,7 @@ interface TableColAttributes<T extends HTMLTableColElement = HTMLTableColElement
 /**
  * - `<cell>`
  */
-interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElement> extends Attributes<T>, ARIA.Structural {
+interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElement> extends Attributes<T>, ARIAStructural {
     /**
      * {@link HTMLTableCellElement}  →  {@link TableCellAttributes}
      *
@@ -4375,7 +4603,7 @@ interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElem
 /**
  * - `<form>`
  */
-interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>, ARIA.Form, FormListeners<T>, AnimationListeners<T> {
+interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>, ARIAForm, FormListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLFormElement}  →  {@link FormAttributes}
      *
@@ -4465,7 +4693,7 @@ interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends
 /**
  * - `<input>`
  */
-interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>, ARIA.Interactive, ARIA.Form, FormListeners<HTMLFormElement>, AnimationListeners<T>, DragListeners<T> {
+interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLInputElement}  →  {@link InputAttributes}
      *
@@ -4726,7 +4954,7 @@ interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends
 /**
  * - `<button>`
  */
-interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>, ARIA.Interactive, AnimationListeners<T> {
+interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>, ARIAInteractive, AnimationListeners<T> {
     /**
      * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
      *
@@ -4819,7 +5047,7 @@ interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> exte
 /**
  * - `<select>`
  */
-interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>, ARIA.Interactive, ARIA.Form, FormListeners<HTMLFormElement>, AnimationListeners<T> {
+interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T> {
     /**
      * {@link HTMLSelectElement}  →  {@link SelectAttributes}
      *
@@ -4888,7 +5116,7 @@ interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> exte
 /**
  * - `<optgroup>`
  */
-interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroupElement> extends Attributes<T>, ARIA.Structural {
+interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroupElement> extends Attributes<T>, ARIAStructural {
     /**
      * {@link HTMLOptGroupElement}  →  {@link OptGroupAttributes}
      *
@@ -4917,7 +5145,7 @@ interface OptGroupAttributes<T extends HTMLOptGroupElement = HTMLOptGroupElement
 /**
  * - `<option>`
  */
-interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> extends Attributes<T>, ARIA.Interactive {
+interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> extends Attributes<T>, ARIAInteractive {
     /**
      * {@link HTMLOptionElement}  →  {@link OptionAttributes}
      *
@@ -4962,7 +5190,7 @@ interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> exte
 /**
  * - `<textarea>`
  */
-interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>, ARIA.Interactive, ARIA.Form, FormListeners<HTMLFormElement>, AnimationListeners<T> {
+interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T> {
     /**
      * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
      *
@@ -5116,7 +5344,7 @@ interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> exte
 /**
  * - `<progress>`
  */
-interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>, ARIA.Progress, AnimationListeners<T> {
+interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>, ARIAProgress, AnimationListeners<T> {
     /**
      * {@link HTMLProgressElement}  →  {@link ProgressAttributes}
      *
@@ -5145,7 +5373,7 @@ interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement
 /**
  * - `<meter>`
  */
-interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>, ARIA.Progress, AnimationListeners<T> {
+interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>, ARIAProgress, AnimationListeners<T> {
     /**
      * {@link HTMLMeterElement}  →  {@link MeterAttributes}
      *
@@ -5243,7 +5471,7 @@ interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement
 /**
  * - `<details>`
  */
-interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>, ARIA.Interactive, ARIA.Modal, DetailsListeners<T>, AnimationListeners<T> {
+interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DetailsListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLDetailsElement}  →  {@link DetailsAttributes}
      *
@@ -5264,7 +5492,7 @@ interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> e
 /**
  * - `<dialog>`
  */
-interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>, ARIA.Interactive, ARIA.Modal, DialogListeners<T>, AnimationListeners<T> {
+interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DialogListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLDialogElement}  →  {@link DialogAttributes}
      *
@@ -5346,7 +5574,7 @@ interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElement> exte
 /**
  * - `<canvas>`
  */
-interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>, ARIA.Busy, CanvasListeners<T> {
+interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>, ARIABusy, CanvasListeners<T> {
     /**
      * {@link HTMLCanvasElement}  →  {@link CanvasAttributes}
      *
@@ -5394,298 +5622,157 @@ interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends At
     role?: StringUnion<"term" | "presentation">;
 }
 
-type SinElement<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : T extends HTMLElement ? HTMLAttributes<HTMLElement> : never;
-type SinNode = Children | Children[] | StyledComponent | Array<Children | StyledComponent> | [];
-type Arguments<attrs, children, context> = [attrs: attrs, children: children[], context: context];
-type StyledSignature<T extends HTMLElement> = [
+type Components = typeof s;
+type SinElement<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : HTMLAttributes<HTMLElement>;
+type Varidiac = Children | Children[] | StyledComponent | Array<Children | StyledComponent> | [];
+type Arguments<T, U, V> = [
+    attrs: isInferred<T, Attrs, T>,
+    children: U extends any[] ? [...U, Children] : U[],
+    context: keyof V extends never ? Context<{}> : Context<V>
+];
+type Signatures<T, U, V> = {
+    (tag: TagLiteral, ...interpolate: Interpolate): Signatures<T, U, V>;
+    (attrs: isInferred<T, {}, T>): View<T>;
+    (attrs: isInferred<T, {}, T>, ...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
+    (attrs: isInferred<T, {}, T>, children: U extends [] ? Children[] : U, context?: V): View<T>;
+    (...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
+};
+type StatelessSignature<T, U, V> = (...x: Arguments<T, U, V>) => Varidiac;
+type StatelessComponent<T, U, V> = Signatures<T, U, V>;
+type StatefulSignature<T, U, V> = (...x: Arguments<T, U, V>) => P<(...x: Arguments<T, U, V>) => P<Varidiac>>;
+type StatefulComponent<T, U, V> = Signatures<T, U, V>;
+type StyledSignature<T extends HTMLElement> = Partial<[
     attributes?: SinElement<T>,
     ...children: Array<Children | StyledComponent<T>>
 ] | [
     ...children: Array<Children | StyledComponent<T>>
-];
+]>;
 type StyledComponent<T extends HTMLElement = HTMLElement> = {
     /** Element with Attributes Signature */
-    <Attrs = {}>(...attibutes: Partial<StyledSignature<T>>): View<Attrs>;
+    <A = {}>(...attibutes: StyledSignature<T>): View<A>;
     /** Styled Component Literal Signature */
     (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
 };
-type StatelessSignature<attrs, children, context> = ((attrs?: attrs) => SinNode) | ((attrs: attrs, children: children[], context?: context) => SinNode) | ((attrs: attrs, children: children, context?: context) => SinNode);
-type StatelessComponents<attrs, children, context> = {
-    /** attrs only in stateless */
-    (attrs: attrs): View<attrs>;
-    /** Direct Signature with attrs and Varidiac children */
-    (attrs: attrs, ...children: children[]): View<attrs>;
-    /** Direct Signature with attrs, children and context */
-    (attrs: attrs, children: children[], context: context): View<attrs>;
-    /** Stateless component varidiac children */
-    (...children: children[]): View<attrs>;
-    /** Literal Signature for style overrides - last for overload resolution */
-    (tag: TagLiteral, ...interpolate: Interpolate): StatelessComponents<attrs, children, context>;
-};
-type StatelessComponent<attrs, children, context> = StatelessComponents<attrs, children, context> & StyledComponent;
-type StatefullSignature<attrs, children, context> = (...args: Arguments<attrs, children, context>) => P<(...args: Arguments<attrs, children, context>) => P<SinNode>>;
-type StatefullComponent<attrs, children, context> = {
-    /** Literal Signature */
-    (tag: TagLiteral, ...interpolate: Interpolate): StatefullComponent<attrs, children, context>;
-    /** Direct Signature with attrs */
-    (attrs: attrs): View<attrs>;
-    /** Direct Signature with attrs and children */
-    (attrs: attrs, ...children: children[]): View<attrs>;
-    /** Direct Signature with attrs, children and context */
-    (attrs: attrs, children: children[], context: context): View<attrs>;
-    /** Statefull Component children signature */
-    (...children: children[]): View<attrs>;
-};
-interface Components {
-    /** HyperScript signature for creating a sin view */
-    <T extends Selector>(selector: T, ...attributes: StyledSignature<HTMLTagElement<T>>): View;
-    /** Literal signature for creating a sin view */
-    <T extends HTMLElement>(tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
-    /** Statefull component signature */
-    <T = any, children = any, context = any>(fn: ifAny<children, StatefullSignature<T, Children, Context & context>, StatefullSignature<T, children, Context & context>>): ifAny<children, StatefullComponent<T, Children, Context & context>, StatefullComponent<T, children, Context & context>>;
-    /** Stateless component signature */
-    <T = any, children = any, context = any>(fn: ifAny<children, StatelessSignature<T, Children, Context & context>, StatelessSignature<T, children, Context & context>>): ifAny<children, StatelessComponent<T, Children, Context & context>, StatelessComponent<T, children, Context & context>>;
-}
+type InferComponent<S> = S extends StatelessSignature<infer T, infer U, infer V> ? StatelessComponent<T, U, V> : S extends StatefulSignature<infer T, infer U, infer V> ? StatefulComponent<T, U, V> : never;
+type Component<T = {}, U = [], V = {}> = T extends HTMLElement ? StyledComponent<T> : InferComponent<(...args: Arguments<T, U, V>) => any> extends never ? StatelessComponent<T, U, V> | StatefulComponent<T, U, V> : InferComponent<(...args: Arguments<T, U, V>) => any>;
 
 /**
- * Route handler options argument type
- *
- * @example
- *
- * s.route({ '/': () => [] }, {
- *   replace: false,
- *   scroll: true,
- *   state: {}
- * })
+ * DOM Event handler
  */
-type Options<State = {}> = {
+type On = <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
+/**
+ * The DOM Element listener will be attached
+ */
+target: T, 
+/**
+ * The event name
+ */
+event: K, 
+/**
+ * The listener callback function
+ */
+listener: (this: T, event?: WindowEventMap[K], dom?: T) => Void, 
+/**
+ * Event Options
+ */
+options?: boolean | AddEventListenerOptions) => () => Void;
+/**
+ * Custom event handler with observer pattern support.
+ */
+type Listener<T> = {
     /**
-     * History pushState replace
+     * Triggers the event, calling all subscribed observers with the provided arguments.
+     * Returns an array of return values from all observer functions
      *
-     * @default false
+     * @example
+     *
+     * const listen = s.event();
+     *
+     * listen.observe((x) => x * 2);
+     * listen(5); // returns [10]
      */
-    replace?: boolean;
+    (value: T): T[];
     /**
-     * Scroll restoration
-     *
-     * @default true
+     * Adds an observer function to be called when the event is triggered.
      */
-    scroll?: boolean;
+    observe: {
+        /**
+         * Subscribes a persistent observer that remains until explicitly removed.
+         * The function will return a function which can be used to unsubscribe the observer.
+         *
+         * @example
+         *
+         * const event = s.event();
+         * const unsubscribe = event.observe(x => console.log(x));
+         *
+         * event(1); // logs: 1
+         * unsubscribe(); // removes observer
+         */
+        (observer: (value: T) => void): () => void;
+        /**
+         * Subscribes a one-time observer that automatically unsubscribes after first trigger.
+         * Returns a function which will unsubscribe the observer before it fires if called.
+         *
+         * @example
+         *
+         * const event = s.event();
+         * event.observe(x => console.log(x), true);
+         *
+         * event(1); // logs: 1
+         * event(2); // no log (observer already removed)
+         */
+        (observer: (value: T) => void, once: true): () => void;
+    };
     /**
-     * History pushState state object
+     * Gets an AbortSignal that can be used to monitor the events lifecycle.
+     * The signal aborts when an observer is added with `once: true`.
      *
-     * @default {}
+     * @example
+     *
+     * const event = s.event();
+     * const signal = ev.signal;
+     *
+     * signal.addEventListener('abort', () => console.log('aborted'));
      */
-    state?: State;
+    readonly signal: AbortSignal;
 };
-/**
- * Route `query` value interface
- *
- * @example
- *
- * s.route.query // Route.Query
- */
-type Query = {
-    /**
-     * Get a query parameter value
-     *
-     * @example
-     *
-     * // ?garden=eden&fruit=apple
-     *
-     * s.route.query.get('fruit') // => apple
-     */
-    get: (key: string) => string | null;
-    /**
-     * Set a query parameter value
-     *
-     * @example
-     *
-     * // ?garden=eden
-     *
-     * s.route.query.set('garden', 'eden')
-     */
-    set: <T extends string | number | boolean>(key: string, value: T) => void;
-    /**
-     * Replaces query parameters. Accepts object or string
-     *
-     * @example
-     *
-     * // ?adam=male&eve=female
-     *
-     * s.route.query.replace({
-     *   adam: 'male',
-     *   eve: 'female',
-     * })
-     */
-    replace: <T extends Record<string, string | number | boolean> | string>(params: T) => URLSearchParams;
-    /**
-     * Clear/remove the query parameters from URL
-     *
-     * @example
-     *
-     * s.route.query.clear()
-     */
-    clear: () => void;
-};
-/**
- * Component Routes
- */
-declare type Routes<T extends Attrs = Attrs> = Record<`/${string}`, ((attrs: T & Record<string, string>) => Components | Components[]) | Components | Components[]>;
-/**
- * Function type for the `s.route` method and `{ route }` instance/s.
- */
-interface Route {
-    /**
-     * Visit route
-     *
-     * @example
-     *
-     * s.route('/sinner')
-     */
-    (route: string): void;
-    /**
-     * Route Handler
-     *
-     * @example
-     *
-     * s.route({
-     *  // Component
-     *  '/sin-component': s`main`([
-     *    s`h1`('Hail the wicked!')
-     *  ]),
-     *  // Function
-     *  '/sin-function': () => [
-     *    s`section`('Joyous Blasphemy')
-     *  ],
-     * })
-     */
-    <T extends Attrs = Attrs>(routes: Routes<T>, options?: Options): View;
-    /**
-     * Returns the current URL pathname (route)
-     *
-     * @example
-     *
-     * s.route.path // -> '/'
-     */
-    readonly path: string;
-    /**
-     * Pathmode prefixing used to define hashbang routing
-     *
-     * @default ''
-     */
-    prefix: StringUnion<'' | '#!'>;
-    /**
-     * Query Parameter utilities
-     */
-    query: Query;
-    /**
-     * The parent route instance.
-     *
-     * @example
-     *
-     * s.route.parent.path // -> /a/b > /a is parent
-     */
-    parent: Route;
-    /**
-     * The root route handler (alias of `s.route`)
-     *
-     * @example
-     *
-     * s.root // => Route
-     */
-    root: Route;
-    /**
-     * Whether or not the provided string is a pathname of the URL
-     *
-     * @example
-     *
-     * // Pathname: /sinner/loki
-     *
-     * s.route.has('loki') // -> true;
-     * s.route.has('sin') // -> false;
-     */
-    has(path: string): boolean;
-    /**
-     * Returns the current URL pathname (route)
-     *
-     * @example
-     *
-     * s.toString() // -> '/'
-     */
-    toString(): string;
-}
 
-type Context<T = Record<string, any>> = T & {
-    /**
-     * Sin SSR (last modified date of `sin build`)
-     */
-    readonly modified: number;
-    /**
-     * A boolean indicating whether or not component is hydrating
-     */
-    readonly hydrating: boolean;
-    /**
-     * References `window.location`
-     */
-    location: Pick<globalThis.Window, 'location'>;
-    /**
-     * Document Methods
-     */
-    doc: Doc;
-    /**
-     * Route Control
-     */
-    route: Route;
-    /**
-     * Called when component is removed or destroyed.
-     *
-     * @example
-     *
-     * const section = s`section`('Penance Required!');
-     *
-     * section.onremove() => console.log('Forgiven')
-     */
-    onremove: (cb: () => void) => void;
-    /**
-     * Exclude component from global redraws. Expects a `boolean` parameter!
-     *
-     * > By default, components will redraw.
-     *
-     * @example
-     *
-     * s(({},[], { ignore }) => ignore(true))   // Component is ignored during redraw
-     * s(({},[], { ignore }) => ignore(false))  // Component applies redraw (default)
-     */
-    ignore: (enable: boolean) => void;
-    /**
-     * Re-initializes the component and redraws without removal.
-     *
-     * > Use `refresh()` to update stateful data without killing the component.
-     *
-     * @example
-     *
-     * s(({}, [], { refresh }) => refresh())
-     */
-    refresh: () => void;
-    /**
-     * Reloads the component, similar to updating `key` reference.
-     *
-     * > Use `reload()` to crucify and resurrect the component.
-     *
-     * @example
-     *
-     * s(({}, [], { reload }) => reload())
-     */
-    reload: () => void;
-    /**
-     * Synchronous Redraw on the component level
-     *
-     * @example
-     *
-     * s(({}, [], { redraw }) => redraw())
-     */
-    redraw: () => Promise<void>;
+/**
+ * Extended type reference of {@link HTMLElementTagNameMap} to support unknown keys
+ */
+interface HTMLTagElementMap extends HTMLElementTagNameMap {
+    [tag: string]: HTMLElement;
+}
+/**
+ * Literal union of {@link HTMLElementTagNameMap} keys
+ */
+type Selector = StringUnion<keyof HTMLElementTagNameMap>;
+/**
+ * Suffixed tag name extraction
+ */
+type Suffixed<T> = T extends `${infer Tag}${'.' | '#' | '['}${string}` ? Tag : T;
+/**
+ * Returns a HTML Element from {@link HTMLElementTagNameMap}
+ *
+ * > This will perform string operations and attempt to extract element names from
+ * > selector Hyperscript expressions
+ */
+type HTMLTagElement<HTMLElementName extends string> = Has<HTMLElementTagNameMap, HTMLElementName, HTMLTagElementMap[HTMLElementName], Has<HTMLElementTagNameMap, Suffixed<HTMLElementName>, HTMLTagElementMap[Suffixed<HTMLElementName>], HTMLElement>>;
+
+/**
+ * DOM element argument type
+ */
+type DOM = HTMLElement | Element | {};
+/**
+ * Function type for the `s.mount` method.
+*/
+type Mount = {
+    (fn: (route: {
+        route: Route;
+    }) => Children): void;
+    (fn: <Attrs = {}>(attrs: Attrs, children: Children | [], context: Context) => Children): void;
+    (fn: (children: Children | [], context: Context) => Children): void;
+    (dom: DOM, fn: (attrs: any, children: View[] | [], context: Context) => Children): void;
 };
 
 /**
@@ -5875,116 +5962,51 @@ interface Http extends Methods {
     <T = any>(params?: Params<T>): Promise<T>;
 }
 
-/**
- * DOM element argument type
- */
-type DOM = HTMLElement | Element | {};
-/**
- * Function type for the `s.mount` method.
-*/
-type Mount = {
-    (fn: (route: {
-        route: Route;
-    }) => Children): void;
-    (fn: <Attrs = {}>(attrs: Attrs, children: View[] | [], context: Context) => Children): void;
-    (fn: (children: View[] | [], context: Context) => Children): void;
-    (dom: DOM, fn: (attrs: any, children: View[] | [], context: Context) => Children): void;
-};
-
-/**
- * DOM Event handler
- */
-type On = <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
-/**
- * The DOM Element listener will be attached
- */
-target: T, 
-/**
- * The event name
- */
-event: K, 
-/**
- * The listener callback function
- */
-listener: (this: T, event?: WindowEventMap[K], dom?: T) => Void, 
-/**
- * Event Options
- */
-options?: boolean | AddEventListenerOptions) => () => Void;
-/**
- * Custom event handler with observer pattern support.
- */
-type Listener<T> = {
+declare global {
     /**
-     * Triggers the event, calling all subscribed observers with the provided arguments.
-     * Returns an array of return values from all observer functions
+     * Sin `p(...)`
+     *
+     * Intercept, print to console and return the value.
+     * Pass any primitive and get it back the same way.
      *
      * @example
-     *
-     * const listen = s.event();
-     *
-     * listen.observe((x) => x * 2);
-     * listen(5); // returns [10]
+     * const x = p(333)   // Logs 333
+     * const v = x + 333  // Value of v is 666
      */
-    (value: T): T[];
-    /**
-     * Adds an observer function to be called when the event is triggered.
-     */
-    observe: {
-        /**
-         * Subscribes a persistent observer that remains until explicitly removed.
-         * The function will return a function which can be used to unsubscribe the observer.
-         *
-         * @example
-         *
-         * const event = s.event();
-         * const unsubscribe = event.observe(x => console.log(x));
-         *
-         * event(1); // logs: 1
-         * unsubscribe(); // removes observer
-         */
-        (observer: (value: T) => void): () => void;
-        /**
-         * Subscribes a one-time observer that automatically unsubscribes after first trigger.
-         * Returns a function which will unsubscribe the observer before it fires if called.
-         *
-         * @example
-         *
-         * const event = s.event();
-         * event.observe(x => console.log(x), true);
-         *
-         * event(1); // logs: 1
-         * event(2); // no log (observer already removed)
-         */
-        (observer: (value: T) => void, once: true): () => void;
-    };
-    /**
-     * Gets an AbortSignal that can be used to monitor the events lifecycle.
-     * The signal aborts when an observer is added with `once: true`.
-     *
-     * @example
-     *
-     * const event = s.event();
-     * const signal = ev.signal;
-     *
-     * signal.addEventListener('abort', () => console.log('aborted'));
-     */
-    readonly signal: AbortSignal;
-};
-
-type Sin = Components & {
+    export function p<T = any>(...input: T[]): T;
+}
+/**
+ * Statefull Component
+ */
+declare function s<T, U = [], V = {}>(statefull: StatefulSignature<T, U, V>): StatefulComponent<T, U, V>;
+/**
+ * Stateless Component
+ */
+declare function s<T, U = [], V = {}>(stateless: StatelessSignature<T, U, V>): StatelessComponent<T, U, V>;
+/**
+ * HyperScript Component
+ */
+declare function s<T extends Selector>(selector: T, ...attributes: StyledSignature<HTMLTagElement<T>>): View;
+/**
+ * Styled Component
+ */
+declare function s<T extends HTMLElement>(tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
+/**
+ * Sin API
+ */
+declare namespace s {
     /**
      * Global Window Object
      */
-    readonly window: Window & typeof globalThis;
+    export const window: Window & typeof globalThis;
     /**
      * Scroll Restoration
      */
-    readonly scroll: boolean;
+    export const scroll: boolean;
     /**
      * Runtime references
      */
-    readonly is: {
+    export const is: {
         /**
          * Whether or not code is executing on server.
          */
@@ -5993,13 +6015,13 @@ type Sin = Components & {
     /**
      * Redrawing
      */
-    readonly redrawing: boolean;
+    export const redrawing: boolean;
     /**
      * JSX Component Creation Reference
      *
      * > **𓃵 Sacrificial Decision**
      */
-    jsx: any;
+    export const jsx: any;
     /**
      * Delay redraw or operation.
      *
@@ -6009,7 +6031,7 @@ type Sin = Components & {
      * await sleep(2000)
      * // What dreams my come?
      */
-    sleep(x: number): Promise<number>;
+    export function sleep(x: number): Promise<number>;
     /**
      * **⮂** Sin Redraw
      *
@@ -6017,7 +6039,16 @@ type Sin = Components & {
      *
      * s.redraw() // Asynchronous Redraws
      */
-    redraw: Redraw;
+    export const redraw: {
+        /**
+         * Asynchronous Redraws
+         */
+        (): void;
+        /**
+         * Force Redraw
+         */
+        force(): void;
+    };
     /**
      * Set the base `<style>` element which sin uses for CSS cascades.
      *
@@ -6030,7 +6061,7 @@ type Sin = Components & {
      * // Omitting parameter returns current <style> sin is using
      * s.style() // => HTMLStyleElement
      */
-    style: (element?: HTMLStyleElement) => HTMLStyleElement;
+    export const style: (element?: HTMLStyleElement) => HTMLStyleElement;
     /**
      * Creates a custom event handler with observer pattern support.
      *
@@ -6041,15 +6072,15 @@ type Sin = Components & {
      *
      * sinned.observe('repent')
      */
-    event: <T = any>(callback?: (value: T) => void) => Listener<T>;
+    export const event: <T = any>(callback?: (value: T) => void) => Listener<T>;
     /**
      * CSS Methods for controlling the cascades
      */
-    css: CSS;
+    export const css: CSS;
     /**
      * CSS Animate utility
      */
-    animate: () => (defferable?: boolean) => void;
+    export const animate: () => (defferable?: boolean) => void;
     /**
      * Sin Mount
      *
@@ -6058,7 +6089,7 @@ type Sin = Components & {
      *
      * s.mount(document.body, () => s`div`('In the den of sin!'))
      */
-    mount: Mount;
+    export const mount: Mount;
     /**
      * HTTP utility for requests
      *
@@ -6078,7 +6109,7 @@ type Sin = Components & {
      *  config: (xhr) => {},
      * })
      */
-    http: Http;
+    export const http: Http;
     /**
      * Create live stream with value. Optionally pass a list of observers.
      *
@@ -6087,7 +6118,7 @@ type Sin = Components & {
      * const a = s.live(10);
      * const b = s.live(20, x => {}, x => {});
      */
-    live: LiveStatic;
+    export const live: LiveStatic;
     /**
      * Sin Routing
      *
@@ -6113,7 +6144,7 @@ type Sin = Components & {
      *  ],
      * })
      */
-    route: Route;
+    export const route: Route;
     /**
      * DOM Event listener - forwarded to `addEventListener`
      *
@@ -6125,7 +6156,7 @@ type Sin = Components & {
      *  })
      * });
      */
-    on: On;
+    export const on: On;
     /**
      * Forgiving HTML or SVG strings into unescaped HTML or SVG.
      *
@@ -6136,38 +6167,18 @@ type Sin = Components & {
      * s.trust`<small>In the den of Sin</small>`
      * s.trust(`<h1>Woe to the wicked!</h1>`)
      */
-    trust: {
+    export const trust: {
         (markup: TagLiteral, ...interpolate: Interpolate): View;
         (markup: string): View;
     };
     /**
      * Error
      */
-    error(): Children;
-};
-
-declare const s: Sin;
-declare namespace s {
+    export function error(): Children;
     /**
-     * Component Context - TypeScript Utility
-     *
-     * @example
-     *
-     * const x: Context<{ x: string }>  // Merges Context
+     * Exposed Types
      */
-    type Context<T> = T & Context;
-    /**
-     * Sin Component - TypeScript Utility
-     *
-     * @example
-     *
-     * const x: s.Component;
-     * const x: s.Component<{}>;
-     * const x: s.Component<{}, []>;
-     * const x: s.Component<{}, [], {}>;
-     * const x: s.Component<HTMLElement>;
-     */
-    type Component<attrs = {}, children = [], context = {}> = ((attrs?: attrs) => SinNode) | ((attrs?: attrs, ...children: children extends [] ? Children[] : children[]) => SinNode) | ((attrs?: attrs, children?: children extends [] ? Children[] : children[], context?: Context<context>) => View) | (attrs extends HTMLElement ? StyledComponent<attrs> : SinNode);
+    export type { Context, Nodes, Daft, Primitive, Children, Component, Child, Node, View };
 }
 
-export { s as default };
+export { s as default, s };

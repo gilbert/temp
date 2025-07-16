@@ -1,5 +1,5 @@
 import type { TagLiteral as CSSLiteral, Interpolate } from "./Utilities";
-import type { Tag, View } from "./View";
+import type { View } from "./View";
 
 
 // CSS Vars type value exposed on `tag.vars`

@@ -1,6 +1,6 @@
+import type { Void } from "./Utilities";
 import type { Context } from "./Context";
 import type { Children } from "./View";
-import type { Void } from "./Utilities";
 
 export type SetNonNullable<BaseType, Keys extends keyof BaseType = keyof BaseType> = {
 	[Key in keyof BaseType]: Key extends Keys
@@ -14,7 +14,7 @@ export type EventHandler<Dom, Event, Attrs = any> = (this: Dom, ...args: [
   dom?: Dom,
   attrs?: Attrs,
   children?: Children,
-  state?: Context
+  context?: Context
 ]) => Void;
 
 
