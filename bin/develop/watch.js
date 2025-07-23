@@ -43,9 +43,19 @@ function remove(x) {
 }
 
 function node(x) {
-  x.next === x.content
-    ? api.node.restart(x)
-    : api.node.hotload(x)
+  // For TypeScript files that might be imported by other modules,
+  // restart the node process to ensure all imports are refreshed
+  const isTypescript = x.path.endsWith('.ts') || x.path.endsWith('.tsx')
+  const isMainEntry = x.path.includes('/+/index.') || x.path.includes('/index.')
+
+  if (x.next === x.content) {
+    api.node.restart(x)
+  } else if (isTypescript && !isMainEntry) {
+    // Restart for non-entry TypeScript files to ensure imports are refreshed
+    api.node.restart(x)
+  } else {
+    api.node.hotload(x)
+  }
 }
 
 function browser(x) {
@@ -55,11 +65,21 @@ function browser(x) {
 }
 
 function both(x) {
-  x.next === x.content
-    ? x.content === x.pre
+  const isTypescript = x.path.endsWith('.ts') || x.path.endsWith('.tsx')
+  const isMainEntry = x.path.includes('/+/index.') || x.path.includes('/index.')
+
+  if (x.next === x.content) {
+    x.content === x.pre
       ? api.node.restart('reload')
       : (api.node.hotload(x), api.browser.reload(x))
-    : (api.node.hotload(x), api.browser.hotload(x))
+  } else if (isTypescript && !isMainEntry) {
+    // Restart Node for non-entry TypeScript files, but try to hotload in browser
+    api.node.restart(x)
+    api.browser.hotload(x)
+  } else {
+    api.node.hotload(x)
+    api.browser.hotload(x)
+  }
 }
 
 async function read(path) {
