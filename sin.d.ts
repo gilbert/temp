@@ -681,13 +681,13 @@ interface Route {
 }
 
 /**
- * Component Context - TypeScript Utility
+ * Component Level Context - TypeScript Utility
  *
  * @example
  *
  * const x: Context<{ x: string }>
  */
-type Context<T = {}> = T & {
+type Context<T = {}> = T & context & {
     [key: string]: unknown;
     /**
      * Sin SSR (last modified date of `sin build`)
@@ -1093,7 +1093,7 @@ interface ARIABusy {
 type SetNonNullable<BaseType, Keys extends keyof BaseType = keyof BaseType> = {
     [Key in keyof BaseType]: Key extends Keys ? NonNullable<BaseType[Key]> : BaseType[Key];
 };
-type EventHandler<Dom, Event, Attrs = any> = (this: Dom, ...args: [
+type Events<Dom, Event, Attrs = any> = (this: Dom, ...args: [
     event?: SetNonNullable<Target<Dom, Event>>,
     dom?: Dom,
     attrs?: Attrs,
@@ -1122,440 +1122,440 @@ type Target<T, E> = E & {
     readonly srcElement: T;
 };
 /**
- * Universal events that apply to all HTML elements
+ * Universal events that applies to all HTML elements
  */
-interface DOMListen<T extends HTMLElement> {
+interface EventListener<T extends HTMLElement> {
     /**
      * Fires when a non-primary mouse button (e.g., middle or right) is clicked, typically used for auxiliary actions.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/auxclick_event)
      */
-    onauxclick?: EventHandler<T, MouseEvent>;
+    onauxclick?: Events<T, MouseEvent>;
     /**
      * Fires when the object loses the input focus, such as when the user tabs away or clicks elsewhere.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/blur_event)
      */
-    onblur?: EventHandler<T, FocusEvent>;
+    onblur?: Events<T, FocusEvent>;
     /**
      * Fires when the user clicks the left mouse button on the object, triggering a standard click action.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/click_event)
      */
-    onclick?: EventHandler<T, MouseEvent>;
+    onclick?: Events<T, MouseEvent>;
     /**
      * Fires when the user clicks the right mouse button in the client area, opening the context menu.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/contextmenu_event)
      */
-    oncontextmenu?: EventHandler<T, MouseEvent>;
+    oncontextmenu?: Events<T, MouseEvent>;
     /**
      * Fires when the user double-clicks the object with the primary mouse button.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/dblclick_event)
      */
-    ondblclick?: EventHandler<T, MouseEvent>;
+    ondblclick?: Events<T, MouseEvent>;
     /**
      * Fires when an error occurs during the loading of an object, such as an image, script, or media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/error_event)
      */
-    onerror?: EventHandler<T, OnErrorEventHandler>;
+    onerror?: Events<T, OnErrorEventHandler>;
     /**
      * Fires when the object receives input focus, such as when the user tabs to or clicks it.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focus_event)
      */
-    onfocus?: EventHandler<T, FocusEvent>;
+    onfocus?: Events<T, FocusEvent>;
     /**
      * Fires when an element or one of its descendants receives focus, bubbling up through the DOM.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focusin_event)
      */
-    onfocusin?: EventHandler<T, FocusEvent>;
+    onfocusin?: Events<T, FocusEvent>;
     /**
      * Fires when an element or one of its descendants loses focus, bubbling up through the DOM.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focusout_event)
      */
-    onfocusout?: EventHandler<T, FocusEvent>;
+    onfocusout?: Events<T, FocusEvent>;
     /**
      * Fires when the user presses a key on the keyboard, including modifier keys.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keydown_event)
      */
-    onkeydown?: EventHandler<T, FocusEvent>;
+    onkeydown?: Events<T, FocusEvent>;
     /**
      * Fires when the user presses an alphanumeric key. This event is deprecated; use `onkeydown` or `oninput` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keypress_event)
      */
-    onkeypress?: EventHandler<T, FocusEvent>;
+    onkeypress?: Events<T, FocusEvent>;
     /**
      * Fires when the user releases a key on the keyboard.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keyup_event)
      */
-    onkeyup?: EventHandler<T, FocusEvent>;
+    onkeyup?: Events<T, FocusEvent>;
     /**
      * Fires immediately after the browser fully loads an object, such as an image, script, or SVG element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGElement/load_event)
      */
-    onload?: EventHandler<T, Event>;
+    onload?: Events<T, Event>;
     /**
      * Fires when the user presses a mouse button down over the object, initiating a click or drag.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousedown_event)
      */
-    onmousedown?: EventHandler<T, MouseEvent>;
+    onmousedown?: Events<T, MouseEvent>;
     /**
      * Fires when the mouse pointer enters an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseenter_event)
      */
-    onmouseenter?: EventHandler<T, MouseEvent>;
+    onmouseenter?: Events<T, MouseEvent>;
     /**
      * Fires when the mouse pointer leaves an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseleave_event)
      */
-    onmouseleave?: EventHandler<T, MouseEvent>;
+    onmouseleave?: Events<T, MouseEvent>;
     /**
      * Fires continuously when the user moves the mouse pointer over the object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousemove_event)
      */
-    onmousemove?: EventHandler<T, MouseEvent>;
+    onmousemove?: Events<T, MouseEvent>;
     /**
      * Fires when the mouse pointer moves outside the boundaries of the object or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseout_event)
      */
-    onmouseout?: EventHandler<T, MouseEvent>;
+    onmouseout?: Events<T, MouseEvent>;
     /**
      * Fires when the mouse pointer moves into the object or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseover_event)
      */
-    onmouseover?: EventHandler<T, MouseEvent>;
+    onmouseover?: Events<T, MouseEvent>;
     /**
      * Fires when the user releases a mouse button while the pointer is over the object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseup_event)
      */
-    onmouseup?: EventHandler<T, MouseEvent>;
+    onmouseup?: Events<T, MouseEvent>;
     /**
      * Fires when the mouse wheel is rotated. This event is deprecated; use `onwheel` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousewheel_event)
      */
-    onmousewheel?: EventHandler<T, MouseEvent>;
+    onmousewheel?: Events<T, MouseEvent>;
     /**
      * Fires when a pointer interaction (e.g., touch or pen) is interrupted, such as lifting a finger unexpectedly.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointercancel_event)
      */
-    onpointercancel?: EventHandler<T, PointerEvent>;
+    onpointercancel?: Events<T, PointerEvent>;
     /**
      * Fires when a pointer (e.g., mouse, touch, or pen) is pressed down on an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerdown_event)
      */
-    onpointerdown?: EventHandler<T, PointerEvent>;
+    onpointerdown?: Events<T, PointerEvent>;
     /**
      * Fires when a pointer enters an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerenter_event)
      */
-    onpointerenter?: EventHandler<T, PointerEvent>;
+    onpointerenter?: Events<T, PointerEvent>;
     /**
      * Fires when a pointer leaves an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerleave_event)
      */
-    onpointerleave?: EventHandler<T, PointerEvent>;
+    onpointerleave?: Events<T, PointerEvent>;
     /**
      * Fires continuously when a pointer moves over an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointermove_event)
      */
-    onpointermove?: EventHandler<T, PointerEvent>;
+    onpointermove?: Events<T, PointerEvent>;
     /**
      * Fires when a pointer moves out of an element or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerout_event)
      */
-    onpointerout?: EventHandler<T, PointerEvent>;
+    onpointerout?: Events<T, PointerEvent>;
     /**
      * Fires when a pointer moves into an element or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerover_event)
      */
-    onpointerover?: EventHandler<T, PointerEvent>;
+    onpointerover?: Events<T, PointerEvent>;
     /**
      * Fires when a pointer is released over an element, such as lifting a finger or mouse button.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerup_event)
      */
-    onpointerup?: EventHandler<T, PointerEvent>;
+    onpointerup?: Events<T, PointerEvent>;
     /**
      * Fires when the user repositions the scroll box in a scrollable element, indicating scrolling activity.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/scroll_event)
      */
-    onscroll?: EventHandler<T, Event>;
+    onscroll?: Events<T, Event>;
     /**
      * Fires when scrolling has stopped in a scrollable element, after the user finishes scrolling.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/scrollend_event)
      */
-    onscrollend?: EventHandler<T, Event>;
+    onscrollend?: Events<T, Event>;
     /**
      * Fires when a touch interaction is interrupted, such as lifting a finger unexpectedly during a gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchcancel_event)
      */
-    ontouchcancel?: EventHandler<T, TouchEvent>;
+    ontouchcancel?: Events<T, TouchEvent>;
     /**
      * Fires when a touch point is removed from an element, such as lifting a finger from the screen.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchend_event)
      */
-    ontouchend?: EventHandler<T, TouchEvent>;
+    ontouchend?: Events<T, TouchEvent>;
     /**
      * Fires continuously when a touch point moves over an element during a touch gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchmove_event)
      */
-    ontouchmove?: EventHandler<T, TouchEvent>;
+    ontouchmove?: Events<T, TouchEvent>;
     /**
      * Fires when a touch point contacts an element, initiating a touch gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchstart_event)
      */
-    ontouchstart?: EventHandler<T, TouchEvent>;
+    ontouchstart?: Events<T, TouchEvent>;
     /**
      * Fires when the window is about to be unloaded, such as when the user closes the tab or navigates away.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/unload_event)
      */
-    onunload?: EventHandler<T, Event>;
+    onunload?: Events<T, Event>;
     /**
      * Fires when the mouse wheel or trackpad is scrolled over an element, providing delta values for scroll direction.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/wheel_event)
      */
-    onwheel?: EventHandler<T, WheelEvent>;
+    onwheel?: Events<T, WheelEvent>;
 }
 /**
  * Media-specific events (for `<audio>`, `<video>`)
  */
-interface MediaListeners<T extends HTMLElement> {
+interface MediaListener<T extends HTMLElement> {
     /**
      * Fires when the user aborts the download of a resource, such as a media element or fetch request.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event)
      */
-    onabort?: EventHandler<T, UIEvent>;
+    onabort?: Events<T, UIEvent>;
     /**
      * Occurs when playback is possible for a media element, but further buffering may be required to
      * continue without interruption.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplay_event)
      */
-    oncanplay?: EventHandler<T, Event>;
+    oncanplay?: Events<T, Event>;
     /**
      * Occurs when a media element can play through to the end without requiring additional buffering.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event)
      */
-    oncanplaythrough?: EventHandler<T, Event>;
+    oncanplaythrough?: Events<T, Event>;
     /**
      * Occurs when the duration attribute of a media element is updated, reflecting a change in media length.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/durationchange_event)
      */
-    ondurationchange?: EventHandler<T, Event>;
+    ondurationchange?: Events<T, Event>;
     /**
      * Occurs when a media element is reset to its initial state, typically after its source is cleared.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/emptied_event)
      */
-    onemptied?: EventHandler<T, Event>;
+    onemptied?: Events<T, Event>;
     /**
      * Occurs when playback of a media element reaches its end.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ended_event)
      */
-    onended?: EventHandler<T, Event>;
+    onended?: Events<T, Event>;
     /**
      * Occurs when media data is loaded at the current playback position of a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadeddata_event)
      */
-    onloadeddata?: EventHandler<T, Event>;
+    onloadeddata?: Events<T, Event>;
     /**
      * Occurs when the duration and dimensions of a media element have been determined during loading.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadedmetadata_event)
      */
-    onloadedmetadata?: EventHandler<T, Event>;
+    onloadedmetadata?: Events<T, Event>;
     /**
      * Occurs when the browser begins looking for media data, marking the start of the loading process.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadstart_event)
      */
-    onloadstart?: EventHandler<T, Event>;
+    onloadstart?: Events<T, Event>;
     /**
      * Occurs when playback of a media element is paused, either by the user or programmatically.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/pause_event)
      */
-    onpause?: EventHandler<T, Event>;
+    onpause?: Events<T, Event>;
     /**
      * Occurs when playback of a media element is requested via the `play()` method, before it actually starts.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play_event)
      */
-    onplay?: EventHandler<T, Event>;
+    onplay?: Events<T, Event>;
     /**
      * Occurs when a media element has started playing, after buffering and any delays.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/playing_event)
      */
-    onplaying?: EventHandler<T, Event>;
+    onplaying?: Events<T, Event>;
     /**
      * Occurs periodically to indicate progress while downloading media data for a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/progress_event)
      */
-    onprogress?: EventHandler<T, ProgressEvent>;
+    onprogress?: Events<T, ProgressEvent>;
     /**
      * Occurs when the playback rate of a media element changes, such as speeding up or slowing down.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ratechange_event)
      */
-    onratechange?: EventHandler<T, Event>;
+    onratechange?: Events<T, Event>;
     /**
      * Occurs when a seek operation on a media element completes, positioning playback at the new time.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeked_event)
      */
-    onseeked?: EventHandler<T, Event>;
+    onseeked?: Events<T, Event>;
     /**
      * Occurs when a seek operation begins on a media element, moving the playback position.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeking_event)
      */
-    onseeking?: EventHandler<T, Event>;
+    onseeking?: Events<T, Event>;
     /**
      * Occurs when media download stalls due to insufficient data or network issues.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/stalled_event)
      */
-    onstalled?: EventHandler<T, Event>;
+    onstalled?: Events<T, Event>;
     /**
      * Occurs when media loading is intentionally suspended, such as when the browser pauses a download.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/suspend_event)
      */
-    onsuspend?: EventHandler<T, Event>;
+    onsuspend?: Events<T, Event>;
     /**
      * Occurs periodically to report the current playback position of a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/timeupdate_event)
      */
-    ontimeupdate?: EventHandler<T, Event>;
+    ontimeupdate?: Events<T, Event>;
     /**
      * Occurs when the volume of a media element changes, including muting or unmuting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/volumechange_event)
      */
-    onvolumechange?: EventHandler<T, Event>;
+    onvolumechange?: Events<T, Event>;
     /**
      * Occurs when playback stops because the next frame of a media resource is unavailable, requiring buffering.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waiting_event)
      */
-    onwaiting?: EventHandler<T, Event>;
+    onwaiting?: Events<T, Event>;
 }
 /**
  * Form-specific events (for `<form>`, `<input>`, `<select>`, `<textarea>`)
  */
-interface FormListeners<T extends HTMLFormElement> {
+interface FormListener<T extends HTMLFormElement> {
     /**
      * Fires before an input element’s value is modified, allowing cancellation or modification of the input.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/beforeinput_event)
      */
-    onbeforeinput?: EventHandler<T, InputEvent>;
+    onbeforeinput?: Events<T, InputEvent>;
     /**
      * Fires when the contents of an input element or selection have changed, such as after a user modifies a form field.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event)
      */
-    onchange?: EventHandler<T, Event>;
+    onchange?: Events<T, Event>;
     /**
      * Fires when content is copied to the clipboard, allowing modification or cancellation of the operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/copy_event)
      */
-    oncopy?: EventHandler<T, ClipboardEvent>;
+    oncopy?: Events<T, ClipboardEvent>;
     /**
      * Fires when content is cut to the clipboard, allowing modification or cancellation of the operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/cut_event)
      */
-    oncut?: EventHandler<T, ClipboardEvent>;
+    oncut?: Events<T, ClipboardEvent>;
     /**
      * Fires when a form’s data is being constructed, allowing modification of the `FormData` object before submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/formdata_event)
      */
-    onformdata?: EventHandler<T, FormDataEvent>;
+    onformdata?: Events<T, FormDataEvent>;
     /**
      * Fires when the value of an input element changes due to user input, such as typing or pasting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/input_event)
      */
-    oninput?: EventHandler<T, Event>;
+    oninput?: Events<T, Event>;
     /**
      * Fires when an input element’s value fails validation constraints upon form submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLInputElement/invalid_event)
      */
-    oninvalid?: EventHandler<T, Event>;
+    oninvalid?: Events<T, Event>;
     /**
      * Fires when content is pasted from the clipboard into an element, allowing modification of the pasted data.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/paste_event)
      */
-    onpaste?: EventHandler<T, ClipboardEvent>;
+    onpaste?: Events<T, ClipboardEvent>;
     /**
      * Fires when the user resets a form, restoring its fields to their default values.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/reset_event)
      */
-    onreset?: EventHandler<T, Event>;
+    onreset?: Events<T, Event>;
     /**
      * Fires when the current text selection changes within an input or textarea element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLInputElement/select_event)
      */
-    onselect?: EventHandler<T, Event>;
+    onselect?: Events<T, Event>;
     /**
      * Fires when the document’s text selection changes, such as selecting or deselecting text.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/selectionchange_event)
      */
-    onselectionchange?: EventHandler<T, Event>;
+    onselectionchange?: Events<T, Event>;
     /**
      * Fires when the user begins selecting text or content within an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/selectstart_event)
      */
-    onselectstart?: EventHandler<T, Event>;
+    onselectstart?: Events<T, Event>;
     /**
      * Fires when a form is submitted, either by user action or programmatically, allowing validation or cancellation.
      *
@@ -1566,238 +1566,238 @@ interface FormListeners<T extends HTMLFormElement> {
 /**
  * Drag-and-drop events (for draggable elements)
  */
-interface DragListeners<T extends HTMLElement> {
+interface DragListener<T extends HTMLElement> {
     /**
      * Fires on the source object continuously during a drag operation while the user moves the dragged item.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event)
      */
-    ondrag?: EventHandler<T, DragEvent>;
+    ondrag?: Events<T, DragEvent>;
     /**
      * Fires on the source object when the user releases the mouse at the end of a drag operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event)
      */
-    ondragend?: EventHandler<T, DragEvent>;
+    ondragend?: Events<T, DragEvent>;
     /**
      * Fires on the target element when the user drags an object into a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event)
      */
-    ondragenter?: EventHandler<T, DragEvent>;
+    ondragenter?: Events<T, DragEvent>;
     /**
      * Fires on the target object when the user moves the dragged item out of a valid drop target during a drag operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event)
      */
-    ondragleave?: EventHandler<T, DragEvent>;
+    ondragleave?: Events<T, DragEvent>;
     /**
      * Fires on the target element continuously while the user drags an object over a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event)
      */
-    ondragover?: EventHandler<T, DragEvent>;
+    ondragover?: Events<T, DragEvent>;
     /**
      * Fires on the source object when the user starts dragging a text selection or selected object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event)
      */
-    ondragstart?: EventHandler<T, DragEvent>;
+    ondragstart?: Events<T, DragEvent>;
     /**
      * Fires on the target element when the user drops a dragged object onto a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/drop_event)
      */
-    ondrop?: EventHandler<T, DragEvent>;
+    ondrop?: Events<T, DragEvent>;
 }
 /**
  * Animation and transition events (for styled elements)
  */
-interface AnimationListeners<T extends HTMLElement> {
+interface AnimationListener<T extends HTMLElement> {
     /**
      * Fires when an animation is aborted unexpectedly, such as when the element is removed from the DOM before completion.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationcancel_event)
      */
-    onanimationcancel?: EventHandler<T, AnimationEvent>;
+    onanimationcancel?: Events<T, AnimationEvent>;
     /**
      * Fires when a CSS animation completes successfully, after all iterations have finished.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationend_event)
      */
-    onanimationend?: EventHandler<T, AnimationEvent>;
+    onanimationend?: Events<T, AnimationEvent>;
     /**
      * Fires when a CSS animation completes a single iteration, but only if the animation has multiple iterations.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event)
      */
-    onanimationiteration?: EventHandler<T, AnimationEvent>;
+    onanimationiteration?: Events<T, AnimationEvent>;
     /**
      * Fires when a CSS animation begins, after any delay specified in the animation has elapsed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationstart_event)
      */
-    onanimationstart?: EventHandler<T, AnimationEvent>;
+    onanimationstart?: Events<T, AnimationEvent>;
     /**
      * Fires when a CSS transition is cancelled before completion, such as when a property is removed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitioncancel_event)
      */
-    ontransitioncancel?: EventHandler<T, TransitionEvent>;
+    ontransitioncancel?: Events<T, TransitionEvent>;
     /**
      * Fires when a CSS transition completes successfully, after reaching its end state.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionend_event)
      */
-    ontransitionend?: EventHandler<T, TransitionEvent>;
+    ontransitionend?: Events<T, TransitionEvent>;
     /**
      * Fires when a CSS transition is first scheduled to run, before it actually starts.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionrun_event)
      */
-    ontransitionrun?: EventHandler<T, TransitionEvent>;
+    ontransitionrun?: Events<T, TransitionEvent>;
     /**
      * Fires when a CSS transition begins, after any delay has elapsed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionstart_event)
      */
-    ontransitionstart?: EventHandler<T, TransitionEvent>;
+    ontransitionstart?: Events<T, TransitionEvent>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationend`. It is deprecated; use `onanimationend` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationend_event)
      */
-    onwebkitanimationend?: EventHandler<T, Event>;
+    onwebkitanimationend?: Events<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationiteration`. It is deprecated; use `onanimationiteration` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event)
      */
-    onwebkitanimationiteration?: EventHandler<T, Event>;
+    onwebkitanimationiteration?: Events<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationstart`. It is deprecated; use `onanimationstart` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationstart_event)
      */
-    onwebkitanimationstart?: EventHandler<T, Event>;
+    onwebkitanimationstart?: Events<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `ontransitionend`. It is deprecated; use `ontransitionend` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionend_event)
      */
-    onwebkittransitionend?: EventHandler<T, Event>;
+    onwebkittransitionend?: Events<T, Event>;
 }
 /**
  * Canvas-specific events
  */
-interface CanvasListeners<T extends HTMLElement> {
+interface CanvasListener<T extends HTMLElement> {
     /**
      * Fires when a WebGL context is lost, typically due to hardware or driver issues, requiring reinitialization.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/webglcontextlost_event)
      */
-    oncontextlost?: EventHandler<T, Event>;
+    oncontextlost?: Events<T, Event>;
     /**
      * Fires when a lost WebGL context is restored, allowing rendering to resume on a `<canvas>` element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextrestored_event)
      */
-    oncontextrestored?: EventHandler<T, Event>;
+    oncontextrestored?: Events<T, Event>;
 }
 /**
  * Dialog-specific events
  */
-interface DialogListeners<T extends HTMLElement> {
+interface DialogListener<T extends HTMLElement> {
     /**
      * Fires when a dialog or similar cancellable action is aborted by the user, such as pressing Esc in a `<dialog>`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/cancel_event)
      */
-    oncancel?: EventHandler<T, Event>;
+    oncancel?: Events<T, Event>;
     /**
      * Fires when a `<dialog>` element is closed, either by the user or programmatically.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/close_event)
      */
-    onclose?: EventHandler<T, Event>;
+    onclose?: Events<T, Event>;
 }
 /**
  * Details-specific events
  */
-interface DetailsListeners<T extends HTMLElement> {
+interface DetailsListener<T extends HTMLElement> {
     /**
      * Fires when a `<details>` element’s open state toggles, either opening or closing the details.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLDetailsElement/toggle_event)
      */
-    ontoggle?: EventHandler<T, Event>;
+    ontoggle?: Events<T, Event>;
 }
 /**
  * Track-specific events
  */
-interface TrackListeners<T extends HTMLElement> {
+interface TrackListener<T extends HTMLElement> {
     /**
      * Fires when a text track cue changes, such as in a `<track>` element for subtitles or captions.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/cuechange_event)
      */
-    oncuechange?: EventHandler<T, Event>;
+    oncuechange?: Events<T, Event>;
 }
 /**
  * Video-specific events (extends MediaListeners)
  */
-interface VideoListeners<T extends HTMLElement> extends MediaListeners<T> {
+interface VideoListener<T extends HTMLElement> extends MediaListener<T> {
     /**
      * Fires when a video element’s intrinsic size changes, such as when new metadata is loaded.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/resize_event)
      */
-    onresize?: EventHandler<T, UIEvent>;
+    onresize?: Events<T, UIEvent>;
 }
 /**
  * Popover-specific events (for elements with popover attribute)
  */
-interface PopoverListeners<T extends HTMLElement> {
+interface PopoverListener<T extends HTMLElement> {
     /**
      * Fires just before an element’s `popover` state toggles (e.g., before showing or hiding a popover).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/beforetoggle_event)
      */
-    onbeforetoggle?: EventHandler<T, Event>;
+    onbeforetoggle?: Events<T, Event>;
     /**
      * Fires when an element’s `popover` state toggles (e.g., showing or hiding a popover).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/toggle_event)
      */
-    ontoggle?: EventHandler<T, Event>;
+    ontoggle?: Events<T, Event>;
 }
 /**
  * Pointer capture-specific events (for elements using pointer capture)
  */
-interface PointerListeners<T extends HTMLElement> {
+interface PointerListener<T extends HTMLElement> {
     /**
      * Fires when an element captures a pointer (e.g., mouse or touch) after a `setPointerCapture` call.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event)
      */
-    ongotpointercapture?: EventHandler<T, PointerEvent>;
+    ongotpointercapture?: Events<T, PointerEvent>;
     /**
      * Fires when an element loses pointer capture, such as when released via `releasePointerCapture`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/lostpointercapture_event)
      */
-    onlostpointercapture?: EventHandler<T, PointerEvent>;
+    onlostpointercapture?: Events<T, PointerEvent>;
 }
 /**
  * Security policy violation event (for elements affected by CSP)
  */
-interface SecurityListeners<T extends HTMLElement> {
+interface SecurityListener<T extends HTMLElement> {
     /**
      * Fires when a Content Security Policy violation occurs, such as an attempt to load a blocked resource.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/securitypolicyviolation_event)
      */
-    onsecuritypolicyviolation?: EventHandler<T, SecurityPolicyViolationEvent>;
+    onsecuritypolicyviolation?: Events<T, SecurityPolicyViolationEvent>;
 }
 
 /**
@@ -1859,7 +1859,7 @@ type AutoCompleteUnion = StringUnion<'additional-name' | 'address-level1' | 'add
  * handling of tagged literals via {@link TemplateStringsArray} which prevents type
  * extraction and renders parse tag name analysis impossible.
  */
-interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<HTMLFormElement>, MediaListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T>, ARIAForm, ARIABusy, ARIAInteractive, ARIAModal, ARIAProgress, ARIAStructural {
+interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, AnimationListener<T>, CanvasListener<T>, DetailsListener<T>, DialogListener<T>, DragListener<T>, FormListener<HTMLFormElement>, MediaListener<T>, SecurityListener<T>, TrackListener<T>, VideoListener<T>, ARIAForm, ARIABusy, ARIAInteractive, ARIAModal, ARIAProgress, ARIAStructural {
     /**
      * - {@link InputAttributes}
      *
@@ -2837,7 +2837,7 @@ interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, Animation
      */
     wrap?: StringUnion<"soft" | "hard">;
 }
-interface Attributes<T extends HTMLElement> extends ARIAAttrs, SinAttributes<T>, DOMListen<T>, PointerListeners<T>, PopoverListeners<T> {
+interface Attributes<T extends HTMLElement> extends ARIAAttrs, SinAttributes<T>, EventListener<T>, PointerListener<T>, PopoverListener<T> {
     [attribute: string]: any;
     /**
      * {@link HTMLElement}  →  {@link Attributes}
@@ -3336,7 +3336,7 @@ interface Attributes<T extends HTMLElement> extends ARIAAttrs, SinAttributes<T>,
 /**
  * - `<a>`
  */
-interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends Attributes<T>, SecurityListeners<T> {
+interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends Attributes<T>, SecurityListener<T> {
     /**
      * {@link HTMLLinkElement}  →  {@link LinkAttributes}
      *
@@ -3511,7 +3511,7 @@ interface StyleAttributes<T extends HTMLStyleElement = HTMLStyleElement> extends
 /**
  * - `<blockquote>`
  */
-interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends Attributes<T>, AnimationListeners<T>, DragListeners<T> {
+interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends Attributes<T>, AnimationListener<T>, DragListener<T> {
     /**
      * {@link HTMLQuoteElement}  →  {@link QuoteAttributes}
      *
@@ -3533,7 +3533,7 @@ interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends
 /**
  * - `<ol>`
  */
-interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>, ARIAStructural, AnimationListeners<T>, DragListeners<T> {
+interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>, ARIAStructural, AnimationListener<T>, DragListener<T> {
     /**
      * {@link HTMLOListElement}  →  {@link OListAttributes}
      *
@@ -3594,7 +3594,7 @@ interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends
 /**
  * - `<li>`
  */
-interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>, ARIAStructural, AnimationListeners<T>, DragListeners<T> {
+interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>, ARIAStructural, AnimationListener<T>, DragListener<T> {
     /**
      * {@link HTMLLIElement}  →  {@link LIAttributes}
      *
@@ -3725,7 +3725,7 @@ interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> exte
 /**
  * - `<time>`
  */
-interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends Attributes<T>, AnimationListeners<T> {
+interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends Attributes<T>, AnimationListener<T> {
     /**
      * {@link HTMLTimeElement}  →  {@link TimeAttributes}
      *
@@ -3756,7 +3756,7 @@ interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends At
  * - `<del>`
  * - `<ins>`
  */
-interface ModAttributes<T extends HTMLModElement = HTMLModElement> extends Attributes<T>, AnimationListeners<T> {
+interface ModAttributes<T extends HTMLModElement = HTMLModElement> extends Attributes<T>, AnimationListener<T> {
     /**
      * {@link HTMLModElement}  →  {@link ModAttributes}
      *
@@ -4169,7 +4169,7 @@ interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> exte
 /**
  * - `<video>`
  */
-interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>, ARIABusy, VideoListeners<T>, DragListeners<T>, AnimationListeners<T> {
+interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>, ARIABusy, VideoListener<T>, DragListener<T>, AnimationListener<T> {
     /**
      * {@link HTMLVideoElement}  →  {@link VideoAttributes}
      *
@@ -4270,7 +4270,7 @@ interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends
 /**
  * - `<audio>`
  */
-interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>, ARIABusy, MediaListeners<T>, AnimationListeners<T> {
+interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>, ARIABusy, MediaListener<T>, AnimationListener<T> {
     /**
      * {@link HTMLAudioElement}  →  {@link AudioAttributes}
      *
@@ -4373,7 +4373,7 @@ interface SourceAttributes<T extends HTMLSourceElement = HTMLSourceElement> exte
 /**
  * - `<track>`
  */
-interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> extends Attributes<T>, TrackListeners<T> {
+interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> extends Attributes<T>, TrackListener<T> {
     /**
      * {@link HTMLTrackElement}  →  {@link TrackAttributes}
      *
@@ -4603,7 +4603,7 @@ interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElem
 /**
  * - `<form>`
  */
-interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>, ARIAForm, FormListeners<T>, AnimationListeners<T> {
+interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>, ARIAForm, FormListener<T>, AnimationListener<T> {
     /**
      * {@link HTMLFormElement}  →  {@link FormAttributes}
      *
@@ -4680,7 +4680,7 @@ interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends At
 /**
  * - `<label>`
  */
-interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends Attributes<T>, AnimationListeners<T> {
+interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends Attributes<T>, AnimationListener<T> {
     /**
      * {@link HTMLLabelElement}  →  {@link LabelAttributes}
      *
@@ -4693,7 +4693,7 @@ interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends
 /**
  * - `<input>`
  */
-interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T>, DragListeners<T> {
+interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListener<HTMLFormElement>, AnimationListener<T>, DragListener<T> {
     /**
      * {@link HTMLInputElement}  →  {@link InputAttributes}
      *
@@ -4954,7 +4954,7 @@ interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends
 /**
  * - `<button>`
  */
-interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>, ARIAInteractive, AnimationListeners<T> {
+interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>, ARIAInteractive, AnimationListener<T> {
     /**
      * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
      *
@@ -5047,7 +5047,7 @@ interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> exte
 /**
  * - `<select>`
  */
-interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T> {
+interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListener<HTMLFormElement>, AnimationListener<T> {
     /**
      * {@link HTMLSelectElement}  →  {@link SelectAttributes}
      *
@@ -5190,7 +5190,7 @@ interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> exte
 /**
  * - `<textarea>`
  */
-interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T> {
+interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListener<HTMLFormElement>, AnimationListener<T> {
     /**
      * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
      *
@@ -5307,7 +5307,7 @@ interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement
 /**
  * - `<output>`
  */
-interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> extends Attributes<T>, AnimationListeners<T> {
+interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> extends Attributes<T>, AnimationListener<T> {
     /**
      * {@link HTMLOutputElement}  →  {@link OutputAttributes}
      *
@@ -5344,7 +5344,7 @@ interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> exte
 /**
  * - `<progress>`
  */
-interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>, ARIAProgress, AnimationListeners<T> {
+interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>, ARIAProgress, AnimationListener<T> {
     /**
      * {@link HTMLProgressElement}  →  {@link ProgressAttributes}
      *
@@ -5373,7 +5373,7 @@ interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement
 /**
  * - `<meter>`
  */
-interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>, ARIAProgress, AnimationListeners<T> {
+interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>, ARIAProgress, AnimationListener<T> {
     /**
      * {@link HTMLMeterElement}  →  {@link MeterAttributes}
      *
@@ -5434,7 +5434,7 @@ interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends
 /**
  * - `<fieldset>`
  */
-interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement> extends Attributes<T>, AnimationListeners<T> {
+interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement> extends Attributes<T>, AnimationListener<T> {
     /**
      * {@link HTMLFieldSetElement}  →  {@link FieldSetAttributes}
      *
@@ -5471,7 +5471,7 @@ interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement
 /**
  * - `<details>`
  */
-interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DetailsListeners<T>, AnimationListeners<T> {
+interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DetailsListener<T>, AnimationListener<T> {
     /**
      * {@link HTMLDetailsElement}  →  {@link DetailsAttributes}
      *
@@ -5492,7 +5492,7 @@ interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> e
 /**
  * - `<dialog>`
  */
-interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DialogListeners<T>, AnimationListeners<T> {
+interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DialogListener<T>, AnimationListener<T> {
     /**
      * {@link HTMLDialogElement}  →  {@link DialogAttributes}
      *
@@ -5574,7 +5574,7 @@ interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElement> exte
 /**
  * - `<canvas>`
  */
-interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>, ARIABusy, CanvasListeners<T> {
+interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>, ARIABusy, CanvasListener<T> {
     /**
      * {@link HTMLCanvasElement}  →  {@link CanvasAttributes}
      *
@@ -5603,7 +5603,7 @@ interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> exte
 /**
  * - `<data>`
  */
-interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends Attributes<T>, AnimationListeners<T> {
+interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends Attributes<T>, AnimationListener<T> {
     /**
      * {@link HTMLDataElement}  →  {@link DataAttributes}
      *
@@ -5625,11 +5625,28 @@ interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends At
 type Components = typeof s;
 type SinElement<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : HTMLAttributes<HTMLElement>;
 type Varidiac = Children | Children[] | StyledComponent | Array<Children | StyledComponent> | [];
+type AsyncOptions<T, U, V> = {
+    /**
+     * Asynchronous loading
+     */
+    loading?: any;
+    /**
+     * Intercept throws or errors
+     */
+    error?: <Exception extends DOMException = any>(err?: Exception) => void | InferComponent<(...args: Arguments<T, U, V>) => any>;
+};
+type AsyncSignature<T, U, V> = [
+    async: AsyncOptions<T, U, V>,
+    component: (...args: Arguments<T, U, V>) => P<StatelessSignature<T, U, V>>
+];
 type Arguments<T, U, V> = [
     attrs: isInferred<T, Attrs, T>,
     children: U extends any[] ? [...U, Children] : U[],
     context: keyof V extends never ? Context<{}> : Context<V>
 ];
+/**
+ * Stateless and Stateful Signature Overloads
+ */
 type Signatures<T, U, V> = {
     (tag: TagLiteral, ...interpolate: Interpolate): Signatures<T, U, V>;
     (attrs: isInferred<T, {}, T>): View<T>;
@@ -5637,10 +5654,26 @@ type Signatures<T, U, V> = {
     (attrs: isInferred<T, {}, T>, children: U extends [] ? Children[] : U, context?: V): View<T>;
     (...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
 };
+/**
+ * Stateless Signature
+ */
 type StatelessSignature<T, U, V> = (...x: Arguments<T, U, V>) => Varidiac;
+/**
+ * Stateless Component
+ */
 type StatelessComponent<T, U, V> = Signatures<T, U, V>;
+/**
+ * Stateful Signature
+ */
 type StatefulSignature<T, U, V> = (...x: Arguments<T, U, V>) => P<(...x: Arguments<T, U, V>) => P<Varidiac>>;
+/**
+ * Stateful Component
+ */
 type StatefulComponent<T, U, V> = Signatures<T, U, V>;
+/**
+ * Async Component
+ */
+type AsyncComponent<T, U, V> = AsyncSignature<T, U, V>;
 type StyledSignature<T extends HTMLElement> = Partial<[
     attributes?: SinElement<T>,
     ...children: Array<Children | StyledComponent<T>>
@@ -5654,6 +5687,13 @@ type StyledComponent<T extends HTMLElement = HTMLElement> = {
     (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
 };
 type InferComponent<S> = S extends StatelessSignature<infer T, infer U, infer V> ? StatelessComponent<T, U, V> : S extends StatefulSignature<infer T, infer U, infer V> ? StatefulComponent<T, U, V> : never;
+/**
+ * Component - TypeScript Utility
+ *
+ * @example
+ *
+ * const x: s.Component<{}, [], {}>;
+ */
 type Component<T = {}, U = [], V = {}> = T extends HTMLElement ? StyledComponent<T> : InferComponent<(...args: Arguments<T, U, V>) => any> extends never ? StatelessComponent<T, U, V> | StatefulComponent<T, U, V> : InferComponent<(...args: Arguments<T, U, V>) => any>;
 
 /**
@@ -5679,7 +5719,7 @@ options?: boolean | AddEventListenerOptions) => () => Void;
 /**
  * Custom event handler with observer pattern support.
  */
-type Listener<T> = {
+type OnListener<T> = {
     /**
      * Triggers the event, calling all subscribed observers with the provided arguments.
      * Returns an array of return values from all observer functions
@@ -5964,14 +6004,30 @@ interface Http extends Methods {
 
 declare global {
     /**
+     * Sin `context`
+     *
+     * Interface for extending the global component context.
+     * Use the `s.Context<T>` Type Utility for component level
+     * context extends.
+     */
+    interface context {
+    }
+    /**
+     * Sin `s.is`
+     *
+     * Extend the global `s.is.*` references of sin.
+     */
+    interface is {
+    }
+    /**
      * Sin `p(...)`
      *
-     * Intercept, print to console and return the value.
+     * Intercept, print to console and then return the last value argument.
      * Pass any primitive and get it back the same way.
      *
      * @example
-     * const x = p(333)   // Logs 333
-     * const v = x + 333  // Value of v is 666
+     * const x = p('x', 333) // Logs x 333 and returns 333
+     * const v = x + 333     // Value of v is 666
      */
     export function p<T = any>(...input: T[]): T;
 }
@@ -5983,6 +6039,10 @@ declare function s<T, U = [], V = {}>(statefull: StatefulSignature<T, U, V>): St
  * Stateless Component
  */
 declare function s<T, U = [], V = {}>(stateless: StatelessSignature<T, U, V>): StatelessComponent<T, U, V>;
+/**
+ * Async Component
+ */
+declare function s<T, U = [], V = {}>(...async: AsyncSignature<T, U, V>): AsyncComponent<T, U, V>;
 /**
  * HyperScript Component
  */
@@ -6006,7 +6066,7 @@ declare namespace s {
     /**
      * Runtime references
      */
-    export const is: {
+    export const is: is & {
         /**
          * Whether or not code is executing on server.
          */
@@ -6072,7 +6132,7 @@ declare namespace s {
      *
      * sinned.observe('repent')
      */
-    export const event: <T = any>(callback?: (value: T) => void) => Listener<T>;
+    export const event: <T = any>(callback?: (value: T) => void) => OnListener<T>;
     /**
      * CSS Methods for controlling the cascades
      */
@@ -6178,7 +6238,7 @@ declare namespace s {
     /**
      * Exposed Types
      */
-    export type { Context, Nodes, Daft, Primitive, Children, Component, Child, Node, View };
+    export type { Nodes, Daft, Primitive, Children, Component, Child, Node, View, Context, Events as Event };
 }
 
 export { s as default, s };
