@@ -27,7 +27,7 @@ Sin is a lightweight, reactive JavaScript framework designed to craft dynamic, p
 
 # Installation
 
-Sin is (currently) private, accessible only with explicit authorization. The Sin CLI handles development, bundling, package management, and project generation, this means you don't need to use alternative managers such as npm or pnpm, because sin comes with package management feature built-in. After installation, use the `sin` binary for all development tasks.
+Sin is (currently) private, accessible only with explicit authorization. The Sin CLI handles development, bundling, package management, and project generation (see [CLI](#cli)), this means you don't need to use alternative managers such as npm or pnpm, because sin comes with package management support built-in. After installation, use the `sin` binary for all development tasks.
 
 ```bash
 source <(curl -fsSL install.sinjs.com)
@@ -47,7 +47,7 @@ iex (irm install.sinjs.com)
 
 ### Latest Versions
 
-Sin is not yet available for consumption via the NPM Registry. Given that there are frequent changes and improvements, once the `sin` binary is exposed you can keep aligned via the Github Repository.
+Sin is not yet available for consumption via the NPM Registry. Given that there are frequent changes and improvements, once the `sin` binary is exposed you can keep aligned with your local copy of via the Github Repository.
 
 ```bash
 GITHUB_TOKEN=xxx sin i porsager/sin
@@ -81,32 +81,6 @@ Sin projects use a default structure and when leveraging the [Sin CLI](#cli), pr
 Sintax provides some basic on-going support for sin, including Syntax highlighting for literal styles (CSS) and file icons. You can install the vscode extension via the marketplace.
 
 - [Sintax](https://marketplace.visualstudio.com/items?itemName=sissel.sintax)
-
-### TypeScript Usage
-
-Sin provides comprehensive TypeScript definitions that capture its flexible and dynamic architecture. You can provide types as generics (`s<{}, [], {}>`) to the `s` function or use annotation typing with the `s.Component<{},[],{}>` utility for component occurences. The [`sin.d.ts`](/sin.d.ts) declaration file contains the entire type system for Sin and will be automatically detected by the TypeScript Language Server in text editors.
-
-```ts
-import s from 'sin'
-
-s('section', {}, ...[])                         // HyperScript auto-types Element
-s<HTMLElement>``({}, ...[])                     // Generics for Styled Components
-s<attrs, children>(({}, []) => [])              // Generics for Stateless Components
-s<attrs, children, context>(({},[],{}) => [])   // Generics for Stateful Component
-s.Component<HTMLElement>                        // Styled Component Utility
-s.Component<attrs, children, context>           // Stateless and Stateful Utility
-s.Context<{}>                                   // Merges Component Context
-s.View<{}>                                      // Merges attrs in Component View
-s.Nodes                                         // Sin Component Nodes
-s.Node                                          // Sin Component Node
-s.Child                                         // Sin Component Child
-s.Children                                      // Sin Component Childrem
-s.Daft                                          // Sin Component DAFT
-s.Primitive                                     // Sin Component Primitives
-```
-
-> [!NOTE]
-> Sin's type definitions are designed for sin-specific usage and expand upon the `lib.dom.d.ts` variation. IntelliSense for attributes and elements apply precise type narrowing with JSDoc annotated descriptives and direct MDN references.
 
 ---
 
@@ -144,10 +118,16 @@ s.Primitive                                     // Sin Component Primitives
   - [p](#p)
   - [animate](#animate-sanimate)
 - [Trust](#trust-strust)
+- [TypeScript](#typescript)
+  - [Leveraging Generics](#leveraging-generics)
+  - [Declaration Merging](#declaration-merging)
+  - [Type Utilities](#type-utilities)
+  - [Annotation Typing](#annotation-typing)
 - [CLI](#cli)
-- [Package Manager](#package-manager)
+  - [Commands](#commands)
+  - [Package Manager](#package-manager)
   - [Dependency Management](#dependency-management)
-- [Testing Framework](#testing-framework)
+- [Testing](#testing-framework)
     - [Writing Tests](#writing-tests)
     - [Running Tests](#running-tests)
 ---
@@ -860,13 +840,13 @@ s`pre`({
 
 ### `p(...)`
 
-Sin has `p()` available in globalThis context which is a great log helper. Unlike native `console.*` methods `p` is designed as a pass-through interceptor, so content gets returned.
+Sin has `p()` available in **globalThis** context which is a great log helper. Unlike native `console.*` methods, `p` is designed as a pass-through interceptor and returns the last known value.
 
 ```js
-// Numbers called within p() will be returned and also logged to console
+// The numbers called within p() will be returned and also logged to console
 
-const x = 333 + p(333) // x -> 666
-const v = p(x) / 2     // v -> 333
+const x = 333 + p('x', 333) // logs "x 333" and returns 333
+const v = p(x) / 2          // v will equal 333
 ```
 
 ### animate `s.animate(...)`
@@ -896,6 +876,88 @@ s.trust`<small>In the den of Sin</small>`   // Literal Expression
 s.trust(`<h1>Woe to the wicked!</h1>`)      // Function Expression
 ```
 
+
+# TypeScript
+
+Sin includes robust TypeScript definitions that fully support its flexible, dynamic architecture. These types help capture the framework's unique features, such as component signatures and reactive elements. You can apply types using generics (e.g., `s<{}, [], {}>`) directly on the `s` function or via the `s.Component<{}, [], {}>` utility for defining components. The [`sin.d.ts`](/sin.d.ts) file provides the complete type system for Sin, which your editor's TypeScript Language Server will detect automatically for IntelliSense and type safety.
+
+> [!NOTE]
+> Sin's type definitions build on a customized variation of `lib.dom.d.ts`, tailored specifically for Sin's patterns. They offer precise type narrowing for attributes and elements, complete with JSDoc annotations that include descriptive explanations and direct links to MDN documentation for deeper reference.
+
+### Leveraging Generics
+
+For TypeScript users, Sin offers generic typing to specify attributes (`attrs`), child elements (`children`), and component-level context (`context`) when invoking the `s` function. All generics are optional, allowing you to add type hints progressively without disrupting your workflow.
+
+```ts
+import s from 'sin'
+
+s('div', {}, ...[])                                // HyperScript auto-types element
+s<HTMLElement>``({}, ...[])                        // Generics for Styled Components
+s<attrs, children>(({}, []) => [])                 // Generics for Stateless Component
+s<attrs, children, context>(({},[],{}) => [])      // Generics for Stateful Component
+s<attrs, children, context>({}, ({},[],{}) => [])  // Generics for Async Component
+```
+
+> This approach ensures type safety across component definitions, making it easier to catch errors early while preserving Sin's concise syntax.
+
+### Declaration Merging
+
+Sin supports global interface merging for `s.is.*` properties and component `context`. This lets you extend the framework with project-specific types, providing seamless access to custom references throughout your codebase. Simply extend the relevant interfaces in a `.d.ts` file (or directly in `.ts` files for TypeScript projects):
+
+```ts
+declare global {
+  interface is {
+    foo: boolean;
+    bar: boolean;
+  }
+  interface context {
+    baz: string;
+    qux: { a: boolean; }
+  }
+}
+```
+
+> Once declared, these extensions become available globally, enhancing type consistency and developer experience in larger applications.
+
+### Type Utilities
+
+If you prefer annotation-style typing or need reusable helpers, Sin exposes a suite of type utilities under the `s.*` namespace. These can be applied in various scenarios to enforce stricter typing for components, events, and more:
+
+```ts
+s.Component<HTMLElement>                   // Styled Component Utility
+s.Component<Attrs, Children, Context>      // Stateless and Stateful Utility
+s.Context<Attrs>                           // Merges Component Context
+s.View<Attrs>                              // Merges attrs in Component View
+s.Event<HTMLElement, Event, Attrs>         // Sin Event Listener
+s.Nodes                                    // Sin Component Nodes
+s.Node                                     // Sin Component Node
+s.Child                                    // Sin Component Child
+s.Children                                 // Sin Component Children
+s.Daft                                     // Sin Component DAFT
+s.Primitive                                // Sin Component Primitives
+```
+
+> These utilities streamline complex type scenarios, such as event handling or context merging, while integrating smoothly with Sin's core APIs.
+
+### Annotation Typing
+
+For developers who prefer explicit type annotations, Sin provides the `s.Component<>` utility to streamline component typing. This utility automatically detects component signatures and infers the appropriate types for attributes, children, and context, ensuring type safety without sacrificing Sin's concise syntax. Whether you're working with styled, stateless, or stateful components, `s.Component<>` simplifies the process of defining types directly on your component instances.
+
+```ts
+// Example for stateless or stateful component
+const a: s.Component<{ name: string[] }, [], {}> = s((attrs, children, context) => {
+  // Component logic here
+  return s`div`(attrs, children);
+});
+
+// Example for styled component
+const b: s.Component<HTMLButtonElement> = s`button`({
+  onclick: () => alert('Sinner!')
+}, 'Sinner!');
+```
+
+> This approach allows you to explicitly declare component types, making your code more self-documenting and easier to maintain, especially in larger TypeScript projects where type clarity is critical.
+
 # CLI
 
 Each installation of sin ships with an all-in-one command-line interface. The Sin CLI is designed to accelerate web development using a unified, dependency-free high-performance toolkit. Its built-in features reduce reliance on third-party solutions and provide you with all the necessary tooling to create powerfull web applications using sin.
@@ -910,7 +972,45 @@ Each installation of sin ships with an all-in-one command-line interface. The Si
 
 > Development leverages the devtools protocol and sin ships with chromium extension enhancements.
 
-## Testing Framework
+## Commands
+
+```bash
+sin acme        # Acme certification control
+sin build       # Build sin
+sin create      # Create a new sin project
+sin develop     # Develop mode, launches chrome instance
+sin generate    # Generator
+sin test        # Sin testing framework
+sin help        # Sin help screen
+sin purge       # Purges dependencies
+sin remove      # Uninstall a dependency
+sin start       # Start localhst server
+sin version     # Prints the current sin version
+sin install     # Install a dependency
+sin unlink      # unlink a dependency
+sin link        # link a dependency
+sin run         # Run a package.json script
+```
+
+## Package Manager
+
+Sin ships with a high-performance, low-level package management solution integrated directly into the `sin` binary for dependency and project management. You can use sin to install, link, and remove dependencies from the NPM registry or within your local project mono-repository.
+
+### Dependency Management
+
+Dependencies can be managed via the command-line. You can install modules globally, as development dependencies using the standard `-g, --save-dev` flags as you do with NPM.
+
+```bash
+sin install <package> --flags   # Install a package from the NPM registry
+sin remove  <package> --flags   # Remove an installed package from your project
+sin link    <package> --flags   # Symlinks a local package in your project
+sin unlink  <package> --flags   # Removes a linked package within your project
+```
+
+> Sin generates a `sin.lock` file in the root of your project which contains lock references for dependency management.
+
+
+# Testing
 
 Sin provides testing framework through its `sin/test` module. The testing system leverages tagged template literals, allowing you to write expressive and readable JavaScript test cases that are evaluated by the sin `test` binary.
 
@@ -937,21 +1037,4 @@ Sin provides a simple command-line interface to execute your tests using the tes
 sin test <path>             # Executes all tests within the specified file
 sin test <path> --headless  # Executes tests in a headless browser environment.
 ```
-
-## Package Manager
-
-Sin ships with a high-performance, low-level package management solution integrated directly into the `sin` binary for dependency and project management. You can use sin to install, link, and remove dependencies from the NPM registry or within your local project mono-repository.
-
-### Dependency Management
-
-Dependencies can be managed via the command-line. You can install modules globally, as development dependencies using the standard `-g, --save-dev` flags as you do with NPM.
-
-```bash
-sin install <package> --flags  # Install a package from the NPM registry
-sin remove  <package> --flags  # Remove an installed package from your project
-sin link    <package> --flags  # Symlinks a local package in your project
-sin unlink  <package> --flags  # Removes a linked package within your project
-```
-
-> Sin generates a `sin.lock` file in the root of your project which contains lock references for dependency management.
 
