@@ -202,6 +202,7 @@ export default new Map([
   ['jsonld', 'application/ld+json'],
   ['jsonml', 'application/jsonml+json'],
   ['jsx', 'text/jsx'],
+  ['jxl', 'image/jxl'],
   ['jxr', 'image/jxr'],
   ['jxra', 'image/jxra'],
   ['jxrs', 'image/jxrs'],
