@@ -233,16 +233,18 @@ export default class Request {
     const writable = r[$.writable] = new Writable({
       autoDestroy: true,
       write(chunk, encoding, callback) {
-        r.write(chunk)
+        r[$.length]
+          ? r.tryEnd(chunk, r[$.length])
+          : r.write(chunk)
           ? callback()
           : r.onWritable(() => (callback(), true))
       },
       destroy(error, callback) {
         callback(error)
-        r.end()
+        r[$.length] || r.end()
       },
       final(callback) {
-        r.end()
+        r[$.length] || r.end()
         callback()
       }
     })
