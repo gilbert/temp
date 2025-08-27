@@ -422,9 +422,13 @@ export default class Request {
   }
 
   onWritable(fn) {
+    if ($.onWritable in this)
+      return this[$.onWritable] = fn
+    
+    this[$.onWritable] = fn
     return this[$.res].onWritable(x => {
       this[$.corked] = true
-      const result = fn(x)
+      const result = this[$.onWritable](x)
       this[$.corked] = false
       return result
     })

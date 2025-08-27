@@ -26,5 +26,6 @@ export const symbols = {
   reading: Symbol('reading'),
   readable: Symbol('readable'),
   writable: Symbol('writable'),
-  handling: Symbol('handling')
+  handling: Symbol('handling'),
+  onWritable: Symbol('onWritable')
 }
