@@ -42,8 +42,8 @@ class Request {
 
 class WS {
   constructor(res, data, handlers) {
+    this.data = data
     this._res = res
-    this._data = data
     this._handlers = handlers
     this._frames = null
     this._binary = false
@@ -164,8 +164,8 @@ class Response {
       done
     ]
   }
-  upgrade(data, key, protocol, extensions, handlers) {
-    this.ws = new WS(this._res, data, handlers)
+  upgrade(x, key, protocol, extensions, handlers) {
+    this.ws = new WS(this._res, x.data, handlers)
     this._res.on('data', x => ondata(this.ws, x))
     this._res.write(
       wsStart
