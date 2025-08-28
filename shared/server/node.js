@@ -274,13 +274,14 @@ function init(options, https) {
       return res.writeStatus('404 Not Found').end()
 
     const handler = wsHandlers.get(req.url) || wsHandlers.get('/*')
-    handler.upgrade
+    
+    return handler.upgrade
       ? handler.upgrade(res, req, handler)
       : res.upgrade(
         {},
-        req.headers['sec-websocket-key'],
-        req.headers['sec-websocket-protocol'],
-        req.headers['sec-websocket-extensions'],
+        req.getHeader('sec-websocket-key'),
+        req.getHeader('sec-websocket-protocol'),
+        req.getHeader('sec-websocket-extensions'),
         handler
       )
   }
