@@ -140,7 +140,7 @@ export default class Request {
         : type === 'text'
         ? full.toString()
         : type === 'multipart'
-        ? this.options.backend.getParts(full, contentType)
+        ? this.options[$.backend].getParts(full, contentType)
         : full
     })
   }

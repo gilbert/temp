@@ -20,6 +20,7 @@ export const symbols = {
   length: Symbol('length'),
   onData: Symbol('onData'),
   status: Symbol('status'),
+  backend: Symbol('backend'),
   context: Symbol('context'),
   aborted: Symbol('aborted'),
   headers: Symbol('headers'),

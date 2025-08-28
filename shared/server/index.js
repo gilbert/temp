@@ -120,7 +120,7 @@ export default function Server({
       return new Promise((resolve, reject) => {
         typeof address === 'object' && (options = address, address = null)
         const o = {
-          backend,
+          [$.backend]: backend,
           ...defaultOptions,
           ...(options || {})
         }
