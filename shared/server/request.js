@@ -310,6 +310,8 @@ export default class Request {
   }
 
   close() {
+    if (this.ended)
+      return
     this[$.res].close()
     ended(this)
     return this
