@@ -146,6 +146,9 @@ export default class Request {
   }
 
   onAborted(fn) {
+    if (this.ended)
+      return
+    
     if (this[$.aborted])
       return fn && this[$.aborted].push(fn)
 
