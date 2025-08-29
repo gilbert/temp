@@ -445,8 +445,8 @@ async function writeLock() {
     await rm('node_modules')
     return
   }
-
-  if (removes.length === 0 && installs.size === 0)
+  
+  if (equalDependencies(oldLock.dependencies, packageJson.dependencies) && removes.length === 0 && installs.size === 0)
     return
 
   lock.dependencies = packageJson.dependencies
@@ -469,6 +469,18 @@ async function writeLock() {
   function sort(x, k) {
     x[k] && (x[k] = Object.fromEntries(Object.entries(x[k]).sort(([a], [b]) => a > b ? 1 : a < b ? -1 : 0)))
   }
+}
+
+function equalDependencies(a, b) {
+  for (const x in a) {
+    if (a[x] !== b[x])
+      return false
+  }
+  for (const x in b) {
+    if (a[x] !== b[x])
+      return false
+  }
+  return true
 }
 
 async function writePackage(xs) {
