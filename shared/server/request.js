@@ -673,7 +673,7 @@ function getCookie(name, x) {
 }
 
 function aborted(r) {
-  r.aborted = true
+  r.aborted = r.ended = r.handled = true
   r[$.aborted] === null || r[$.aborted].forEach(x => x())
   ended(r)
 }
