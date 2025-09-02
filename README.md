@@ -127,6 +127,7 @@ Sintax provides some basic on-going IDE support for sin, including Syntax highli
   - [Leveraging Generics](#leveraging-generics)
   - [Declaration Merging](#declaration-merging)
   - [Type Utilities](#type-utilities)
+  - [Global SinElement](#global-sinelement)
   - [Annotation Typing](#annotation-typing)
 - [CLI](#cli)
   - [Commands](#commands)
@@ -1079,8 +1080,9 @@ s.Component<HTMLElement>                              // Styled Component Utilit
 s.Component<HTMLElement, Attrs, Children, Context>    // Merges Element attributes with Attrs Utility
 s.Component<Attrs, Children, Context>                 // Stateless and Stateful Utility
 s.Context<Attrs>                                      // Merges Component Context
+s.Attrs<HTMLElement>                                  // Returns Attributes of Element
+s.Event<Event, HTMLElement>                           // Sin Event Listener
 s.View<Attrs>                                         // Merges attrs in Component View
-s.Event<HTMLElement, Event, Attrs>                    // Sin Event Listener
 s.Nodes                                               // Sin Component Nodes
 s.Node                                                // Sin Component Node
 s.Child                                               // Sin Component Child
@@ -1090,6 +1092,10 @@ s.Primitive                                           // Sin Component Primitive
 ```
 
 > These utilities streamline complex type scenarios, such as event handling or context merging, while integrating smoothly with Sin's core APIs.
+
+### Global `SinElement`
+
+A global HTMLElement type which represents virtual sin elements is available and can be leveraged when you wish to obtain an interface which inherits all DOM Element attributes via `s.Component` or annotation typing.
 
 ### Annotation Typing
 
