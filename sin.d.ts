@@ -1,19 +1,314 @@
 /**
+ * A reactive stream created by `s.live`, supporting any type.
+ */
+type Live<T> = {
+    /**
+     * Get the current value if called with no arguments, or set a new value and return it.
+     *
+     * @example
+     * const sin = s.live(0)
+     * sin() // -> 0
+     * sin(1) // -> 1
+     *
+     * const name = s.live("loki")
+     * name() // -> "loki"
+     */
+    (value?: T): T;
+    /**
+     * The current value of the live stream.
+     *
+     * @example
+     * s.live(10).value // -> 10
+     * s.live("thor").value // -> "thor"
+     */
+    readonly value: T;
+    /**
+     * Returns the value, enabling coercion in operations (e.g., `live + 1` for numbers).
+     *
+     * @example
+     * const sin = s.live(10)
+     * sin.valueOf() // -> 10
+     * sin + 1 // -> 11 (when T is number)
+     */
+    valueOf: () => T;
+    /**
+     * Returns the value for JSON serialization.
+     *
+     * @example
+     * s.live(10).toJSON() // -> 10
+     */
+    toJSON: () => T;
+    /**
+     * Returns the stringified value.
+     *
+     * @example
+     * s.live(10).toString() // -> "10"
+     * s.live("loki").toString() // -> "loki"
+     */
+    toString: () => string;
+    /**
+     * Derive a new live value from a property or function.
+     *
+     * @example
+     * const a = s.live(10)
+     * a.get(x => x + 1)() // -> 11
+     * s.live({ name: "loki" }).get("name")() // -> "loki"
+     */
+    get: <U>(x: keyof T | ((value: T) => U)) => Live<U>;
+    /**
+     * Set the value, either directly or via a function, returning a function that applies it.
+     *
+     * @example
+     * const sin = s.live(10)
+     * sin.set(20)() // -> sin with value 20
+     * sin.set(x => x + 10)() // -> sin with value 20
+     *
+     * const name = s.live("loki")
+     * name.set("thor")() // -> name with value "thor"
+     */
+    set: (x: T | ((...args: any[]) => T)) => (...args: any[]) => Live<T>;
+    /**
+     * Observe value changes, returning a function to unsubscribe.
+     *
+     * @example
+     * const sin = s.live(0)
+     * const detach = sin.observe((newVal, oldVal) => console.log(newVal, oldVal))
+     * sin(1) // -> Logs: 1, 0
+     */
+    observe: (fn: (newValue: T, oldValue: T, detach: () => void) => void, once?: boolean) => () => boolean;
+    /**
+     * Detach observers (no-op if none).
+     *
+     * @example
+     * s.live(10).detach()
+     */
+    detach: () => void;
+    /**
+     * Reduce values into a new Live stream.
+     *
+     * @example
+     * const sin = s.live(0)
+     * const total = sin.reduce((acc, val) => acc + val, 0)
+     * sin(1) // -> total() becomes 1
+     *
+     * const text = s.live("")
+     * const concat = text.reduce((acc, val) => acc + val, "prefix")
+     * text("x") // -> concat() becomes "prefixx"
+     */
+    reduce: <U>(fn: (acc: U, value: T, index: number) => U, initial?: U) => Live<U>;
+    /**
+     * Conditionally return a value based on equality.
+     *
+     * - No extra args: Returns Live<boolean> (true/false).
+     * - One extra arg: Returns Live<U | false>.
+     * - Two extra args: Returns Live<U | V>.
+     *
+     * @example
+     * const a = s.live(666)
+     * a.if(666)() // -> true
+     * a.if(777, 1)() // -> false
+     * a.if(777, 1, 0)() // -> 0
+     *
+     * const name = s.live("loki")
+     * name.if("loki")() // -> true
+     * name.if("thor", "yes", "no")() // -> "no"
+     */
+    if: <U = true, V = false>(equals: T, isTrue?: U, isFalse?: V) => [U, V] extends [
+        undefined,
+        undefined
+    ] ? Live<boolean> : [U] extends [undefined] ? Live<boolean> : Live<U | V>;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    arguments?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    prototype?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    apply?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    call?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    caller?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    bind?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    length: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    name?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    Symbol?: never;
+};
+type SinLive = {
+    /**
+     * Create a Live instance with an initial value and optional observers.
+     * Returns Live<T> & T when T is a number for arithmetic support.
+     *
+     * @example
+     * const sin = s.live(0)
+     * const name = s.live("loki")
+     */
+    <T>(value: T, ...observers: ((newValue: T, oldValue: T, detach: () => void) => void)[]): T extends number ? Live<T> & T : Live<T>;
+    /**
+     * Create a Live instance from other Live instances and a computation.
+     *
+     * @example
+     * const a = s.live(2)
+     * const b = s.live(3)
+     * const sum = s.live.from(a, b, (x, y) => x + y)
+     * sum() // -> 5
+     *
+     * const x = s.live("x")
+     * const y = s.live("y")
+     * const concat = s.live.from(x, y, (a, b) => a + b)
+     * concat() // -> "xy"
+     */
+    from<U>(...args: [...streams: Live<any>[], fn: (...values: any[]) => U]): U extends number ? Live<U> & U : Live<U>;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    arguments?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    prototype?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    apply?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    call?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    caller?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    bind?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    length: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    name?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    toString?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    valueOf?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    Symbol?: never;
+};
+
+/**
  * Sin `attrs` generic type default
  */
 type Attrs = {
     [prop: string]: any;
 };
 /**
- * Returns boolean `true` is type is `null` otherwise `false`
+ * Returns boolean `true` if type is empty tuple `[[]]` otherwise `false`
+ */
+type IfEmptyTuple<X> = [X] extends [[]] ? true : false;
+/**
+ * Returns boolean `true` if type is empty object `[keyof X]` otherwise `false`
+ */
+type IfEmptyObject<X> = [keyof X] extends [never] ? true : false;
+/**
+ * Returns boolean `true` if type is `null` otherwise `false`
  */
 type isNull<T> = [T] extends [null] ? true : false;
 /**
- * Returns boolean `true` is type is `never` otherwise `false`
+ * Returns boolean `true` if type is `never` otherwise `false`
  */
 type isNever<T> = [T] extends [never] ? true : false;
 /**
- * Returns boolean `true` is type is `unknown` otherwise `false`
+ * Returns boolean `true` if type is `unknown` otherwise `false`
  */
 type isUnknown<T> = unknown extends T ? isNull<T> extends false ? true : false : false;
 /**
@@ -28,6 +323,19 @@ type ifNever<T, True, False> = isNever<T> extends true ? True : False;
  * Conditional Utility for checking whether `never` or `unknown` Type
  */
 type isInferred<T, True, False> = ifUnknown<T, True, ifNever<T, True, False>>;
+/**
+ * Useful to flatten the type output to improve type hints shown in editors.
+ *
+ * @example
+ *
+ * type A = { right: number; };
+ * type B = { left: number; };
+ *
+ * Simple<A & B>
+ */
+type Simple<T> = {
+    [K in keyof T]: T[K];
+} & {};
 /**
  * Sync void type, uses 'unknown' for safer `any` - like (forces type checks)
  */
@@ -66,150 +374,6 @@ type Interpolate = unknown[];
  * Promise shorthand
  */
 type P<T> = Promise<T> | T;
-
-/**
- * A reactive stream created by `s.live`, supporting any type.
- */
-type Live<T> = {
-    /**
-     * Get the current value if called with no arguments, or set a new value and return it.
-     *
-     * @example
-     * const sin = s.live(0)
-     * sin() // -> 0
-     * sin(1) // -> 1
-     *
-     * const name = s.live("loki")
-     * name() // -> "loki"
-     */
-    (value?: T): T;
-    /**
-     * The current value of the live stream.
-     *
-     * @example
-     * s.live(10).value // -> 10
-     * s.live("thor").value // -> "thor"
-     */
-    readonly value: T;
-    /**
-     * Returns the value, enabling coercion in operations (e.g., `live + 1` for numbers).
-     *
-     * @example
-     * const sin = s.live(10)
-     * sin.valueOf() // -> 10
-     * sin + 1 // -> 11 (when T is number)
-     */
-    valueOf(): T;
-    /**
-     * Returns the value for JSON serialization.
-     *
-     * @example
-     * s.live(10).toJSON() // -> 10
-     */
-    toJSON(): T;
-    /**
-     * Returns the stringified value.
-     *
-     * @example
-     * s.live(10).toString() // -> "10"
-     * s.live("loki").toString() // -> "loki"
-     */
-    toString(): string;
-    /**
-     * Derive a new live value from a property or function.
-     *
-     * @example
-     * const a = s.live(10)
-     * a.get(x => x + 1)() // -> 11
-     * s.live({ name: "loki" }).get("name")() // -> "loki"
-     */
-    get<U>(x: keyof T | ((value: T) => U)): Live<U>;
-    /**
-     * Set the value, either directly or via a function, returning a function that applies it.
-     *
-     * @example
-     * const sin = s.live(10)
-     * sin.set(20)() // -> sin with value 20
-     * sin.set(x => x + 10)() // -> sin with value 20
-     *
-     * const name = s.live("loki")
-     * name.set("thor")() // -> name with value "thor"
-     */
-    set(x: T | ((...args: any[]) => T)): (...args: any[]) => Live<T>;
-    /**
-     * Observe value changes, returning a function to unsubscribe.
-     *
-     * @example
-     * const sin = s.live(0)
-     * const detach = sin.observe((newVal, oldVal) => console.log(newVal, oldVal))
-     * sin(1) // -> Logs: 1, 0
-     */
-    observe(fn: (newValue: T, oldValue: T, detach: () => void) => void, once?: boolean): () => boolean;
-    /**
-     * Detach observers (no-op if none).
-     *
-     * @example
-     * s.live(10).detach()
-     */
-    detach(): void;
-    /**
-     * Reduce values into a new Live stream.
-     *
-     * @example
-     * const sin = s.live(0)
-     * const total = sin.reduce((acc, val) => acc + val, 0)
-     * sin(1) // -> total() becomes 1
-     *
-     * const text = s.live("")
-     * const concat = text.reduce((acc, val) => acc + val, "prefix")
-     * text("x") // -> concat() becomes "prefixx"
-     */
-    reduce<U>(fn: (acc: U, value: T, index: number) => U, initial?: U): Live<U>;
-    /**
-     * Conditionally return a value based on equality.
-     *
-     * - No extra args: Returns Live<boolean> (true/false).
-     * - One extra arg: Returns Live<U | false>.
-     * - Two extra args: Returns Live<U | V>.
-     *
-     * @example
-     * const a = s.live(666)
-     * a.if(666)() // -> true
-     * a.if(777, 1)() // -> false
-     * a.if(777, 1, 0)() // -> 0
-     *
-     * const name = s.live("loki")
-     * name.if("loki")() // -> true
-     * name.if("thor", "yes", "no")() // -> "no"
-     */
-    if<U = true, V = false>(equals: T, a?: U, b?: V): [U, V] extends [undefined, undefined] ? Live<boolean> : [U] extends [undefined] ? Live<boolean> : Live<U | V>;
-};
-type LiveStatic = {
-    /**
-     * Create a Live instance with an initial value and optional observers.
-     * Returns Live<T> & T when T is a number for arithmetic support.
-     *
-     * @example
-     * const sin = s.live(0)
-     * const name = s.live("loki")
-     */
-    <T>(value: T, ...observers: ((newValue: T, oldValue: T, detach: () => void) => void)[]): T extends number ? Live<T> & T : Live<T>;
-    /**
-     * Create a Live instance from other Live instances and a computation.
-     *
-     * @example
-     * const a = s.live(2)
-     * const b = s.live(3)
-     * const sum = s.live.from(a, b, (x, y) => x + y)
-     * sum() // -> 5
-     *
-     * const x = s.live("x")
-     * const y = s.live("y")
-     * const concat = s.live.from(x, y, (a, b) => a + b)
-     * concat() // -> "xy"
-     */
-    from<U>(...args: [...streams: Live<any>[], fn: (...values: any[]) => U]): U extends number ? Live<U> & U : Live<U>;
-};
 
 type Vars = {
     /**
@@ -318,6 +482,83 @@ type CSS = {
         (id: string, fn: (value: string, property: string) => string): void;
         (units: Record<string, (value: string, property: string) => string>): void;
     };
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    arguments?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    prototype?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    apply?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    call?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    caller?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    bind?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    length: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    name?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    toString?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    valueOf?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    Symbol?: never;
 };
 
 /**
@@ -342,13 +583,13 @@ type Children = Node | Daft | Child | Nodes;
 /**
  * The child node of a component
  */
-type Child = View | Primitive | Nodes | Daft;
+type Child = View | string | number | Nodes | Daft;
 /**
  * Component Node
  *
  * An array of nodes in a sin component
  */
-type Node = Nodes | string | number | boolean;
+type Node = Nodes | string | number;
 /**
  * Sin components will return a View interface
  *
@@ -360,7 +601,23 @@ type View<T = {}> = {
     /**
      * Sin Children (child nodes)
      */
-    readonly children: Children;
+    readonly children: Array<Primitive | Daft | View>;
+    /**
+    * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
+    */
+    readonly attrs: T;
+    /**
+     * The value used to map a DOM element to its respective item in an array of data.
+     */
+    readonly key: any;
+    /**
+     * The nesting index of the Sin Element
+     */
+    readonly nesting: number;
+    /**
+     * Reference to the function (or [fn, options] pair) that defines how the view should render/update.
+     */
+    readonly component: undefined | Function | [Function, Record<string, any>];
     /**
      * Tag reference describing the syntactic markup on the node
      */
@@ -442,14 +699,6 @@ type View<T = {}> = {
          */
         readonly vars: Record<`--${string}`, Vars>;
     };
-    /**
-     * A hashmap of DOM attributes, events, properties and lifecycle methods of a component.
-     */
-    readonly attrs: T;
-    /**
-     * The value used to map a DOM element to its respective item in an array of data.
-     */
-    readonly key: any;
 };
 
 /**
@@ -595,11 +844,11 @@ type Query = {
 /**
  * Component Routes
  */
-type Routes<T extends Attrs = Attrs> = Record<`/${string}`, ((attrs: T & Record<string, string>) => Components | Components[]) | Components | Components[]>;
+type Routes<T = {}> = Record<`/${string}`, ((attrs: T & Record<string, string>) => Components | Components[]) | Components | Components[]>;
 /**
  * Function type for the `s.route` method and `{ route }` instance/s.
  */
-interface Route {
+type Route = {
     /**
      * Visit route
      *
@@ -624,7 +873,7 @@ interface Route {
      *  ],
      * })
      */
-    <T extends Attrs = Attrs>(routes: Routes<T>, options?: Options): View<Attrs>;
+    <T = {}>(routes: Routes<T>, options?: Options): View<T>;
     /**
      * Returns the current URL pathname (route)
      *
@@ -669,7 +918,7 @@ interface Route {
      * s.route.has('loki') // -> true;
      * s.route.has('sin') // -> false;
      */
-    has(path: string): boolean;
+    has: (path: string) => boolean;
     /**
      * Returns the current URL pathname (route)
      *
@@ -677,17 +926,87 @@ interface Route {
      *
      * s.toString() // -> '/'
      */
-    toString(): string;
-}
+    toString: () => string;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    arguments?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    prototype?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    apply?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    call?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    caller?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    bind?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    length: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    name?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    valueOf?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    Symbol?: never;
+};
 
 /**
- * Component Level Context - TypeScript Utility
+ * Component Context - TypeScript Utility
  *
  * @example
  *
  * const x: Context<{ x: string }>
  */
-type Context<T = {}> = T & context & {
+type Context<T = {}> = T & {
     [key: string]: unknown;
     /**
      * Sin SSR (last modified date of `sin build`)
@@ -1093,7 +1412,7 @@ interface ARIABusy {
 type SetNonNullable<BaseType, Keys extends keyof BaseType = keyof BaseType> = {
     [Key in keyof BaseType]: Key extends Keys ? NonNullable<BaseType[Key]> : BaseType[Key];
 };
-type Events<Dom, Event, Attrs = any> = (this: Dom, ...args: [
+type EventHandler<Dom, Event, Attrs = any> = (this: Dom, ...args: [
     event?: SetNonNullable<Target<Dom, Event>>,
     dom?: Dom,
     attrs?: Attrs,
@@ -1122,440 +1441,440 @@ type Target<T, E> = E & {
     readonly srcElement: T;
 };
 /**
- * Universal events that applies to all HTML elements
+ * Universal events that apply to all HTML elements
  */
-interface EventListener<T extends HTMLElement> {
+interface DOMListen<T extends HTMLElement> {
     /**
      * Fires when a non-primary mouse button (e.g., middle or right) is clicked, typically used for auxiliary actions.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/auxclick_event)
      */
-    onauxclick?: Events<T, MouseEvent>;
+    onauxclick?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the object loses the input focus, such as when the user tabs away or clicks elsewhere.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/blur_event)
      */
-    onblur?: Events<T, FocusEvent>;
+    onblur?: EventHandler<T, FocusEvent>;
     /**
      * Fires when the user clicks the left mouse button on the object, triggering a standard click action.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/click_event)
      */
-    onclick?: Events<T, MouseEvent>;
+    onclick?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the user clicks the right mouse button in the client area, opening the context menu.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/contextmenu_event)
      */
-    oncontextmenu?: Events<T, MouseEvent>;
+    oncontextmenu?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the user double-clicks the object with the primary mouse button.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/dblclick_event)
      */
-    ondblclick?: Events<T, MouseEvent>;
+    ondblclick?: EventHandler<T, MouseEvent>;
     /**
      * Fires when an error occurs during the loading of an object, such as an image, script, or media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/error_event)
      */
-    onerror?: Events<T, OnErrorEventHandler>;
+    onerror?: EventHandler<T, OnErrorEventHandler>;
     /**
      * Fires when the object receives input focus, such as when the user tabs to or clicks it.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focus_event)
      */
-    onfocus?: Events<T, FocusEvent>;
+    onfocus?: EventHandler<T, FocusEvent>;
     /**
      * Fires when an element or one of its descendants receives focus, bubbling up through the DOM.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focusin_event)
      */
-    onfocusin?: Events<T, FocusEvent>;
+    onfocusin?: EventHandler<T, FocusEvent>;
     /**
      * Fires when an element or one of its descendants loses focus, bubbling up through the DOM.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/focusout_event)
      */
-    onfocusout?: Events<T, FocusEvent>;
+    onfocusout?: EventHandler<T, FocusEvent>;
     /**
      * Fires when the user presses a key on the keyboard, including modifier keys.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keydown_event)
      */
-    onkeydown?: Events<T, FocusEvent>;
+    onkeydown?: EventHandler<T, FocusEvent>;
     /**
      * Fires when the user presses an alphanumeric key. This event is deprecated; use `onkeydown` or `oninput` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keypress_event)
      */
-    onkeypress?: Events<T, FocusEvent>;
+    onkeypress?: EventHandler<T, FocusEvent>;
     /**
      * Fires when the user releases a key on the keyboard.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/keyup_event)
      */
-    onkeyup?: Events<T, FocusEvent>;
+    onkeyup?: EventHandler<T, FocusEvent>;
     /**
      * Fires immediately after the browser fully loads an object, such as an image, script, or SVG element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/SVGElement/load_event)
      */
-    onload?: Events<T, Event>;
+    onload?: EventHandler<T, Event>;
     /**
      * Fires when the user presses a mouse button down over the object, initiating a click or drag.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousedown_event)
      */
-    onmousedown?: Events<T, MouseEvent>;
+    onmousedown?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse pointer enters an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseenter_event)
      */
-    onmouseenter?: Events<T, MouseEvent>;
+    onmouseenter?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse pointer leaves an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseleave_event)
      */
-    onmouseleave?: Events<T, MouseEvent>;
+    onmouseleave?: EventHandler<T, MouseEvent>;
     /**
      * Fires continuously when the user moves the mouse pointer over the object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousemove_event)
      */
-    onmousemove?: Events<T, MouseEvent>;
+    onmousemove?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse pointer moves outside the boundaries of the object or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseout_event)
      */
-    onmouseout?: Events<T, MouseEvent>;
+    onmouseout?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse pointer moves into the object or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseover_event)
      */
-    onmouseover?: Events<T, MouseEvent>;
+    onmouseover?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the user releases a mouse button while the pointer is over the object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mouseup_event)
      */
-    onmouseup?: Events<T, MouseEvent>;
+    onmouseup?: EventHandler<T, MouseEvent>;
     /**
      * Fires when the mouse wheel is rotated. This event is deprecated; use `onwheel` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/mousewheel_event)
      */
-    onmousewheel?: Events<T, MouseEvent>;
+    onmousewheel?: EventHandler<T, MouseEvent>;
     /**
      * Fires when a pointer interaction (e.g., touch or pen) is interrupted, such as lifting a finger unexpectedly.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointercancel_event)
      */
-    onpointercancel?: Events<T, PointerEvent>;
+    onpointercancel?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer (e.g., mouse, touch, or pen) is pressed down on an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerdown_event)
      */
-    onpointerdown?: Events<T, PointerEvent>;
+    onpointerdown?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer enters an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerenter_event)
      */
-    onpointerenter?: Events<T, PointerEvent>;
+    onpointerenter?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer leaves an element’s boundaries, without bubbling to ancestors.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerleave_event)
      */
-    onpointerleave?: Events<T, PointerEvent>;
+    onpointerleave?: EventHandler<T, PointerEvent>;
     /**
      * Fires continuously when a pointer moves over an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointermove_event)
      */
-    onpointermove?: Events<T, PointerEvent>;
+    onpointermove?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer moves out of an element or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerout_event)
      */
-    onpointerout?: Events<T, PointerEvent>;
+    onpointerout?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer moves into an element or one of its descendants.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerover_event)
      */
-    onpointerover?: Events<T, PointerEvent>;
+    onpointerover?: EventHandler<T, PointerEvent>;
     /**
      * Fires when a pointer is released over an element, such as lifting a finger or mouse button.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/pointerup_event)
      */
-    onpointerup?: Events<T, PointerEvent>;
+    onpointerup?: EventHandler<T, PointerEvent>;
     /**
      * Fires when the user repositions the scroll box in a scrollable element, indicating scrolling activity.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/scroll_event)
      */
-    onscroll?: Events<T, Event>;
+    onscroll?: EventHandler<T, Event>;
     /**
      * Fires when scrolling has stopped in a scrollable element, after the user finishes scrolling.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/scrollend_event)
      */
-    onscrollend?: Events<T, Event>;
+    onscrollend?: EventHandler<T, Event>;
     /**
      * Fires when a touch interaction is interrupted, such as lifting a finger unexpectedly during a gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchcancel_event)
      */
-    ontouchcancel?: Events<T, TouchEvent>;
+    ontouchcancel?: EventHandler<T, TouchEvent>;
     /**
      * Fires when a touch point is removed from an element, such as lifting a finger from the screen.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchend_event)
      */
-    ontouchend?: Events<T, TouchEvent>;
+    ontouchend?: EventHandler<T, TouchEvent>;
     /**
      * Fires continuously when a touch point moves over an element during a touch gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchmove_event)
      */
-    ontouchmove?: Events<T, TouchEvent>;
+    ontouchmove?: EventHandler<T, TouchEvent>;
     /**
      * Fires when a touch point contacts an element, initiating a touch gesture.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/touchstart_event)
      */
-    ontouchstart?: Events<T, TouchEvent>;
+    ontouchstart?: EventHandler<T, TouchEvent>;
     /**
      * Fires when the window is about to be unloaded, such as when the user closes the tab or navigates away.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/unload_event)
      */
-    onunload?: Events<T, Event>;
+    onunload?: EventHandler<T, Event>;
     /**
      * Fires when the mouse wheel or trackpad is scrolled over an element, providing delta values for scroll direction.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/wheel_event)
      */
-    onwheel?: Events<T, WheelEvent>;
+    onwheel?: EventHandler<T, WheelEvent>;
 }
 /**
  * Media-specific events (for `<audio>`, `<video>`)
  */
-interface MediaListener<T extends HTMLElement> {
+interface MediaListeners<T extends HTMLElement> {
     /**
      * Fires when the user aborts the download of a resource, such as a media element or fetch request.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/abort_event)
      */
-    onabort?: Events<T, UIEvent>;
+    onabort?: EventHandler<T, UIEvent>;
     /**
      * Occurs when playback is possible for a media element, but further buffering may be required to
      * continue without interruption.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplay_event)
      */
-    oncanplay?: Events<T, Event>;
+    oncanplay?: EventHandler<T, Event>;
     /**
      * Occurs when a media element can play through to the end without requiring additional buffering.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/canplaythrough_event)
      */
-    oncanplaythrough?: Events<T, Event>;
+    oncanplaythrough?: EventHandler<T, Event>;
     /**
      * Occurs when the duration attribute of a media element is updated, reflecting a change in media length.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/durationchange_event)
      */
-    ondurationchange?: Events<T, Event>;
+    ondurationchange?: EventHandler<T, Event>;
     /**
      * Occurs when a media element is reset to its initial state, typically after its source is cleared.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/emptied_event)
      */
-    onemptied?: Events<T, Event>;
+    onemptied?: EventHandler<T, Event>;
     /**
      * Occurs when playback of a media element reaches its end.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ended_event)
      */
-    onended?: Events<T, Event>;
+    onended?: EventHandler<T, Event>;
     /**
      * Occurs when media data is loaded at the current playback position of a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadeddata_event)
      */
-    onloadeddata?: Events<T, Event>;
+    onloadeddata?: EventHandler<T, Event>;
     /**
      * Occurs when the duration and dimensions of a media element have been determined during loading.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadedmetadata_event)
      */
-    onloadedmetadata?: Events<T, Event>;
+    onloadedmetadata?: EventHandler<T, Event>;
     /**
      * Occurs when the browser begins looking for media data, marking the start of the loading process.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/loadstart_event)
      */
-    onloadstart?: Events<T, Event>;
+    onloadstart?: EventHandler<T, Event>;
     /**
      * Occurs when playback of a media element is paused, either by the user or programmatically.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/pause_event)
      */
-    onpause?: Events<T, Event>;
+    onpause?: EventHandler<T, Event>;
     /**
      * Occurs when playback of a media element is requested via the `play()` method, before it actually starts.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/play_event)
      */
-    onplay?: Events<T, Event>;
+    onplay?: EventHandler<T, Event>;
     /**
      * Occurs when a media element has started playing, after buffering and any delays.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/playing_event)
      */
-    onplaying?: Events<T, Event>;
+    onplaying?: EventHandler<T, Event>;
     /**
      * Occurs periodically to indicate progress while downloading media data for a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/progress_event)
      */
-    onprogress?: Events<T, ProgressEvent>;
+    onprogress?: EventHandler<T, ProgressEvent>;
     /**
      * Occurs when the playback rate of a media element changes, such as speeding up or slowing down.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/ratechange_event)
      */
-    onratechange?: Events<T, Event>;
+    onratechange?: EventHandler<T, Event>;
     /**
      * Occurs when a seek operation on a media element completes, positioning playback at the new time.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeked_event)
      */
-    onseeked?: Events<T, Event>;
+    onseeked?: EventHandler<T, Event>;
     /**
      * Occurs when a seek operation begins on a media element, moving the playback position.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/seeking_event)
      */
-    onseeking?: Events<T, Event>;
+    onseeking?: EventHandler<T, Event>;
     /**
      * Occurs when media download stalls due to insufficient data or network issues.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/stalled_event)
      */
-    onstalled?: Events<T, Event>;
+    onstalled?: EventHandler<T, Event>;
     /**
      * Occurs when media loading is intentionally suspended, such as when the browser pauses a download.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/suspend_event)
      */
-    onsuspend?: Events<T, Event>;
+    onsuspend?: EventHandler<T, Event>;
     /**
      * Occurs periodically to report the current playback position of a media element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/timeupdate_event)
      */
-    ontimeupdate?: Events<T, Event>;
+    ontimeupdate?: EventHandler<T, Event>;
     /**
      * Occurs when the volume of a media element changes, including muting or unmuting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/volumechange_event)
      */
-    onvolumechange?: Events<T, Event>;
+    onvolumechange?: EventHandler<T, Event>;
     /**
      * Occurs when playback stops because the next frame of a media resource is unavailable, requiring buffering.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLMediaElement/waiting_event)
      */
-    onwaiting?: Events<T, Event>;
+    onwaiting?: EventHandler<T, Event>;
 }
 /**
  * Form-specific events (for `<form>`, `<input>`, `<select>`, `<textarea>`)
  */
-interface FormListener<T extends HTMLFormElement> {
+interface FormListeners<T extends HTMLFormElement> {
     /**
      * Fires before an input element’s value is modified, allowing cancellation or modification of the input.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/beforeinput_event)
      */
-    onbeforeinput?: Events<T, InputEvent>;
+    onbeforeinput?: EventHandler<T, InputEvent>;
     /**
      * Fires when the contents of an input element or selection have changed, such as after a user modifies a form field.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event)
      */
-    onchange?: Events<T, Event>;
+    onchange?: EventHandler<T, Event>;
     /**
      * Fires when content is copied to the clipboard, allowing modification or cancellation of the operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/copy_event)
      */
-    oncopy?: Events<T, ClipboardEvent>;
+    oncopy?: EventHandler<T, ClipboardEvent>;
     /**
      * Fires when content is cut to the clipboard, allowing modification or cancellation of the operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/cut_event)
      */
-    oncut?: Events<T, ClipboardEvent>;
+    oncut?: EventHandler<T, ClipboardEvent>;
     /**
      * Fires when a form’s data is being constructed, allowing modification of the `FormData` object before submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/formdata_event)
      */
-    onformdata?: Events<T, FormDataEvent>;
+    onformdata?: EventHandler<T, FormDataEvent>;
     /**
      * Fires when the value of an input element changes due to user input, such as typing or pasting.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/input_event)
      */
-    oninput?: Events<T, Event>;
+    oninput?: EventHandler<T, Event>;
     /**
      * Fires when an input element’s value fails validation constraints upon form submission.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLInputElement/invalid_event)
      */
-    oninvalid?: Events<T, Event>;
+    oninvalid?: EventHandler<T, Event>;
     /**
      * Fires when content is pasted from the clipboard into an element, allowing modification of the pasted data.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/paste_event)
      */
-    onpaste?: Events<T, ClipboardEvent>;
+    onpaste?: EventHandler<T, ClipboardEvent>;
     /**
      * Fires when the user resets a form, restoring its fields to their default values.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLFormElement/reset_event)
      */
-    onreset?: Events<T, Event>;
+    onreset?: EventHandler<T, Event>;
     /**
      * Fires when the current text selection changes within an input or textarea element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLInputElement/select_event)
      */
-    onselect?: Events<T, Event>;
+    onselect?: EventHandler<T, Event>;
     /**
      * Fires when the document’s text selection changes, such as selecting or deselecting text.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/selectionchange_event)
      */
-    onselectionchange?: Events<T, Event>;
+    onselectionchange?: EventHandler<T, Event>;
     /**
      * Fires when the user begins selecting text or content within an element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Node/selectstart_event)
      */
-    onselectstart?: Events<T, Event>;
+    onselectstart?: EventHandler<T, Event>;
     /**
      * Fires when a form is submitted, either by user action or programmatically, allowing validation or cancellation.
      *
@@ -1566,238 +1885,238 @@ interface FormListener<T extends HTMLFormElement> {
 /**
  * Drag-and-drop events (for draggable elements)
  */
-interface DragListener<T extends HTMLElement> {
+interface DragListeners<T extends HTMLElement> {
     /**
      * Fires on the source object continuously during a drag operation while the user moves the dragged item.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/drag_event)
      */
-    ondrag?: Events<T, DragEvent>;
+    ondrag?: EventHandler<T, DragEvent>;
     /**
      * Fires on the source object when the user releases the mouse at the end of a drag operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragend_event)
      */
-    ondragend?: Events<T, DragEvent>;
+    ondragend?: EventHandler<T, DragEvent>;
     /**
      * Fires on the target element when the user drags an object into a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragenter_event)
      */
-    ondragenter?: Events<T, DragEvent>;
+    ondragenter?: EventHandler<T, DragEvent>;
     /**
      * Fires on the target object when the user moves the dragged item out of a valid drop target during a drag operation.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragleave_event)
      */
-    ondragleave?: Events<T, DragEvent>;
+    ondragleave?: EventHandler<T, DragEvent>;
     /**
      * Fires on the target element continuously while the user drags an object over a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragover_event)
      */
-    ondragover?: Events<T, DragEvent>;
+    ondragover?: EventHandler<T, DragEvent>;
     /**
      * Fires on the source object when the user starts dragging a text selection or selected object.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/dragstart_event)
      */
-    ondragstart?: Events<T, DragEvent>;
+    ondragstart?: EventHandler<T, DragEvent>;
     /**
      * Fires on the target element when the user drops a dragged object onto a valid drop target.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/drop_event)
      */
-    ondrop?: Events<T, DragEvent>;
+    ondrop?: EventHandler<T, DragEvent>;
 }
 /**
  * Animation and transition events (for styled elements)
  */
-interface AnimationListener<T extends HTMLElement> {
+interface AnimationListeners<T extends HTMLElement> {
     /**
      * Fires when an animation is aborted unexpectedly, such as when the element is removed from the DOM before completion.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationcancel_event)
      */
-    onanimationcancel?: Events<T, AnimationEvent>;
+    onanimationcancel?: EventHandler<T, AnimationEvent>;
     /**
      * Fires when a CSS animation completes successfully, after all iterations have finished.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationend_event)
      */
-    onanimationend?: Events<T, AnimationEvent>;
+    onanimationend?: EventHandler<T, AnimationEvent>;
     /**
      * Fires when a CSS animation completes a single iteration, but only if the animation has multiple iterations.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event)
      */
-    onanimationiteration?: Events<T, AnimationEvent>;
+    onanimationiteration?: EventHandler<T, AnimationEvent>;
     /**
      * Fires when a CSS animation begins, after any delay specified in the animation has elapsed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationstart_event)
      */
-    onanimationstart?: Events<T, AnimationEvent>;
+    onanimationstart?: EventHandler<T, AnimationEvent>;
     /**
      * Fires when a CSS transition is cancelled before completion, such as when a property is removed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitioncancel_event)
      */
-    ontransitioncancel?: Events<T, TransitionEvent>;
+    ontransitioncancel?: EventHandler<T, TransitionEvent>;
     /**
      * Fires when a CSS transition completes successfully, after reaching its end state.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionend_event)
      */
-    ontransitionend?: Events<T, TransitionEvent>;
+    ontransitionend?: EventHandler<T, TransitionEvent>;
     /**
      * Fires when a CSS transition is first scheduled to run, before it actually starts.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionrun_event)
      */
-    ontransitionrun?: Events<T, TransitionEvent>;
+    ontransitionrun?: EventHandler<T, TransitionEvent>;
     /**
      * Fires when a CSS transition begins, after any delay has elapsed.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionstart_event)
      */
-    ontransitionstart?: Events<T, TransitionEvent>;
+    ontransitionstart?: EventHandler<T, TransitionEvent>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationend`. It is deprecated; use `onanimationend` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationend_event)
      */
-    onwebkitanimationend?: Events<T, Event>;
+    onwebkitanimationend?: EventHandler<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationiteration`. It is deprecated; use `onanimationiteration` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationiteration_event)
      */
-    onwebkitanimationiteration?: Events<T, Event>;
+    onwebkitanimationiteration?: EventHandler<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `onanimationstart`. It is deprecated; use `onanimationstart` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/animationstart_event)
      */
-    onwebkitanimationstart?: Events<T, Event>;
+    onwebkitanimationstart?: EventHandler<T, Event>;
     /**
      * This is a legacy Webkit-specific alias of `ontransitionend`. It is deprecated; use `ontransitionend` instead.
      *
      * @deprecated [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/transitionend_event)
      */
-    onwebkittransitionend?: Events<T, Event>;
+    onwebkittransitionend?: EventHandler<T, Event>;
 }
 /**
  * Canvas-specific events
  */
-interface CanvasListener<T extends HTMLElement> {
+interface CanvasListeners<T extends HTMLElement> {
     /**
      * Fires when a WebGL context is lost, typically due to hardware or driver issues, requiring reinitialization.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/webglcontextlost_event)
      */
-    oncontextlost?: Events<T, Event>;
+    oncontextlost?: EventHandler<T, Event>;
     /**
      * Fires when a lost WebGL context is restored, allowing rendering to resume on a `<canvas>` element.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement/contextrestored_event)
      */
-    oncontextrestored?: Events<T, Event>;
+    oncontextrestored?: EventHandler<T, Event>;
 }
 /**
  * Dialog-specific events
  */
-interface DialogListener<T extends HTMLElement> {
+interface DialogListeners<T extends HTMLElement> {
     /**
      * Fires when a dialog or similar cancellable action is aborted by the user, such as pressing Esc in a `<dialog>`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/cancel_event)
      */
-    oncancel?: Events<T, Event>;
+    oncancel?: EventHandler<T, Event>;
     /**
      * Fires when a `<dialog>` element is closed, either by the user or programmatically.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLDialogElement/close_event)
      */
-    onclose?: Events<T, Event>;
+    onclose?: EventHandler<T, Event>;
 }
 /**
  * Details-specific events
  */
-interface DetailsListener<T extends HTMLElement> {
+interface DetailsListeners<T extends HTMLElement> {
     /**
      * Fires when a `<details>` element’s open state toggles, either opening or closing the details.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLDetailsElement/toggle_event)
      */
-    ontoggle?: Events<T, Event>;
+    ontoggle?: EventHandler<T, Event>;
 }
 /**
  * Track-specific events
  */
-interface TrackListener<T extends HTMLElement> {
+interface TrackListeners<T extends HTMLElement> {
     /**
      * Fires when a text track cue changes, such as in a `<track>` element for subtitles or captions.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLTrackElement/cuechange_event)
      */
-    oncuechange?: Events<T, Event>;
+    oncuechange?: EventHandler<T, Event>;
 }
 /**
  * Video-specific events (extends MediaListeners)
  */
-interface VideoListener<T extends HTMLElement> extends MediaListener<T> {
+interface VideoListeners<T extends HTMLElement> extends MediaListeners<T> {
     /**
      * Fires when a video element’s intrinsic size changes, such as when new metadata is loaded.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLVideoElement/resize_event)
      */
-    onresize?: Events<T, UIEvent>;
+    onresize?: EventHandler<T, UIEvent>;
 }
 /**
  * Popover-specific events (for elements with popover attribute)
  */
-interface PopoverListener<T extends HTMLElement> {
+interface PopoverListeners<T extends HTMLElement> {
     /**
      * Fires just before an element’s `popover` state toggles (e.g., before showing or hiding a popover).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/beforetoggle_event)
      */
-    onbeforetoggle?: Events<T, Event>;
+    onbeforetoggle?: EventHandler<T, Event>;
     /**
      * Fires when an element’s `popover` state toggles (e.g., showing or hiding a popover).
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/HTMLElement/toggle_event)
      */
-    ontoggle?: Events<T, Event>;
+    ontoggle?: EventHandler<T, Event>;
 }
 /**
  * Pointer capture-specific events (for elements using pointer capture)
  */
-interface PointerListener<T extends HTMLElement> {
+interface PointerListeners<T extends HTMLElement> {
     /**
      * Fires when an element captures a pointer (e.g., mouse or touch) after a `setPointerCapture` call.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/gotpointercapture_event)
      */
-    ongotpointercapture?: Events<T, PointerEvent>;
+    ongotpointercapture?: EventHandler<T, PointerEvent>;
     /**
      * Fires when an element loses pointer capture, such as when released via `releasePointerCapture`.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Element/lostpointercapture_event)
      */
-    onlostpointercapture?: Events<T, PointerEvent>;
+    onlostpointercapture?: EventHandler<T, PointerEvent>;
 }
 /**
  * Security policy violation event (for elements affected by CSP)
  */
-interface SecurityListener<T extends HTMLElement> {
+interface SecurityListeners<T extends HTMLElement> {
     /**
      * Fires when a Content Security Policy violation occurs, such as an attempt to load a blocked resource.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/Document/securitypolicyviolation_event)
      */
-    onsecuritypolicyviolation?: Events<T, SecurityPolicyViolationEvent>;
+    onsecuritypolicyviolation?: EventHandler<T, SecurityPolicyViolationEvent>;
 }
 
 /**
@@ -1836,7 +2155,7 @@ interface SinAttributes<T extends HTMLElement> {
      */
     dom?: ((...params: SinDOM<T, this>) => any) | Array<((...params: SinDOM<T, this>) => any)>;
     /**
-     * Waits for children using deferred removal
+     * Waits for children that have set delayed removal.
      *
      * @default false
      */
@@ -1859,7 +2178,7 @@ type AutoCompleteUnion = StringUnion<'additional-name' | 'address-level1' | 'add
  * handling of tagged literals via {@link TemplateStringsArray} which prevents type
  * extraction and renders parse tag name analysis impossible.
  */
-interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, AnimationListener<T>, CanvasListener<T>, DetailsListener<T>, DialogListener<T>, DragListener<T>, FormListener<HTMLFormElement>, MediaListener<T>, SecurityListener<T>, TrackListener<T>, VideoListener<T>, ARIAForm, ARIABusy, ARIAInteractive, ARIAModal, ARIAProgress, ARIAStructural {
+interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<HTMLFormElement>, MediaListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T>, ARIAForm, ARIABusy, ARIAInteractive, ARIAModal, ARIAProgress, ARIAStructural {
     /**
      * - {@link InputAttributes}
      *
@@ -2837,7 +3156,7 @@ interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, Animation
      */
     wrap?: StringUnion<"soft" | "hard">;
 }
-interface Attributes<T extends HTMLElement> extends ARIAAttrs, SinAttributes<T>, EventListener<T>, PointerListener<T>, PopoverListener<T> {
+interface Attributes<T extends HTMLElement> extends ARIAAttrs, SinAttributes<T>, DOMListen<T>, PointerListeners<T>, PopoverListeners<T> {
     [attribute: string]: any;
     /**
      * {@link HTMLElement}  →  {@link Attributes}
@@ -3336,7 +3655,27 @@ interface Attributes<T extends HTMLElement> extends ARIAAttrs, SinAttributes<T>,
 /**
  * - `<a>`
  */
-interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends Attributes<T>, SecurityListener<T> {
+interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends Attributes<T>, SecurityListeners<T> {
+    /**
+     * The state key is a special attribute in Sin that can be applied to anchor (`a`) elements to facilitate data
+     * passing during client-side routing. It leverages the browser's History API (specifically `history.pushState`)
+     * to forward an object of data to the target route without altering the URL (e.g., no query parameters or
+     * fragments are added).
+     *
+     * This data is then automatically merged into the `attrs` argument of the receiving component on the target route.
+     *
+     * @example
+     *
+     * // Consider the following href
+     * s`a`({
+     *   href: '/path/to',
+     *   state: {
+     *     name: 'Loki',
+     *     age: 666
+     *   }
+     * })
+     */
+    state?: Record<any, any>;
     /**
      * {@link HTMLLinkElement}  →  {@link LinkAttributes}
      *
@@ -3511,7 +3850,7 @@ interface StyleAttributes<T extends HTMLStyleElement = HTMLStyleElement> extends
 /**
  * - `<blockquote>`
  */
-interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends Attributes<T>, AnimationListener<T>, DragListener<T> {
+interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends Attributes<T>, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLQuoteElement}  →  {@link QuoteAttributes}
      *
@@ -3533,7 +3872,7 @@ interface QuoteAttributes<T extends HTMLQuoteElement = HTMLQuoteElement> extends
 /**
  * - `<ol>`
  */
-interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>, ARIAStructural, AnimationListener<T>, DragListener<T> {
+interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends Attributes<T>, ARIAStructural, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLOListElement}  →  {@link OListAttributes}
      *
@@ -3594,7 +3933,7 @@ interface OListAttributes<T extends HTMLOListElement = HTMLOListElement> extends
 /**
  * - `<li>`
  */
-interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>, ARIAStructural, AnimationListener<T>, DragListener<T> {
+interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attributes<T>, ARIAStructural, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLLIElement}  →  {@link LIAttributes}
      *
@@ -3725,7 +4064,7 @@ interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> exte
 /**
  * - `<time>`
  */
-interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends Attributes<T>, AnimationListener<T> {
+interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLTimeElement}  →  {@link TimeAttributes}
      *
@@ -3756,7 +4095,7 @@ interface TimeAttributes<T extends HTMLTimeElement = HTMLTimeElement> extends At
  * - `<del>`
  * - `<ins>`
  */
-interface ModAttributes<T extends HTMLModElement = HTMLModElement> extends Attributes<T>, AnimationListener<T> {
+interface ModAttributes<T extends HTMLModElement = HTMLModElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLModElement}  →  {@link ModAttributes}
      *
@@ -4169,7 +4508,7 @@ interface ObjectAttributes<T extends HTMLObjectElement = HTMLObjectElement> exte
 /**
  * - `<video>`
  */
-interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>, ARIABusy, VideoListener<T>, DragListener<T>, AnimationListener<T> {
+interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends Attributes<T>, ARIABusy, VideoListeners<T>, DragListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLVideoElement}  →  {@link VideoAttributes}
      *
@@ -4270,7 +4609,7 @@ interface VideoAttributes<T extends HTMLVideoElement = HTMLVideoElement> extends
 /**
  * - `<audio>`
  */
-interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>, ARIABusy, MediaListener<T>, AnimationListener<T> {
+interface AudioAttributes<T extends HTMLAudioElement = HTMLAudioElement> extends Attributes<T>, ARIABusy, MediaListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLAudioElement}  →  {@link AudioAttributes}
      *
@@ -4373,7 +4712,7 @@ interface SourceAttributes<T extends HTMLSourceElement = HTMLSourceElement> exte
 /**
  * - `<track>`
  */
-interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> extends Attributes<T>, TrackListener<T> {
+interface TrackAttributes<T extends HTMLTrackElement = HTMLTrackElement> extends Attributes<T>, TrackListeners<T> {
     /**
      * {@link HTMLTrackElement}  →  {@link TrackAttributes}
      *
@@ -4603,7 +4942,7 @@ interface TableCellAttributes<T extends HTMLTableCellElement = HTMLTableCellElem
 /**
  * - `<form>`
  */
-interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>, ARIAForm, FormListener<T>, AnimationListener<T> {
+interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends Attributes<T>, ARIAForm, FormListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLFormElement}  →  {@link FormAttributes}
      *
@@ -4680,7 +5019,7 @@ interface FormAttributes<T extends HTMLFormElement = HTMLFormElement> extends At
 /**
  * - `<label>`
  */
-interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends Attributes<T>, AnimationListener<T> {
+interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLLabelElement}  →  {@link LabelAttributes}
      *
@@ -4693,7 +5032,7 @@ interface LabelAttributes<T extends HTMLLabelElement = HTMLLabelElement> extends
 /**
  * - `<input>`
  */
-interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListener<HTMLFormElement>, AnimationListener<T>, DragListener<T> {
+interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T>, DragListeners<T> {
     /**
      * {@link HTMLInputElement}  →  {@link InputAttributes}
      *
@@ -4954,7 +5293,7 @@ interface InputAttributes<T extends HTMLInputElement = HTMLInputElement> extends
 /**
  * - `<button>`
  */
-interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>, ARIAInteractive, AnimationListener<T> {
+interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> extends Attributes<T>, ARIAInteractive, AnimationListeners<T> {
     /**
      * {@link HTMLButtonElement}  →  {@link ButtonAttributes}
      *
@@ -5047,7 +5386,7 @@ interface ButtonAttributes<T extends HTMLButtonElement = HTMLButtonElement> exte
 /**
  * - `<select>`
  */
-interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListener<HTMLFormElement>, AnimationListener<T> {
+interface SelectAttributes<T extends HTMLSelectElement = HTMLSelectElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T> {
     /**
      * {@link HTMLSelectElement}  →  {@link SelectAttributes}
      *
@@ -5190,7 +5529,7 @@ interface OptionAttributes<T extends HTMLOptionElement = HTMLOptionElement> exte
 /**
  * - `<textarea>`
  */
-interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListener<HTMLFormElement>, AnimationListener<T> {
+interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement> extends Attributes<T>, ARIAInteractive, ARIAForm, FormListeners<HTMLFormElement>, AnimationListeners<T> {
     /**
      * {@link HTMLTextAreaElement}  →  {@link TextAreaAttributes}
      *
@@ -5307,7 +5646,7 @@ interface TextAreaAttributes<T extends HTMLTextAreaElement = HTMLTextAreaElement
 /**
  * - `<output>`
  */
-interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> extends Attributes<T>, AnimationListener<T> {
+interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLOutputElement}  →  {@link OutputAttributes}
      *
@@ -5344,7 +5683,7 @@ interface OutputAttributes<T extends HTMLOutputElement = HTMLOutputElement> exte
 /**
  * - `<progress>`
  */
-interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>, ARIAProgress, AnimationListener<T> {
+interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement> extends Attributes<T>, ARIAProgress, AnimationListeners<T> {
     /**
      * {@link HTMLProgressElement}  →  {@link ProgressAttributes}
      *
@@ -5373,7 +5712,7 @@ interface ProgressAttributes<T extends HTMLProgressElement = HTMLProgressElement
 /**
  * - `<meter>`
  */
-interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>, ARIAProgress, AnimationListener<T> {
+interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends Attributes<T>, ARIAProgress, AnimationListeners<T> {
     /**
      * {@link HTMLMeterElement}  →  {@link MeterAttributes}
      *
@@ -5434,7 +5773,7 @@ interface MeterAttributes<T extends HTMLMeterElement = HTMLMeterElement> extends
 /**
  * - `<fieldset>`
  */
-interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement> extends Attributes<T>, AnimationListener<T> {
+interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLFieldSetElement}  →  {@link FieldSetAttributes}
      *
@@ -5471,7 +5810,7 @@ interface FieldSetAttributes<T extends HTMLFieldSetElement = HTMLFieldSetElement
 /**
  * - `<details>`
  */
-interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DetailsListener<T>, AnimationListener<T> {
+interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DetailsListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLDetailsElement}  →  {@link DetailsAttributes}
      *
@@ -5492,7 +5831,7 @@ interface DetailsAttributes<T extends HTMLDetailsElement = HTMLDetailsElement> e
 /**
  * - `<dialog>`
  */
-interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DialogListener<T>, AnimationListener<T> {
+interface DialogAttributes<T extends HTMLDialogElement = HTMLDialogElement> extends Attributes<T>, ARIAInteractive, ARIAModal, DialogListeners<T>, AnimationListeners<T> {
     /**
      * {@link HTMLDialogElement}  →  {@link DialogAttributes}
      *
@@ -5574,7 +5913,7 @@ interface ScriptAttributes<T extends HTMLScriptElement = HTMLScriptElement> exte
 /**
  * - `<canvas>`
  */
-interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>, ARIABusy, CanvasListener<T> {
+interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> extends Attributes<T>, ARIABusy, CanvasListeners<T> {
     /**
      * {@link HTMLCanvasElement}  →  {@link CanvasAttributes}
      *
@@ -5603,7 +5942,7 @@ interface CanvasAttributes<T extends HTMLCanvasElement = HTMLCanvasElement> exte
 /**
  * - `<data>`
  */
-interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends Attributes<T>, AnimationListener<T> {
+interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends Attributes<T>, AnimationListeners<T> {
     /**
      * {@link HTMLDataElement}  →  {@link DataAttributes}
      *
@@ -5623,103 +5962,88 @@ interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends At
 }
 
 type Components = typeof s;
-type SinElement<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : HTMLAttributes<HTMLElement>;
+type SinAttrs<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : HTMLAttributes<HTMLElement>;
+type MergeAttrs<T, A> = Simple<A & SinAttrs<T>>;
+type Views = Exclude<Children, Record<string, unknown>>;
 type Varidiac = Children | Children[] | StyledComponent | Array<Children | StyledComponent> | [];
-type AsyncOptions<T, U, V> = {
-    /**
-     * Asynchronous loading
-     */
-    loading?: any;
-    /**
-     * Intercept throws or errors
-     */
-    error?: <Exception extends DOMException = any>(err?: Exception) => void | InferComponent<(...args: Arguments<T, U, V>) => any>;
-};
-type AsyncSignature<T, U, V> = [
-    async: AsyncOptions<T, U, V>,
-    component: (...args: Arguments<T, U, V>) => P<StatelessSignature<T, U, V>>
-];
 type Arguments<T, U, V> = [
     attrs: isInferred<T, Attrs, T>,
     children: U extends any[] ? [...U, Children] : U[],
     context: keyof V extends never ? Context<{}> : Context<V>
 ];
-/**
- * Stateless and Stateful Signature Overloads
- */
-type Signatures<T, U, V> = {
+type Signatures<T = {}, U = [], V = {}> = {
     (tag: TagLiteral, ...interpolate: Interpolate): Signatures<T, U, V>;
-    (attrs: isInferred<T, {}, T>): View<T>;
-    (attrs: isInferred<T, {}, T>, ...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
-    (attrs: isInferred<T, {}, T>, children: U extends [] ? Children[] : U, context?: V): View<T>;
-    (...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
+    (attrs: T): View<T>;
+    (attrs: T, children: U extends [] ? Views[] : U, context?: V): View<T>;
+    (attrs: T, ...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
+    (...children: U extends [] ? Views[] : U extends any[] ? U : U[]): View<T>;
 };
-/**
- * Stateless Signature
- */
 type StatelessSignature<T, U, V> = (...x: Arguments<T, U, V>) => Varidiac;
-/**
- * Stateless Component
- */
 type StatelessComponent<T, U, V> = Signatures<T, U, V>;
-/**
- * Stateful Signature
- */
 type StatefulSignature<T, U, V> = (...x: Arguments<T, U, V>) => P<(...x: Arguments<T, U, V>) => P<Varidiac>>;
-/**
- * Stateful Component
- */
 type StatefulComponent<T, U, V> = Signatures<T, U, V>;
-/**
- * Async Component
- */
-type AsyncComponent<T, U, V> = AsyncSignature<T, U, V>;
+type StateSignatures<T, U, V> = StatelessSignature<T, U, V> | StatefulSignature<T, U, V>;
 type StyledSignature<T extends HTMLElement> = Partial<[
-    attributes?: SinElement<T>,
+    attributes?: SinAttrs<T>,
     ...children: Array<Children | StyledComponent<T>>
 ] | [
     ...children: Array<Children | StyledComponent<T>>
 ]>;
 type StyledComponent<T extends HTMLElement = HTMLElement> = {
-    /** Element with Attributes Signature */
+    <S extends StateSignatures<any, any, any>>(component: S): InferComponent<S>;
     <A = {}>(...attibutes: StyledSignature<T>): View<A>;
-    /** Styled Component Literal Signature */
     (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
 };
+type AsyncSignature<T, U, V> = [
+    /**
+     * Async Stateful Options
+     */
+    options: {
+        /**
+         * Render a loading dom element
+         *
+         * @example
+         * s(
+         *  {
+         *    loading: s`div`('patience...')
+         *  },
+         *  async () => {
+         *    // Perform some task...
+         *    await s.sleep(3000);
+         *
+         *    return () => s`h1`('Hello Sinner!')
+         *  }
+         * )
+         */
+        loading?: Components;
+        /**
+         * Intercept throws or errors
+         *
+         * @example
+         * s(
+         *  {
+         *    loading: s`div`('patience...'),
+         *    error: e => s`h1 fc red`('There was an error ' + e)
+         *  },
+         *  async () => {
+         *    // Perform some task...
+         *    await s.sleep(3000);
+         *
+         *    return () => s`h1`('Hello Sinner!')
+         *  }
+         * )
+         */
+        error?: <Exception extends DOMException = any>(e?: Exception) => Components;
+    },
+    /**
+     * Component Rendering
+     */
+    component: P<StatefulComponent<T, U, V>>
+];
 type InferComponent<S> = S extends StatelessSignature<infer T, infer U, infer V> ? StatelessComponent<T, U, V> : S extends StatefulSignature<infer T, infer U, infer V> ? StatefulComponent<T, U, V> : never;
-/**
- * Component - TypeScript Utility
- *
- * @example
- *
- * const x: s.Component<{}, [], {}>;
- */
-type Component<T = {}, U = [], V = {}> = T extends HTMLElement ? StyledComponent<T> : InferComponent<(...args: Arguments<T, U, V>) => any> extends never ? StatelessComponent<T, U, V> | StatefulComponent<T, U, V> : InferComponent<(...args: Arguments<T, U, V>) => any>;
+type Component<E, T = {}, U = [], V = {}> = E extends HTMLElement ? IfEmptyObject<T> extends true ? IfEmptyTuple<U> extends true ? IfEmptyObject<V> extends true ? StyledComponent<E> : InferComponent<(...x: Arguments<MergeAttrs<E, T>, U, V>) => any> : InferComponent<(...x: Arguments<MergeAttrs<E, T>, U, V>) => any> : InferComponent<(...x: Arguments<MergeAttrs<E, T>, U, V>) => any> : IfEmptyObject<E> extends true ? IfEmptyTuple<T> extends true ? IfEmptyObject<U> extends true ? StyledComponent<HTMLElement> : InferComponent<(...x: Arguments<E, T, U>) => any> : InferComponent<(...x: Arguments<E, T, U>) => any> : InferComponent<(...x: Arguments<E, T, U>) => any>;
 
-/**
- * DOM Event handler
- */
-type On = <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
-/**
- * The DOM Element listener will be attached
- */
-target: T, 
-/**
- * The event name
- */
-event: K, 
-/**
- * The listener callback function
- */
-listener: (this: T, event?: WindowEventMap[K], dom?: T) => Void, 
-/**
- * Event Options
- */
-options?: boolean | AddEventListenerOptions) => () => Void;
-/**
- * Custom event handler with observer pattern support.
- */
-type OnListener<T> = {
+type SinEvent<T> = {
     /**
      * Triggers the event, calling all subscribed observers with the provided arguments.
      * Returns an array of return values from all observer functions
@@ -5731,7 +6055,7 @@ type OnListener<T> = {
      * listen.observe((x) => x * 2);
      * listen(5); // returns [10]
      */
-    (value: T): T[];
+    <U = T>(value?: U): U[];
     /**
      * Adds an observer function to be called when the event is triggered.
      */
@@ -5748,7 +6072,7 @@ type OnListener<T> = {
          * event(1); // logs: 1
          * unsubscribe(); // removes observer
          */
-        (observer: (value: T) => void): () => void;
+        (observer: <U = T>(value?: U) => void): () => void;
         /**
          * Subscribes a one-time observer that automatically unsubscribes after first trigger.
          * Returns a function which will unsubscribe the observer before it fires if called.
@@ -5761,7 +6085,7 @@ type OnListener<T> = {
          * event(1); // logs: 1
          * event(2); // no log (observer already removed)
          */
-        (observer: (value: T) => void, once: true): () => void;
+        (observer: <U = T>(value: U) => void, once: true): () => void;
     };
     /**
      * Gets an AbortSignal that can be used to monitor the events lifecycle.
@@ -5775,7 +6099,97 @@ type OnListener<T> = {
      * signal.addEventListener('abort', () => console.log('aborted'));
      */
     readonly signal: AbortSignal;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    arguments?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    prototype?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    apply?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    call?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    caller?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    bind?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    length: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    name?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    toString?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    valueOf?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    Symbol?: never;
 };
+
+/**
+ * DOM Event handler
+ */
+type On = <T extends HTMLElement, K extends keyof WindowEventMap = keyof WindowEventMap>(
+/** The DOM Element listener will be attached */
+target: T,
+/** The event name */
+event: K,
+/** The listener callback function */
+listener: (this: T, event: WindowEventMap[K], dom: T) => Void,
+/** Event Options */
+options?: boolean | AddEventListenerOptions) => () => Void;
 
 /**
  * Extended type reference of {@link HTMLElementTagNameMap} to support unknown keys
@@ -5800,19 +6214,37 @@ type Suffixed<T> = T extends `${infer Tag}${'.' | '#' | '['}${string}` ? Tag : T
 type HTMLTagElement<HTMLElementName extends string> = Has<HTMLElementTagNameMap, HTMLElementName, HTMLTagElementMap[HTMLElementName], Has<HTMLElementTagNameMap, Suffixed<HTMLElementName>, HTMLTagElementMap[Suffixed<HTMLElementName>], HTMLElement>>;
 
 /**
- * DOM element argument type
+ * DOM Target/s for mounting
  */
-type DOM = HTMLElement | Element | {};
+type DOM = Element | HTMLElement | DocumentFragment | ShadowRoot;
 /**
- * Function type for the `s.mount` method.
-*/
+ * Mount Arguments spreads
+ */
+type MountArguments<T, V> = [attrs?: isInferred<T, {}, T>, context?: isInferred<V, {}, V>];
+/**
+ * When `s.is.server === true`, `s.mount` does not patch the DOM. Instead it returns this
+ * object so that the caller can use the mounted view, its resolved attributes, and the
+ * constructed context to drive server-side rendering or serialization.
+ */
+type MountSSR<T, V> = {
+    /** The attributes passed to the mounted root component, inferred from the component signature.*/
+    attrs: T;
+    /** The runtime context in which the component was mounted. */
+    context: Context<V>;
+    /** The mounted root view. On the server this is returned instead of being applied to a DOM node. */
+    view: Component<HTMLElement, T, [], V> | View<T>;
+};
+/**
+ * Mounted Return
+ */
+type Mounted<T, V> = void | MountSSR<T, V>;
 type Mount = {
-    (fn: (route: {
-        route: Route;
-    }) => Children): void;
-    (fn: <Attrs = {}>(attrs: Attrs, children: Children | [], context: Context) => Children): void;
-    (fn: (children: Children | [], context: Context) => Children): void;
-    (dom: DOM, fn: (attrs: any, children: View[] | [], context: Context) => Children): void;
+    <T = {}, U = [], V = {}>(view: StateSignatures<T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
+    <T = {}, U = [], V = {}>(dom: DOM, view: StateSignatures<T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
+    <T = {}, U = [], V = {}>(view: Component<HTMLElement, T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
+    <T = {}, U = [], V = {}>(dom: DOM, view: Component<HTMLElement, T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
+    <T = {}>(view: View<T>, ...x: MountArguments<T, {}>): Mounted<T, {}>;
+    <T = {}>(dom: DOM, view: View<T>, ...x: MountArguments<T, {}>): Mounted<T, {}>;
 };
 
 /**
@@ -6000,49 +6432,110 @@ interface Http extends Methods {
     */
     <T = any>(url: string, params?: Omit<Params<T>, 'url'>): Promise<T>;
     <T = any>(params?: Params<T>): Promise<T>;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    arguments?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    prototype?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    apply?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    call?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    caller?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    bind?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    length: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    name?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    toString?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    valueOf?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    Symbol?: never;
 }
 
 declare global {
     /**
-     * Sin `context`
-     *
-     * Interface for extending the global component context.
-     * Use the `s.Context<T>` Type Utility for component level
-     * context extends.
-     */
-    interface context {
-    }
-    /**
-     * Sin `s.is`
-     *
-     * Extend the global `s.is.*` references of sin.
-     */
-    interface is {
-    }
-    /**
      * Sin `p(...)`
      *
-     * Intercept, print to console and then return the last value argument.
+     * Intercept, print to console and return the value.
      * Pass any primitive and get it back the same way.
      *
      * @example
-     * const x = p('x', 333) // Logs x 333 and returns 333
-     * const v = x + 333     // Value of v is 666
+     * const x = p(333)   // Logs 333
+     * const v = x + 333  // Value of v is 666
      */
     export function p<T = any>(...input: T[]): T;
 }
 /**
  * Statefull Component
  */
-declare function s<T, U = [], V = {}>(statefull: StatefulSignature<T, U, V>): StatefulComponent<T, U, V>;
+declare function s<T = {}, U = [], V = {}>(statefull: StatefulSignature<T, U, V>): StatefulComponent<T, U, V>;
 /**
  * Stateless Component
  */
-declare function s<T, U = [], V = {}>(stateless: StatelessSignature<T, U, V>): StatelessComponent<T, U, V>;
+declare function s<T = {}, U = [], V = {}>(stateless: StatelessSignature<T, U, V>): StatelessComponent<T, U, V>;
 /**
- * Async Component
+ * Asynchronous Component
  */
-declare function s<T, U = [], V = {}>(...async: AsyncSignature<T, U, V>): AsyncComponent<T, U, V>;
+declare function s<T = {}, U = [], V = {}>(...async: AsyncSignature<T, U, V>): StatefulComponent<T, U, V>;
 /**
  * HyperScript Component
  */
@@ -6051,37 +6544,52 @@ declare function s<T extends Selector>(selector: T, ...attributes: StyledSignatu
  * Styled Component
  */
 declare function s<T extends HTMLElement>(tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
-/**
- * Sin API
- */
-declare namespace s {
+declare class s {
     /**
      * Global Window Object
      */
-    export const window: Window & typeof globalThis;
+    static window: Window & typeof globalThis;
     /**
      * Scroll Restoration
      */
-    export const scroll: boolean;
+    static scroll: boolean;
     /**
      * Runtime references
      */
-    export const is: is & {
+    static is: {
         /**
          * Whether or not code is executing on server.
          */
         readonly server: boolean;
     };
     /**
+     * Check whether or not value is `attrs`
+     *
+     * @example
+     *
+     * s.isAttrs([]) // -> false
+     */
+    static isAttrs: (x: any) => boolean;
+    /**
      * Redrawing
      */
-    export const redrawing: boolean;
+    static redrawing: boolean;
     /**
      * JSX Component Creation Reference
      *
      * > **𓃵 Sacrificial Decision**
      */
-    export const jsx: any;
+    static jsx: any;
+    /**
+     * Conditionally transform a value if it exists, without having
+     * to write an explicit if check everywhere.
+     *
+     * @example
+     * s`img`({
+     *   src: s.with(src, x => `/cdn/${x}`) // -> transforms if src is defined
+     * })
+     */
+    static with: <T>(x: T, isTrue: (x: T) => any) => void;
     /**
      * Delay redraw or operation.
      *
@@ -6091,7 +6599,7 @@ declare namespace s {
      * await sleep(2000)
      * // What dreams my come?
      */
-    export function sleep(x: number): Promise<number>;
+    static sleep: (x: number) => Promise<number>;
     /**
      * **⮂** Sin Redraw
      *
@@ -6099,7 +6607,7 @@ declare namespace s {
      *
      * s.redraw() // Asynchronous Redraws
      */
-    export const redraw: {
+    static redraw: {
         /**
          * Asynchronous Redraws
          */
@@ -6107,7 +6615,7 @@ declare namespace s {
         /**
          * Force Redraw
          */
-        force(): void;
+        force: () => void;
     };
     /**
      * Set the base `<style>` element which sin uses for CSS cascades.
@@ -6121,7 +6629,7 @@ declare namespace s {
      * // Omitting parameter returns current <style> sin is using
      * s.style() // => HTMLStyleElement
      */
-    export const style: (element?: HTMLStyleElement) => HTMLStyleElement;
+    static style: (element?: HTMLStyleElement) => HTMLStyleElement;
     /**
      * Creates a custom event handler with observer pattern support.
      *
@@ -6132,15 +6640,24 @@ declare namespace s {
      *
      * sinned.observe('repent')
      */
-    export const event: <T = any>(callback?: (value: T) => void) => OnListener<T>;
+    static event: <T>(value?: T | ((x: T) => any)) => SinEvent<T>;
+    /**
+     * Create live stream with value. Optionally pass a list of observers.
+     *
+     * @example
+     *
+     * const a = s.live(10);
+     * const b = s.live(20, x => {}, x => {});
+     */
+    static live: SinLive;
     /**
      * CSS Methods for controlling the cascades
      */
-    export const css: CSS;
+    static css: CSS;
     /**
      * CSS Animate utility
      */
-    export const animate: () => (defferable?: boolean) => void;
+    static animate: () => (defferable?: boolean) => void;
     /**
      * Sin Mount
      *
@@ -6149,7 +6666,7 @@ declare namespace s {
      *
      * s.mount(document.body, () => s`div`('In the den of sin!'))
      */
-    export const mount: Mount;
+    static mount: Mount;
     /**
      * HTTP utility for requests
      *
@@ -6169,16 +6686,7 @@ declare namespace s {
      *  config: (xhr) => {},
      * })
      */
-    export const http: Http;
-    /**
-     * Create live stream with value. Optionally pass a list of observers.
-     *
-     * @example
-     *
-     * const a = s.live(10);
-     * const b = s.live(20, x => {}, x => {});
-     */
-    export const live: LiveStatic;
+    static http: Http;
     /**
      * Sin Routing
      *
@@ -6204,7 +6712,7 @@ declare namespace s {
      *  ],
      * })
      */
-    export const route: Route;
+    static route: Route;
     /**
      * DOM Event listener - forwarded to `addEventListener`
      *
@@ -6216,7 +6724,7 @@ declare namespace s {
      *  })
      * });
      */
-    export const on: On;
+    static on: On;
     /**
      * Forgiving HTML or SVG strings into unescaped HTML or SVG.
      *
@@ -6227,18 +6735,97 @@ declare namespace s {
      * s.trust`<small>In the den of Sin</small>`
      * s.trust(`<h1>Woe to the wicked!</h1>`)
      */
-    export const trust: {
+    static trust: {
         (markup: TagLiteral, ...interpolate: Interpolate): View;
         (markup: string): View;
     };
     /**
      * Error
      */
-    export function error(): Children;
+    static error: () => Children;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static arguments?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static prototype?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static apply?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static call?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static caller?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static bind?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static length: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static name?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static toString?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static valueOf?: never;
+    /**
+     * Sin marks native function methods as deprecated to prevent them from appearing in IntelliSense completions.
+     * Although these methods are not *truly* deprecated, they are **not** intended for use within Sin.
+     *
+     * @deprecated
+     */
+    static Symbol?: never;
+}
+declare namespace s {
     /**
      * Exposed Types
      */
-    export type { Nodes, Daft, Primitive, Children, Component, Child, Node, View, Context, Events as Event };
+    export type { Context, Nodes, Daft, Primitive, Children, Component, Child, Node, View };
 }
 
 export { s as default, s };
