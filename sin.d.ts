@@ -320,18 +320,21 @@ type ifNever<T, True, False> = isNever<T> extends true ? True : False;
  */
 type ifInferred<T, True, False> = ifUnknown<T, True, ifNever<T, True, False>>;
 /**
- * Useful to flatten the type output to improve type hints shown in editors.
- *
- * @example
- *
- * type A = { right: number; };
- * type B = { left: number; };
- *
- * Simple<A & B>
+ * Omit index signatures present in an object
  */
-type Simple<T> = {
-    [K in keyof T]: T[K];
-} & {};
+type OmitIndex<T> = {
+    [K in keyof T as {} extends Record<K, unknown> ? never : K]: T[K];
+};
+/**
+ * Assign Helper for object merges
+ */
+type Assign<T, U> = {
+    [K in keyof T as K extends keyof U ? never : K]: T[K];
+} & U;
+/**
+ * Merge two object together
+ */
+type Merge<T, U> = Cast<Assign<PickIndex<T>, PickIndex<U>> & Assign<OmitIndex<T>, OmitIndex<U>>>;
 /**
  * Sync void type, uses 'unknown' for safer `any` - like (forces type checks)
  */
@@ -356,6 +359,43 @@ type StringUnion<T> = T | (string & Record<never, never>);
  * Conditional check to see whether `K` exists in `T`
  */
 type Has<T, K extends string, True, False> = K extends keyof T ? True : False;
+/**
+ * Pick only index signatures from the given object type, leaving out all explicitly defined properties.
+ *
+ * @example
+ *
+* interface Sins {
+*    [name: string]: unknown;
+*    blasphemy: boolean;
+* }
+*
+* PickIndex<Sins> // => { [name: string]: unknown; }
+*/
+type PickIndex<T> = {
+    [K in keyof T as {} extends Record<K, unknown> ? K : never]: T[K];
+};
+/**
+ * Transform an interface into a type to aide with assignability.
+ *
+ * @example
+ *
+ * interface Penance {
+ *    given: boolean;
+ *    sin: string;
+ * }
+ *
+ * const sinner: Cast<Penance>;
+ *
+ * // OR
+ *
+ * type A = { right: number; };
+ * type B = { left: number; };
+ *
+ * Simple<A & B>
+ */
+type Cast<T> = {
+    [K in keyof T]: T[K];
+} & {};
 /**
  * Sugar assignment of `TemplateStringsArray`
  */
@@ -5959,6 +5999,7 @@ interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends At
 
 type Components = typeof s;
 type SinAttrs<T> = T extends SinElement ? HTMLAttributes<SinElement> : T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : HTMLAttributes<HTMLElement>;
+type Views = Exclude<Children, Record<string, unknown>>;
 type Varidiac = Children | Children[] | StyledComponent | Array<Children | StyledComponent> | [];
 type Arguments<T, U, V> = [
     attrs: ifInferred<T, Attrs, T>,
@@ -6031,18 +6072,37 @@ type AsyncSignature<T, U, V> = [
     component: P<StatefulComponent<T, U, V>>
 ];
 type InferComponent<S> = S extends StatelessSignature<infer T, infer U, infer V> ? StatelessComponent<T, U, V> : S extends StatefulSignature<infer T, infer U, infer V> ? StatefulComponent<T, U, V> : never;
-type AttrsEmpty<T, U, V> = T extends {} ? U extends [] ? V extends {} ? true : false : false : false;
+type AttrsMerged<T, U> = T extends HTMLElement ? Merge<U, SinAttrs<T>> : U;
+type AttrsArgument<T, U> = T extends HTMLElement ? AttrsMerged<T, U> : isArray<U> extends true ? T : Merge<T, U>;
 type AttrsChildren<T, U, V> = T extends HTMLElement ? V : isArray<U> extends true ? U : V;
 type AttrsContext<T, U, V, Q> = T extends HTMLElement ? Q : isArray<U> extends true ? V : Q;
-type AttrsMerged<T, Q> = T extends HTMLElement ? Simple<SinAttrs<T> & Q> : Q;
-type AttrsArgument<T, U> = T extends HTMLElement ? AttrsMerged<T, U> : isArray<U> extends true ? Simple<T> : Simple<T & U>;
+type AttrsEmpty<U, V, Q> = [keyof U] extends [never] ? (V extends [] ? ([keyof Q] extends [never] ? true : false) : false) : false;
 type AttrsSignatures<A, C, X> = {
     (tag: TagLiteral, ...i: Interpolate): AttrsSignatures<A, C, X>;
-    (attrs: A): View<A>;
-    (attrs: A, ...children: C extends [] ? Children[] : C extends any[] ? C : C[]): View<A>;
-    (attrs: A, children: C extends [] ? Children[] : C, context?: X): View<A>;
-    (...children: C extends [] ? Children[] : C extends any[] ? C : C[]): View<A>;
+    (attrs?: A): View<A>;
+    (attrs: A, ...children: C extends [] ? Views[] : C extends any[] ? C : C[]): View<A>;
+    (attrs: A, children: C extends [] ? Views[] : C, context?: X): View<A>;
+    (...children: C extends [] ? Views[] : C extends any[] ? C : C[]): View<A>;
 };
+/**
+ * Component Utility
+ *
+ * @example
+ * // Styled Component
+ * s.Component<HTMLElement>
+ * // Attrs
+ * s.Component<{}>
+ * // Attrs + Children
+ * s.Component<{}, []>
+ * // Attrs + Children + Context
+ * s.Component<{}, [], {}>
+ * // Element Attributes + Attrs
+ * s.Component<HTMLElement, {}>
+ * // Element Attributes + Attrs + Children
+ * s.Component<HTMLElement, {}, []>
+ * // Element Attributes + Attrs + Children + Context
+ * s.Component<HTMLElement, {}, [], {}>
+ */
 type Component<T = {}, U = {}, V = [], Q = {}> = T extends HTMLElement ? AttrsEmpty<U, V, Q> extends true ? StyledComponent<T> : AttrsSignatures<AttrsArgument<T, U>, AttrsChildren<T, U, V>, AttrsContext<T, U, V, Q>> : AttrsSignatures<AttrsArgument<T, U>, AttrsChildren<T, U, V>, AttrsContext<T, U, V, Q>>;
 
 type SinEvent<T> = {
