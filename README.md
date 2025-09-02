@@ -1,4 +1,4 @@
-<p align="center">
+<p  align="center">
 <a href ="https://sinjs.com">
 <img src="https://sinjs.com/sin.svg" width="400px">
 </a>
@@ -125,9 +125,9 @@ Sintax provides some basic on-going IDE support for sin, including Syntax highli
 - [TypeScript Support](#typescript-support)
   - [Omitted Function Methods](#omitted-function-methods)
   - [Leveraging Generics](#leveraging-generics)
+  - [DOM Global](#dom-global)
   - [Declaration Merging](#declaration-merging)
   - [Type Utilities](#type-utilities)
-  - [Global SinElement](#global-sinelement)
   - [Annotation Typing](#annotation-typing)
 - [CLI](#cli)
   - [Commands](#commands)
@@ -1071,6 +1071,11 @@ declare global {
 
 > Once declared, these extensions become available globally, enhancing type consistency and developer experience in larger applications.
 
+### DOM Global
+
+The global `DOM` type serves as an alternative to `HTMLElement` and represents virtual DOM elements. It provides an interface that inherits all attributes of a DOM element, enabling its use whenever you need to access, reference or interface with all attibute element properties.
+
+
 ### Type Utilities
 
 If you prefer annotation-style typing or need reusable helpers, Sin exposes a suite of type utilities under the `s.*` namespace. These can be applied in various scenarios to enforce stricter typing for components, events, and more:
@@ -1080,9 +1085,8 @@ s.Component<HTMLElement>                              // Styled Component Utilit
 s.Component<HTMLElement, Attrs, Children, Context>    // Merges Element attributes with Attrs Utility
 s.Component<Attrs, Children, Context>                 // Stateless and Stateful Utility
 s.Context<Attrs>                                      // Merges Component Context
-s.Attrs<HTMLElement>                                  // Returns Attributes of Element
-s.Event<Event, HTMLElement>                           // Sin Event Listener
 s.View<Attrs>                                         // Merges attrs in Component View
+s.Event<HTMLElement, Event, Attrs>                    // Sin Event Listener
 s.Nodes                                               // Sin Component Nodes
 s.Node                                                // Sin Component Node
 s.Child                                               // Sin Component Child
@@ -1092,10 +1096,6 @@ s.Primitive                                           // Sin Component Primitive
 ```
 
 > These utilities streamline complex type scenarios, such as event handling or context merging, while integrating smoothly with Sin's core APIs.
-
-### Global `SinElement`
-
-A global HTMLElement type which represents virtual sin elements is available and can be leveraged when you wish to obtain an interface which inherits all DOM Element attributes via `s.Component` or annotation typing.
 
 ### Annotation Typing
 
@@ -1195,4 +1195,3 @@ Sin provides a simple command-line interface to execute your tests using the tes
 sin test <path>             # Executes all tests within the specified file
 sin test <path> --headless  # Executes tests in a headless browser environment.
 ```
-
