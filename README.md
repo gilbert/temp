@@ -1,4 +1,4 @@
-<p  align="center">
+<p align="center">
 <a href ="https://sinjs.com">
 <img src="https://sinjs.com/sin.svg" width="400px">
 </a>
@@ -6,7 +6,7 @@
 
 # Sin
 
-Sin is a lightweight, reactive JavaScript framework designed to craft dynamic, performant, and accessible web applications. It embraces a declarative, component-based approach, offering a unique blend of tagged template literals, reactive streams, and a minimalist API. If you understand HTML, CSS and JavaScript you will understand sin.
+Sin is a lightweight, reactive JavaScript framework designed to craft dynamic, performant, and accessible web applications. It embraces a declarative, component-based approach. If you understand HTML, CSS and JavaScript you will understand sin.
 
 <pre><code><i><strong><a href="https://flems.io/sin">https://flems.io/sin</a></strong></i></code></pre>
 
@@ -78,7 +78,7 @@ Sin projects use a default structure and when leveraging the [Sin CLI](#cli), pr
 
 ### VSCode Extension
 
-Sintax provides some basic on-going support for sin, including Syntax highlighting for literal styles (CSS) and file icons. You can install the vscode extension via the marketplace.
+Sintax provides some basic on-going IDE support for sin, including Syntax highlighting for literal styles (CSS) and file icons. You can install the vscode extension via the marketplace.
 
 - [Sintax](https://marketplace.visualstudio.com/items?itemName=sissel.sintax)
 
@@ -91,6 +91,7 @@ Sintax provides some basic on-going support for sin, including Syntax highlighti
   - [dom](#dom--dom----)
   - [deferrable](#deferrable--deferrable-boolean-)
   - [key](#key--key-any-)
+  - [state](#state)
 - [Arguments](#arguments)
   - [attrs](#attrs-)
   - [children](#children-)
@@ -114,11 +115,15 @@ Sintax provides some basic on-going support for sin, including Syntax highlighti
   - [Options](#request-options)
 - [DOM Helpers](#dom-helpers)
   - [is](#is-sisalias)
-  - [on](#on-son)
-  - [p](#p)
+  - [isAttrs](#isattrs-sisattrsvalue)
+  - [on](#on-sontarget-event-handler-options)
+  - [event](#event-seventdom-event-handler-options)
+  - [with](#with-swithvalue-callback)
   - [animate](#animate-sanimate)
+  - [p](#p)
 - [Trust](#trust-strust)
-- [TypeScript](#typescript)
+- [TypeScript Support](#typescript-support)
+  - [Omitted Function Methods](#omitted-function-methods)
   - [Leveraging Generics](#leveraging-generics)
   - [Declaration Merging](#declaration-merging)
   - [Type Utilities](#type-utilities)
@@ -134,13 +139,13 @@ Sintax provides some basic on-going support for sin, including Syntax highlighti
 
 # ```s`` ```
 
-Sin revolves around components, which are the building blocks of your application. Components can be stateless, stateful, or asynchronous, and they support a variety of signatures. All components in Sin are made to allow overriding styles anywhere they are used.
+Sin revolves around components, which are the building blocks of your application. Components can be stateless, stateful, or asynchronous, and they support a variety of signatures. All components in sin are made to allow overriding styles anywhere they are used.
 
 > The beauty of the Sin component model is that you will never have to change your callsite usage, even if you need to advance the complexity of your component.
 
 ## Elements
 
-Elements (vnodes) are composed as tagged template literals. Sin defaults to creating `div` elements if an HTML element type is not specified and allows `#` and class names `.` right after the element type or at the start of the tagged template literal to be passed.
+Elements are composed as tagged template literals. Sin defaults to creating `div` elements if an HTML element type is not specified and allows `#` and class names `.` right after the element type or at the start of the tagged template literal to be passed.
 
 ```js
 // Basic Element Structures
@@ -177,11 +182,11 @@ s('h1.loki', [ s('h1', 'Hello Sinner!') ])
 
 ## Attributes
 
-Element (vnode) attributes support HTML attribute properties. Sin resolves attributes via JavaScript and DOM APIs (`setAttribute`). Event handler binding supports all DOM events, including those without an `on` property, like `touchstart`. Event handlers are enhanced, with per-element references and additional properties for improved render control.
+Element attributes support HTML attribute properties. Sin resolves attributes via JavaScript and DOM API's (`setAttribute`). Event handler binding supports all DOM events, including those without an `on` property, like `touchstart`. Event handlers are enhanced, with per-element references and additional properties for improved rendering control.
 
 ### dom `{ dom: () => {} }`
 
-DOM Element render callback. Dom is a creation lifcycle hook which will call in the post rendering cycle of a sin view. You will attach third-party tools using this callback method, as it fires once the virtual node has been mounted, rendered and is ready.
+The `dom` key is a render callback. It's a creation lifcycle hook which will fire in the post-rendering cycle of a sin view. You will attach third-party tools using this callback method, as it fires once the virtual node has been mounted, rendered and is ready.
 
 ```js
 s`div`({
@@ -208,34 +213,70 @@ s`div`({
 
 ### deferrable `{ deferrable: boolean }`
 
-The `deferrable` key accepts a boolean, it waits for children using deferred removal:
+The `deferrable` key accepts a boolean, it will wait for any children that have set delayed removal through the dom callback.
 
 ```js
-s`div`({
-  deferrable: false
-})
+s`div`({ deferrable: false })
 ```
 
 ### key `{ key: any }`
 
-The `key` property is a value used to map a DOM element to its respective item in an array of data.
+The `key` property is a value used to map a DOM element to its respective item in an array of data. It is used as a unique child identifier for identity and keyed lists. When you render arrays of children, Sin compares the new View list to the old one. If items have a key, Sin can track their identity across redraws.
 
 ```js
-s`div`({
-  key: 1
-})
+const Item = s(({ label }) => s`li`(label));
+const List = s(({ items }) =>
+  s`ul`(
+    items.map(i =>
+      Item({
+        key: i.id,    // <- Unique key
+        label: i.name
+      })
+    )
+  )
+);
+
+```
+
+Without `key`, Sin compares children by order only. If items move around, the wrong DOM nodes can be reused or recreated unnecessarily. With `key`, Sin builds a lookup map so it can re-use the existing DOM node for the same identity, even if the order changes.
+
+> Sin also uses key as part of the component's identity, That means if a component’s key changes, Sin considers it a different instance and will tear down the old one and mount a fresh one.
+
+### state `{ state: object }`
+
+[![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/3690a0b080af6e58078624b003e63f98)
+
+The `state` key is a special attribute in Sin that can be applied to anchor (`a`) elements to facilitate data passing during client-side routing. It leverages the browser's History API (specifically `history.pushState`) to forward an object of data to the target route without altering the URL (e.g., no query parameters or fragments are added). This data is then automatically merged into the `attrs` argument of the receiving component on the target route.
+
+```js
+const wat = s(({ title, describe, ...attrs }) =>
+  s``(
+    s`h1`(title),
+    s`p`(describe)
+  )
+)
+
+s`main`(
+  s`a`({
+    href: '/wat',
+    state: {
+      title: 'Baphomet',
+      describe: 'The sinful state and sabbatic baphomet'
+    }
+  }, '𓃵'),
+  s.route({
+    ':wat': wat
+  })
+)
 ```
 
 ## Arguments
 
-In Sin, the `attrs`, `children`, and `state` arguments are fundamental to component creation and management, as they define the properties, content, and environment of components. Function signatures of sin components are comprised of 3 arguments. Each argument represents render specifics.
+In Sin, the `attrs`, `children`, and `context` arguments are fundamental to component creation and management, as they define the properties, content, and environment of components. Function signatures of sin components are comprised of 3 arguments. Each argument represents render specifics.
 
 ```js
-s((attrs, children, context) => [
-  s`h1`('Garden')
-  s`button`(attrs, name)
-])
-
+s((attrs, children, context) => [])
+s(({}, [], {}) => [])
 ```
 
 ### attrs `{}`
@@ -305,7 +346,7 @@ s.mount(({}, [], { doc, state }) => {
 
 > [!NOTE]
 > Treat the `context` as broader application reference and when possible, choose `attrs` for passing data
-> between components or consider inline variable using [DAFT](#daft) (default argument function thunk) expressions.
+> between components or consider inline variables using a [DAFT](#daft) (default argument function thunk) expressions.
 
 ## Mounting `s.mount(...)`
 
@@ -316,20 +357,50 @@ The mount method is used to render elements and components. By default, sin will
 s.mount(() => s`h1`('Hello Sinner'))
 
 // Mounting to a specific element
-s.mount(document.querySelector('#sinner') => s`h1`('Hello Sinner'))
+s.mount(
+  document.querySelector('#sinner'),
+  () => s`h1`('Hello Sinner')
+)
+```
+
+You can provide runtime `attrs` and `context` to `s.mount` by passing reference data after component rendering behaviour directly on the mount method itself:
+
+```js
+// Passing pre-define attrs
+s.mount(
+  (attrs) => s`h1`(`${attrs.greet} Sinner`),
+  { greet: 'Sinner' }
+)
+
+// Passing pre-define context
+s.mount(
+  (attrs, [], context) => s`h1`(`Hello ${context.name}`),
+  {},
+  { name: 'Sinner' }
+)
+
+// Passing both attrs and context
+s.mount(({ greet }, [], { name }) =>
+  s`h1`(`${greet} ${name}`),
+  { greet: 'Hello' },
+  { name: 'Sinner' }
+)
 ```
 
 # Components
 
-Sin revolves around components, which are the building blocks of your application. Components can be stateless, stateful, or asynchronous, and they support a variety of signatures. All components in Sin are made to allow overriding styles anywhere they are used.
+Sin revolves around components and are core building blocks of a Sin application. They encapsulate structure, behavior, and styling in a single unit, and can be written as [stateless](#stateless-component-s--) functions, [stateful](#stateful-component-s----) components with internal data, or even [asynchronous](#async-component-s-loading-error--async---) components that resolve over time.
 
-> The beauty of the Sin component model is that you will never have to change your callsite usage, even if you need to advance the complexity of your component.
+No matter which form they take, all components share a consistent signature and are designed to accept style overrides at the point of use. This means you can compose, extend, and restyle components freely without breaking their interface.
+
+
+> The beauty of a Sin component model is that your usage stays the same even as the component evolves, a simple element today can grow into a stateful or async component tomorrow, without requiring changes at the callsite.
 
 ## Styled Component `s``(...)`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/7b60cf8898c8d1f22dbdf6006b7b252a)
 
-The styled component is the most basic form of component in Sin. It has no logic, but only defines the tag name and styles.
+A **styled component** is the simplest type of component in Sin. It doesn’t contain logic or state, it only declares a tag and style/s that should apply to it. Styled components serve as the visual building blocks of your UI, providing reusable elements with consistent appearance. Because they carry no behavior, they are lightweight and easy to compose, and their styles can still be overridden wherever they are used.
 
 ```js
 // Definition
@@ -364,7 +435,7 @@ sinner`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/32e1ada26743cc3d42b988a56f87b34e)
 
-The Stateless component accepts an object for attributes and an array of children.
+A **stateless component** is a pure function of its inputs. It receives an `attrs` object (props) and an array of children, and returns a view to render. Because it has no internal state, the output is entirely determined by the inputs, making it predictable and easy to reason about. Stateless components are ideal for encapsulating layout, presentation, or simple transformations of data, and they can be freely composed into larger structures. Like all Sin components, their styles remain overridable at the point of use.
 
 ```js
 // Definition
@@ -391,11 +462,11 @@ const apostate = s(({ onclick, ...attrs }, children) =>
 )
 ```
 
-## Closure Component `s(() => () => ...)`
+## Stateful Component `s(() => () => ...)`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/2bbf9b783cbacdb2feefb956ccd09109)
 
-The Closure Component is retains its state across redraws and expect a function callback return signature.
+A **stateful component** extends the stateless model by maintaining its own internal data across renders but will retain its state across redraws and expects a function callback return signature. It still accepts an attributes object and an array of children, but it can also track state, respond to events, and trigger redraws. This makes stateful components well-suited for interactive UI elements such as inputs, menus, or toggles. Even with added complexity, they preserve the same callsite signature and allow styles to be overridden wherever they are used.
 
 ```js
 // Definition
@@ -430,8 +501,7 @@ const example = s(() => {
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/4e3e517c8384a384de9b72a74665a7ea)
 
-
-The Async Component accepts an object that can handle the loading and error states. The `loading` key can be a sin element, component or function, the `error` key is a callback hook fired on failure.
+An **asynchronous component** is designed to handle values that resolve over time. Instead of rendering immediately, it can return a Promise that resolves to a view once data or resources are ready. This allows you to defer rendering until an API call completes, a module loads, or some other async operation finishes. As with other component types, async components share the same usage pattern and can be styled or extended without changing how they are called.
 
 ```js
 // Definition
@@ -449,7 +519,7 @@ const judgement = s(
 
 ## DAFT
 
-DAFT (Default Argument Function Thunk) is a signature pattern of Stateful Sin components which can be used for scope-level variables expressed as default arguments.
+DAFT (Default Argument Function Thunk) is a signature pattern unique to Sin components that lets you declare scope-level variables as default arguments in your render functions. Instead of re-declaring the same values inside your component body, DAFT allows you to express them inline at the signature level, keeping the code more concise and easier to read.
 
 ```js
 s((attrs, children, context) => () =>
@@ -804,9 +874,9 @@ s.http({
 
 # DOM Helpers
 
-Sin provides dom helper methods that can be used to improve interfacing on the element (vnode) level.
+Sin provides dom helper methods that can be used to improve interfacing on the element and component level.
 
-### is `s.is.<alias>`
+## is `s.is.<alias>`
 
 The `s.is.*` object contains read-only getter/setter references assigned at runtime. Entries on `s.is` will return a `boolean` of either `true` or `false` and maintained internally by Sin.
 
@@ -820,25 +890,115 @@ s.is.tablet
 s.is.desktop
 ```
 
-### on `s.on(...)`
 
+## isAttrs `s.isAttrs(value)`
+
+The `s.isAttrs` function is a type guard that distinguishes whether a given value should be interpreted as a component's `attrs` object. Since the `s(...)` component signature is highly flexible, the first argument can be either attributes or children. This  helper function ensures that Sin knows how to interpret what you've passed in.
+
+```js
+s.isAttrs({ id: 'foo', class: 'bar' })   // -> true
+s.isAttrs(s`div`())                      // -> false
+s.isAttrs(document.createElement('p'))   // -> false
+s.isAttrs([1,2,3])                       // -> false
+```
+
+> This check is performed internally when rendering, but it iss also useful in custom utility code or when building higher-order components.
+
+## on `s.on(target, event, handler, options?)`
 
 [![Flems](https://img.shields.io/badge/flems-sandbox-playground?labelColor=34454d&color=cdcdcd&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNSAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIzLjY2NCA5LjE2TDE4LjIxNiAzLjczNkMxOC4xMiAzLjYxNiAxNy45NTIgMy41NDQgMTcuODA4IDMuNTQ0SDE3LjEzNkMxNi4zMiAzLjU0NCAxNS41NzYgNC4wNzIgMTUuMzEyIDQuODY0TDE0LjI4IDcuOTZDMTQuMjA4IDguMiAxNC4zNzYgOC40NjQgMTQuNjQgOC40NjRIMTYuNDY0QzE2LjcyOCA4LjQ2NCAxNi44OTYgOC43MDQgMTYuODI0IDguOTQ0TDE2LjEwNCAxMS4xMjhDMTYuMDA4IDExLjM2OCAxNS43OTIgMTEuNTM2IDE1LjUyOCAxMS41MzZIMTMuNTM2QzEzLjI3MiAxMS41MzYgMTMuMDU2IDExLjcwNCAxMi45NiAxMS45NDRMMTEuNDk2IDE2LjM4NEMxMS4wNCAxNy43MjggMTAuMDMyIDE4Ljc2IDguNzU5OTkgMTkuMjRDOS4wMjM5OSAxOS41MjggOS4yNjM5OSAxOS41MjggOS40MzE5OSAxOS41MjhIMTQuNzEyQzE0Ljg4IDE5LjUyOCAxNS4wMjQgMTkuNDggMTUuMTQ0IDE5LjM2TDIzLjY2NCAxMC44NEMyNC4xMiAxMC4zODQgMjQuMTIgOS42MTYgMjMuNjY0IDkuMTZaTTkuNjk1OTkgMTIuMDRDOS43Njc5OSAxMS44IDkuNTc1OTkgMTEuNTM2IDkuMzM1OTkgMTEuNTM2SDcuNTM1OTlDNy4yOTU5OSAxMS41MzYgNy4xMjc5OSAxMS4yOTYgNy4xOTk5OSAxMS4wOEw3Ljk0Mzk5IDguODcyQzguMDE1OTkgOC42MDggOC4yMzE5OSA4LjQ2NCA4LjQ5NTk5IDguNDY0SDEwLjQ0QzEwLjcwNCA4LjQ2NCAxMC45MiA4LjI5NiAxMS4wMTYgOC4wNTZMMTIuNDggMy42MTZDMTIuOTEyIDIuMjcyIDEzLjk0NCAxLjI0IDE1LjIxNiAwLjc2QzE1LjEzMjkgMC42NjQ0NTcgMTUuMDI5MyAwLjU4ODkyNiAxNC45MTMgMC41MzkwNTRDMTQuNzk2NiAwLjQ4OTE4MyAxNC42NzA1IDAuNDY2MjYgMTQuNTQ0IDAuNDcySDkuMjg3OTlDOS4xNDM5OSAwLjQ3MiA4Ljk3NTk5IDAuNTIgOC44Nzk5OSAwLjY0TDAuMzU5OTkgOS4xNkMwLjI0ODIzNyA5LjI2OTUgMC4xNTk0NTYgOS40MDAxOSAwLjA5ODg0NzEgOS41NDQ0M0MwLjAzODIzNzkgOS42ODg2NiAwLjAwNzAxOTA0IDkuODQzNTUgMC4wMDcwMTkwNCAxMEMwLjAwNzAxOTA0IDEwLjE1NjUgMC4wMzgyMzc5IDEwLjMxMTMgMC4wOTg4NDcxIDEwLjQ1NTZDMC4xNTk0NTYgMTAuNTk5OCAwLjI0ODIzNyAxMC43MzA1IDAuMzU5OTkgMTAuODRMNS43ODM5OSAxNi4yNjRDNS45MDM5OSAxNi4zODQgNi4wNDc5OSAxNi40NTYgNi4xOTE5OSAxNi40NTZINi44Mzk5OUM3LjY1NTk5IDE2LjQ1NiA4LjM5OTk5IDE1LjkwNCA4LjY2Mzk5IDE1LjEzNkw5LjY5NTk5IDEyLjA0WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==)](https://flems.io/https://gist.github.com/panoply/c662596e14c94ca238ea063754cfad9b)
 
 
-The `s.on` helper is a DOM Event listener which is forwarded to `addEventListener` event. This helper returns a function and can be passed to the element `{ dom }` as a callback.
+The `s.on` function simplifies attaching and cleaning up DOM Event listeners. It wraps `addEventListener` and `removeEventListener` with a functional API that fits naturally into Sin's component lifecycle. The helper returns a function that can be used as a dom hook inside components, or called manually
 
 ```js
+// Attach via dom hook
 s`pre`({
   dom: s.on(window, 'keydown', (event, dom) => {
-
-    dom.append(`Pressed: ${event.key}`)  // prints the key typed
-
+    dom.append(`Pressed: ${event.key}`)
   })
+})
+
+// Manual usage
+const detach = s.on(button, 'click', () => alert('hi'))()
+detach() // -> Remove the listener
+```
+
+> Invoking the returned function attaches the event listener, and it returns a cleanup function that will detach the listener.
+
+## event `s.event(dom, event, handler, options)`
+
+The `s.event` helpers creates a lightweight, reactive event bus. Instead of wiring up custom Pub/Sub systems or external libraries, you can use `s.event` to manage internal signals that any number of consumers can listen to. An `s.event` instance returns a function you can invoke like a normal callback, that when called, synchronously dispatches to all observers that have been registered.
+
+```js
+const listen = s.event()
+
+listen.observe(() => console.log("Called"))
+listen.observe(() => console.log("Called Once"), true)
+
+listen()  // -> Both observers will trigger
+listen()  // -> First observer will trigger
+listen()  // -> First observer will trigger
+```
+
+Each event instance also exposes a `.signal` getter which can be used to produce an AbortSignal that will abort once the event fires, making it easy to integrate with DOM APIs like `fetch` or `addEventListener` that support cancellation. You can also pass data via triggers
+
+```js
+const reload = s.event(x => console.log(x)) // -> Logs s, i and n
+
+reload.observe(x => console.log(x ? "Trigger" : "Reloaded!"))
+
+reload('s') // -> Trigger
+reload('i') // -> Trigger
+reload('n') // -> Trigger
+
+fetch('/api', { signal: reload.signal }) // -> Integration with AbortController APIs
+```
+
+## with `s.with(value, callback)`
+
+The `s.with` helper is a small but powerful conditional transformation utility. It allows you to safely apply a function to a value only if it is defined, If the value is `undefined` or resolved to a falsy, it is passed through untouched, ensuring that no error occurs.
+
+```js
+// Transform only if defined
+s.with(42, n => n * 2)            // -> 84
+s.with(undefined, n => n * 2)     // -> undefined
+
+// Conditional attributes
+const color = null
+
+s`div`(
+  s.with(color, c => ({ style: `color:${c}` }))
+)
+```
+
+## animate `s.animate(dom)`
+
+The `s.animate` helper gives you a minimal way to trigger entry/exit transitions on DOM nodes. It works by setting an animate attribute on the element, letting you define transitions in CSS, and then automatically cleaning up after the animation frame has advanced.
+
+```js
+s`
+  opacity 1
+  transform translateY(0)
+  transition opacity 200ms, transform 200ms
+
+  [animate=entry] {
+    opacity 0
+    transform translateY(10)
+    transition opacity 200ms, transform 200ms
+  }
+  [animate=exit] {
+    opacity 0
+    transform translateY(-10)
+  }
+`({
+  dom: s.animate  // -> Passing to dom
 })
 ```
 
-### `p(...)`
+> The helper works by setting an `[animate="entry"]` attribute to trigger CSS entry styles, removes it on the next frame, and returns a function that (with deferrable) sets `[animate="exit"]` and waits for exit transitions before removal.
+
+## `p(...)`
 
 Sin has `p()` available in **globalThis** context which is a great log helper. Unlike native `console.*` methods, `p` is designed as a pass-through interceptor and returns the last known value.
 
@@ -847,24 +1007,6 @@ Sin has `p()` available in **globalThis** context which is a great log helper. U
 
 const x = 333 + p('x', 333) // logs "x 333" and returns 333
 const v = p(x) / 2          // v will equal 333
-```
-
-### animate `s.animate(...)`
-
-CSS Animation DOM helper utility
-
-```js
-s`
-  [animate=entry] {
-    opacity 1
-  }
-
-  [animate=exit] {
-    opacity 0
-  }
-`({
-  dom: s.animate
-})
 ```
 
 # Trust ```s.trust`` ```
@@ -877,12 +1019,21 @@ s.trust(`<h1>Woe to the wicked!</h1>`)      // Function Expression
 ```
 
 
-# TypeScript
+# TypeScript Support
 
 Sin includes robust TypeScript definitions that fully support its flexible, dynamic architecture. These types help capture the framework's unique features, such as component signatures and reactive elements. You can apply types using generics (e.g., `s<{}, [], {}>`) directly on the `s` function or via the `s.Component<{}, [], {}>` utility for defining components. The [`sin.d.ts`](/sin.d.ts) file provides the complete type system for Sin, which your editor's TypeScript Language Server will detect automatically for IntelliSense and type safety.
 
 > [!NOTE]
 > Sin's type definitions build on a customized variation of `lib.dom.d.ts`, tailored specifically for Sin's patterns. They offer precise type narrowing for attributes and elements, complete with JSDoc annotations that include descriptive explanations and direct links to MDN documentation for deeper reference.
+
+### Omitted Function Methods
+
+Sin applies function augmentation, which causes IntelliSense completions to include native function methods such as `apply`, `call`, `caller`, `arguments`, `name`, `length`, and `prototype` properties which introduce unwanted clutter and noise in auto-complete suggestions. To address this, wherever function augmentation applies in Sin, native methods are assigned a `never` type and annotated with a `@deprecated` JSDoc tag.
+
+There is no direct way to exclude these methods as its a limitation TypeScript itself. Although this is a cheap-hack tactic, it ensures that these non-applicable methods will appear last in IntelliSense suggestions and prevents them from polluting auto-completion results.
+
+> [!NOTE]
+> If you are using VSCode, you can set the `editor.suggest.showDeprecated` option to `false`, to fully hide these native methods. If you are using **Zed**, no equivalent setting exists to suppress deprecated suggestions.
 
 ### Leveraging Generics
 
@@ -924,24 +1075,25 @@ declare global {
 If you prefer annotation-style typing or need reusable helpers, Sin exposes a suite of type utilities under the `s.*` namespace. These can be applied in various scenarios to enforce stricter typing for components, events, and more:
 
 ```ts
-s.Component<HTMLElement>                   // Styled Component Utility
-s.Component<Attrs, Children, Context>      // Stateless and Stateful Utility
-s.Context<Attrs>                           // Merges Component Context
-s.View<Attrs>                              // Merges attrs in Component View
-s.Event<HTMLElement, Event, Attrs>         // Sin Event Listener
-s.Nodes                                    // Sin Component Nodes
-s.Node                                     // Sin Component Node
-s.Child                                    // Sin Component Child
-s.Children                                 // Sin Component Children
-s.Daft                                     // Sin Component DAFT
-s.Primitive                                // Sin Component Primitives
+s.Component<HTMLElement>                              // Styled Component Utility
+s.Component<HTMLElement, Attrs, Children, Context>    // Merges Element attributes with Attrs Utility
+s.Component<Attrs, Children, Context>                 // Stateless and Stateful Utility
+s.Context<Attrs>                                      // Merges Component Context
+s.View<Attrs>                                         // Merges attrs in Component View
+s.Event<HTMLElement, Event, Attrs>                    // Sin Event Listener
+s.Nodes                                               // Sin Component Nodes
+s.Node                                                // Sin Component Node
+s.Child                                               // Sin Component Child
+s.Children                                            // Sin Component Children
+s.Daft                                                // Sin Component DAFT
+s.Primitive                                           // Sin Component Primitives
 ```
 
 > These utilities streamline complex type scenarios, such as event handling or context merging, while integrating smoothly with Sin's core APIs.
 
 ### Annotation Typing
 
-For developers who prefer explicit type annotations, Sin provides the `s.Component<>` utility to streamline component typing. This utility automatically detects component signatures and infers the appropriate types for attributes, children, and context, ensuring type safety without sacrificing Sin's concise syntax. Whether you're working with styled, stateless, or stateful components, `s.Component<>` simplifies the process of defining types directly on your component instances.
+For developers who prefer explicit type annotations, Sin provides the `s.Component<>` utility for component typing. This utility automatically detects component signatures and infers the appropriate types for attributes, children, and context, providing type safety without sacrificing Sin's concise syntax. Whether you're working with styled, stateless, or stateful components, `s.Component<>` simplifies the process of defining types directly on your component instances.
 
 ```ts
 // Example for stateless or stateful component
