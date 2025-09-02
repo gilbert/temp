@@ -2214,7 +2214,7 @@ type AutoCompleteUnion = StringUnion<'additional-name' | 'address-level1' | 'add
  * handling of tagged literals via {@link TemplateStringsArray} which prevents type
  * extraction and renders parse tag name analysis impossible.
  */
-interface HTMLAttributes<T extends HTMLElement> extends Attributes<T>, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<HTMLFormElement>, MediaListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T>, ARIAForm, ARIABusy, ARIAInteractive, ARIAModal, ARIAProgress, ARIAStructural {
+interface HTMLAttributes<T extends HTMLElement = DOM> extends Attributes<T>, AnimationListeners<T>, CanvasListeners<T>, DetailsListeners<T>, DialogListeners<T>, DragListeners<T>, FormListeners<HTMLFormElement>, MediaListeners<T>, SecurityListeners<T>, TrackListeners<T>, VideoListeners<T>, ARIAForm, ARIABusy, ARIAInteractive, ARIAModal, ARIAProgress, ARIAStructural {
     /**
      * - {@link InputAttributes}
      *
@@ -3693,26 +3693,6 @@ interface Attributes<T extends HTMLElement> extends ARIAAttrs, SinAttributes<T>,
  */
 interface LinkAttributes<T extends HTMLLinkElement = HTMLLinkElement> extends Attributes<T>, SecurityListeners<T> {
     /**
-     * The state key is a special attribute in Sin that can be applied to anchor (`a`) elements to facilitate data
-     * passing during client-side routing. It leverages the browser's History API (specifically `history.pushState`)
-     * to forward an object of data to the target route without altering the URL (e.g., no query parameters or
-     * fragments are added).
-     *
-     * This data is then automatically merged into the `attrs` argument of the receiving component on the target route.
-     *
-     * @example
-     *
-     * // Consider the following href
-     * s`a`({
-     *   href: '/path/to',
-     *   state: {
-     *     name: 'Loki',
-     *     age: 666
-     *   }
-     * })
-     */
-    state?: Record<any, any>;
-    /**
      * {@link HTMLLinkElement}  →  {@link LinkAttributes}
      *
      * Specifies the URL of the resource linked by the `<link>` element, such as a stylesheet, icon, or prefetch resource.
@@ -3994,6 +3974,26 @@ interface LIAttributes<T extends HTMLLIElement = HTMLLIElement> extends Attribut
  * - `<link>`
  */
 interface AnchorAttributes<T extends HTMLAnchorElement = HTMLAnchorElement> extends Attributes<T>, ARIAInteractive {
+    /**
+     * The state key is a special attribute in Sin that can be applied to anchor (`a`) elements to facilitate data
+     * passing during client-side routing. It leverages the browser's History API (specifically `history.pushState`)
+     * to forward an object of data to the target route without altering the URL (e.g., no query parameters or
+     * fragments are added).
+     *
+     * This data is then automatically merged into the `attrs` argument of the receiving component on the target route.
+     *
+     * @example
+     *
+     * // Consider the following href
+     * s`a`({
+     *   href: '/path/to',
+     *   state: {
+     *     name: 'Loki',
+     *     age: 666
+     *   }
+     * })
+     */
+    state?: Record<string, any>;
     /**
      * {@link HTMLAnchorElement}  →  {@link AnchorAttributes}
      *
@@ -5998,7 +5998,7 @@ interface DataAttributes<T extends HTMLDataElement = HTMLDataElement> extends At
 }
 
 type Components = typeof s;
-type SinAttrs<T> = T extends SinElement ? HTMLAttributes<SinElement> : T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : HTMLAttributes<HTMLElement>;
+type SinAttrs<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends HTMLUListElement ? Attributes<HTMLUListElement> : T extends HTMLSpanElement ? Attributes<HTMLElement> : T extends HTMLDivElement ? Attributes<HTMLElement> : T extends HTMLHeadingElement ? Attributes<HTMLElement> : T extends HTMLBodyElement ? Attributes<HTMLElement> : T extends HTMLBRElement ? Attributes<HTMLElement> : T extends HTMLHRElement ? Attributes<HTMLElement> : T extends HTMLHeadElement ? Attributes<HTMLElement> : T extends HTMLHtmlElement ? Attributes<HTMLElement> : T extends HTMLBaseElement ? Attributes<HTMLElement> : T extends DOM ? HTMLAttributes<DOM> : HTMLAttributes<HTMLElement>;
 type Views = Exclude<Children, Record<string, unknown>>;
 type Varidiac = Children | Children[] | StyledComponent | Array<Children | StyledComponent> | [];
 type Arguments<T, U, V> = [
@@ -6008,9 +6008,9 @@ type Arguments<T, U, V> = [
 ];
 type Signatures<T, U, V> = {
     (tag: TagLiteral, ...interpolate: Interpolate): Signatures<T, U, V>;
-    (attrs: ifInferred<T, {}, T>): View<T>;
-    (attrs: ifInferred<T, {}, T>, ...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
-    (attrs: ifInferred<T, {}, T>, children: U extends [] ? Children[] : U, context?: V): View<T>;
+    (attrs: ifInferred<T, HTMLAttributes, T>): View<T>;
+    (attrs: ifInferred<T, HTMLAttributes, T>, ...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
+    (attrs: ifInferred<T, HTMLAttributes, T>, children: U extends [] ? Children[] : U, context?: V): View<T>;
     (...children: U extends [] ? Children[] : U extends any[] ? U : U[]): View<T>;
 };
 type StatelessSignature<T, U, V> = (...x: Arguments<T, U, V>) => Varidiac;
@@ -6018,13 +6018,13 @@ type StatelessComponent<T, U, V> = Signatures<T, U, V>;
 type StatefulSignature<T, U, V> = (...x: Arguments<T, U, V>) => P<(...x: Arguments<T, U, V>) => P<Varidiac>>;
 type StatefulComponent<T, U, V> = Signatures<T, U, V>;
 type StateSignatures<T, U, V> = StatelessSignature<T, U, V> | StatefulSignature<T, U, V>;
-type StyledSignature<T extends SinElement> = Partial<[
+type StyledSignature<T extends DOM> = Partial<[
     attributes?: SinAttrs<T>,
     ...children: Array<Children | StyledComponent<T>>
 ] | [
     ...children: Array<Children | StyledComponent<T>>
 ]>;
-type StyledComponent<T extends SinElement = SinElement> = {
+type StyledComponent<T extends DOM = DOM> = {
     <S extends StateSignatures<any, any, any>>(component: S): InferComponent<S>;
     <A = {}>(...attibutes: StyledSignature<T>): View<A>;
     (tag: TagLiteral, ...interpolate: Interpolate): StyledComponent<T>;
@@ -6278,7 +6278,7 @@ type HTMLTagElement<HTMLElementName extends string> = Has<HTMLElementTagNameMap,
 /**
  * DOM Target/s for mounting
  */
-type DOM = Element | HTMLElement | DocumentFragment | ShadowRoot;
+type DOMTarget = Element | HTMLElement | DocumentFragment | ShadowRoot;
 /**
  * Mount Arguments spreads
  */
@@ -6305,11 +6305,11 @@ type MountSSR<T, V> = {
 type Mounted<T, V> = void | MountSSR<T, V>;
 type Mount = {
     <T = {}, U = [], V = {}>(view: StateSignatures<T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
-    <T = {}, U = [], V = {}>(dom: DOM, view: StateSignatures<T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
+    <T = {}, U = [], V = {}>(dom: DOMTarget, view: StateSignatures<T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
     <T = {}, U = [], V = {}>(view: Component<HTMLBodyElement, T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
-    <T = {}, U = [], V = {}>(dom: DOM, view: Component<T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
+    <T = {}, U = [], V = {}>(dom: DOMTarget, view: Component<T, U, V>, ...x: MountArguments<T, V>): Mounted<T, V>;
     <T = {}>(view: View<T>, ...x: MountArguments<T, {}>): Mounted<T, {}>;
-    <T = {}>(dom: DOM, view: View<T>, ...x: MountArguments<T, {}>): Mounted<T, {}>;
+    <T = {}>(dom: DOMTarget, view: View<T>, ...x: MountArguments<T, {}>): Mounted<T, {}>;
 };
 
 /**
@@ -6589,17 +6589,17 @@ declare global {
      */
     export function p<T = any>(...input: T[]): T;
     /**
-     * Sin Element
+     * Sin DOM
      *
      * A custom element which will inherit all DOM Element attributes.
-     * The `SinElement` is a proxy type over `HTMLElement` and contains
+     * The `DOM` is a proxy type over `HTMLElement` and contains
      * the virtual element schema of sin nodes.
      */
-    interface SinElement extends HTMLElement, SinAttributes<SinElement> {
+    interface DOM extends HTMLElement, SinAttributes<DOM> {
     }
-    var SinElement: {
-        prototype: SinElement;
-        new (): SinElement;
+    var DOM: {
+        prototype: DOM;
+        new (): DOM;
     };
 }
 /**
