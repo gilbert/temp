@@ -187,7 +187,7 @@ Element attributes support HTML attribute properties. Sin resolves attributes vi
 
 ### dom `{ dom: () => {} }`
 
-The `dom` key is a render callback. It's a creation lifcycle hook which will fire in the post-rendering cycle of a sin view. You will attach third-party tools using this callback method, as it fires once the virtual node has been mounted, rendered and is ready.
+The `dom` key is a render callback. It's a creation lifecycle hook which will fire in the post-rendering cycle of a sin view. You will attach third-party tools using this callback method, as it fires once the virtual node has been mounted, rendered and is ready.
 
 ```js
 s`div`({
