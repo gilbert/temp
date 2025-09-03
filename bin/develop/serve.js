@@ -3,6 +3,7 @@
 import path from 'node:path'
 import esbuild from 'esbuild'
 import Server from 'sin/server'
+import exit from 'sin/exit'
 
 import favicon from '../favicon.js'
 import config, { resolve } from './config.js'
@@ -24,7 +25,9 @@ const onlyServer = config.static
   ? staticOnly()
   : await serve()
 
-await router.listen(config.port)
+const { unlisten } = await router.listen(config.port)
+exit.wait('http', unlisten)
+
 process.send('started:' + onlyServer)
 
 function staticOnly() {

@@ -7,7 +7,7 @@ import path from 'node:path'
 import util from 'node:util'
 import cp from 'node:child_process'
 
-import prexit from '../prexit.js'
+import exit from 'sin/exit'
 import config from './config.js'
 import api from './api.js'
 import { rewrite } from './shared.js'
@@ -26,7 +26,9 @@ api.log({ replace, from: 'browser', type: 'status', value: '⏳' })
 ensurePrefs()
 
 let closed
+let exited
 const close = new Promise(r => closed = r)
+const exiting = new Promise(r => exited = r)
 const tabs = new Map()
 const noop = () => { }
 const timeout = (config.ci ? 60 : 20) * 1000
@@ -34,24 +36,6 @@ const chrome = await Promise.race([
   spawn(),
   s.sleep(timeout).then(() => Promise.reject('Chrome spawn timed out'))
 ])
-
-prexit(async() => {
-  let ok
-  try {
-    for (const x of tabs.values()) {
-      if (x.ws) {
-        if (x.ws.coverage) {
-          const { result } = await x.ws.request('Profiler.takePreciseCoverage')
-          console.log('Chrome Coverage', await coverage(result))
-        }
-        ok = await x.ws.request('Browser.close')
-        break
-      }
-    }
-  } finally {
-    ok || chrome.kill()
-  }
-})
 
 await Promise.race([
   updateTabs(true),
@@ -309,12 +293,32 @@ async function spawn() {
     ].filter(x => x), {
       detached: true
     })
+        
+    exit.wait('chrome', async() => {
+      let ok
+      try {
+        for (const x of tabs.values()) {
+          if (x.ws) {
+            if (x.ws.coverage) {
+              const { result } = await x.ws.request('Profiler.takePreciseCoverage')
+              console.log('Chrome Coverage', await coverage(result))
+            }
+            ok = await x.ws.request('Browser.close')
+            break
+          }
+        }
+      } finally {
+        ok || chrome.kill()
+      }
+      await exiting
+    })
 
     chrome.stderr.setEncoding('utf8')
     chrome.stderr.on('data', x => {
       config.debug && console.error('Chrome stderr: ' + x)
       resolve(chrome)
     })
+    
     chrome.stdout.setEncoding('utf8')
     chrome.stdout.on('data', x => {
       config.debug && console.error('Chrome stdout: ' + x)
@@ -322,7 +326,10 @@ async function spawn() {
     })
 
     chrome.on('error', reject)
-    chrome.on('close', x => x || reject('Chrome Closed with exit code: ' + x))
+    chrome.on('close', x => {
+      x && reject('Chrome Closed with exit code: ' + x)
+      exited()
+    })
   })
 }
 

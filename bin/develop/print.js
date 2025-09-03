@@ -1,7 +1,7 @@
 import Url from 'node:url'
 import process from 'node:process'
 
-import prexit from '../prexit.js'
+import exit from 'sin/exit'
 import p from './log.js'
 import config from './config.js'
 import api from './api.js'
@@ -16,12 +16,12 @@ api.browser.hotload.observe(() => std({ from: 'browser', replace: 'browserhot', 
 api.log.observe(std)
 
 if (process.stdin.isTTY) {
-  prexit(() => process.stdin.setRawMode(false))
+  exit.wait('stdin', () => process.stdin.pause())
   process.stdin.setRawMode(true)
   process.stdin.resume()
   process.stdin.on('data', x => {
     x = x.toString()
-      x === '\u0003' ? prexit.exit()
+      x === '\u0003' ? exit('SIGINT')
     : x === 'r' ? api.node.restart()
     : x === 'i' ? api.log() && more(api.log())
     : ''

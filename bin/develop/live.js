@@ -3,7 +3,7 @@ import tls from 'node:tls'
 import net from 'node:net'
 import fs from 'node:fs/promises'
 
-import prexit from '../prexit.js'
+import exit from 'sin/exit'
 import config from './config.js'
 
 const p = console.log // eslint-disable-line
@@ -35,7 +35,7 @@ async function connect(id, port, main) {
     const clients = new Map()
 
     const socket = tls.connect(...options)
-    prexit(() => socket.end())
+    exit.wait('live', () => socket.end())
     let rest = 0
       , client = null
 

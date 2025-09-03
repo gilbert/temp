@@ -5,7 +5,7 @@ import path from 'node:path'
 import process from 'node:process'
 import cp from 'node:child_process'
 
-import prexit from './prexit.js'
+import exit from 'sin/exit'
 import config, { error } from './config.js'
 
 const [major, minor] = process.versions.node.split('.').map(Number)
@@ -22,11 +22,13 @@ try {
     config.config = false
     await import(config.local + '/bin/' + config.$[0] + '/index.js')
   }
-  prexit.exit()
+  await exit()
 } catch (e) {
   config.config && console.log(config) // eslint-disable-line
   config.debug
     ? console.error(e) // eslint-disable-line
     : error(e)
-  prexit.exit(1)
+  process.exitCode = process.exitCode || 1
+  await exit()
+  process.exitCode = process.exitCode || 1
 }

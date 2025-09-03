@@ -1,9 +1,9 @@
 import Server from 'sin/server'
+import exit from 'sin/exit'
 
 import api from '../api.js'
 import editor from './editor.js'
 import config from '../config.js'
-import prexit from '../../prexit.js'
 import eyeDropper from './eyedropper/index.js'
 
 let eyeDropperStop
@@ -24,7 +24,8 @@ app.ws({
   message: (ws, { json }) => json.event && events[json.event](json.data, ws)
 })
 
-await app.listen(config.devPort)
+const { unlisten } = await app.listen(config.devPort)
+exit.wait('http dev', unlisten)
 
 api.browser.reload.observe(x => publish('reload', x))
 api.browser.redraw.observe(x => publish('redraw', x))
@@ -47,5 +48,5 @@ function inspect(x, ws) {
 
 function tested(code) {
   code && console.error('Testing failed with error code:', code)
-  config.ci && prexit.exit(code)
+  config.ci && exit(code)
 }

@@ -3,7 +3,7 @@ import URL from 'node:url'
 import path from 'node:path'
 import cp from 'node:child_process'
 
-import prexit from '../prexit.js'
+import exit from 'sin/exit'
 import color from '../color.js'
 import coverage from '../test/coverage.js'
 
@@ -23,8 +23,8 @@ let node
 
 export const closing = new Promise(r => closed = r)
 
-prexit(() => {
-  close()
+exit.wait('node', async() => {
+  await close()
   closed()
 })
 
@@ -153,7 +153,7 @@ async function start() {
     clearTimeout(closeTimer)
     ws = node = null
 
-    prexit.exiting || api.log({
+    exit.exiting || api.log({
       replace: 'nodeend',
       from: 'node',
       type: 'status',
