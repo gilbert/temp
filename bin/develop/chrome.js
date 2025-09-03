@@ -19,7 +19,7 @@ if (!config.chromePath || !fs.existsSync(config.chromePath))
   throw new Error('Could not find a Chrome installation. Install Chrome or set a valid path using CHROME_PATH=')
 
 const root = 'http://127.0.0.1:' + config.chromePort
-    , hmr = 'window.self===window.top&&(window.sindevhmr=1);'
+    , hmr = 'window.self===window.top&&(window.sindevhmr=1);Error.stackTraceLimit=128;'
     , replace = Math.random()
 
 api.log({ replace, from: 'browser', type: 'status', value: '⏳' })
