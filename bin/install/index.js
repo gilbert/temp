@@ -455,6 +455,7 @@ async function writeLock() {
   sort(lock, 'dependencies')
   sort(lock, 'optionalDependencies')
   sort(lock, 'devDependencies')
+  sort(lock, 'peerDependencies')
   sort(lock, 'packages')
   Object.keys(lock.packages).forEach((k) => {
     const x = lock.packages[k]
