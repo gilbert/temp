@@ -472,7 +472,7 @@ async function writeLock() {
   }
 }
 
-function equalDependencies(a, b) {
+function equalDependencies(a = {}, b = {}) {
   for (const x in a) {
     if (a[x] !== b[x])
       return false
