@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-import URL from 'node:url'
+import URL, { pathToFileURL } from 'node:url'
 import path from 'node:path'
 import process from 'node:process'
 import cp from 'node:child_process'
@@ -20,7 +20,7 @@ try {
   } else {
     config.config && console.log(config) // eslint-disable-line
     config.config = false
-    await import(config.local + '/bin/' + config.$[0] + '/index.js')
+    await import(pathToFileURL(config.local + '/bin/' + config.$[0] + '/index.js'))
   }
   await exit()
 } catch (e) {
