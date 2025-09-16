@@ -137,7 +137,9 @@ export function getLocal(x) {
     return x
 
   const local = path.join(process.cwd(), 'node_modules', 'sin')
-  return fs.existsSync(local)
-    ? local
-    : path.join(url.fileURLToPath(new URL('.', import.meta.url)), '..')
+  return pathToFileURL(
+    fs.existsSync(local)
+      ? local
+      : path.join(url.fileURLToPath(new URL('.', import.meta.url)), '..')
+  )
 }
