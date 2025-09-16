@@ -270,7 +270,7 @@ function getProjects(x, xs) {
   return mkdir(x
     ? x
     : env.WSL_DISTRO_NAME
-    ? env.PATH.match(/\/mnt\/c\/Users\/[^/]+\//)[0] + '/.sin/wsl_projects'
+    ? env.PATH.match(/\/mnt\/c\/Users\/[^/]+\//)[0] + '.sin/wsl_projects'
     : path.join(xs.home, 'projects')
   )
 }
