@@ -15,16 +15,19 @@ api.browser.hotload.observe(() => std({ from: 'browser', replace: 'browserhot', 
 
 api.log.observe(std)
 
-if (process.stdin.isTTY) {
+if (false && process.stdin.isTTY) {
   exit.wait('stdin', () => process.stdin.pause())
   process.stdin.setRawMode(true)
   process.stdin.resume()
   process.stdin.on('data', x => {
     x = x.toString()
-      x === '\u0003' ? exit('SIGINT')
-    : x === 'r' ? api.node.restart()
-    : x === 'i' ? api.log() && more(api.log())
-    : ''
+      x === '\x03' ? exit('SIGINT')
+    : x === '\x1A' ? exit('SIGTSTP')
+    : x === '\x1C' ? exit('SIGQUIT')
+    : x === 'r' ? (process.stdout.write('r'), api.node.restart())
+    : x === 'i' ? (process.stdout.write('i'), api.log() && more(api.log()))
+    : x === '\r' ? process.stdout.write('\n')
+    : process.stdout.write(x)
   })
 }
 
