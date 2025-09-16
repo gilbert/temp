@@ -76,7 +76,6 @@ function handle(name, timeout, event) {
     if (process.listenerCount('SIGHUP') > 1)
       return 
     
-    console.log(event + ' - run ' + handlers.size + ' exit jobs: ' + [...handlers].map(x => x.name).join(', '))
     if (event === 'uncaughtException' || event === 'unhandledRejection')
       console.error(signal)
     
