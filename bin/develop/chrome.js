@@ -18,8 +18,9 @@ import s from '../../src/index.js'
 if (!config.chromePath || !fs.existsSync(config.chromePath))
   throw new Error('Could not find a Chrome installation. Install Chrome or set a valid path using CHROME_PATH=')
 
-const root = 'http://127.0.0.1:' + config.chromePort
-    , hmr = 'window.self===window.top&&(window.sindevhmr=1);Error.stackTraceLimit=128;'
+let root
+
+const hmr = 'window.self===window.top&&(window.sindevhmr=1);Error.stackTraceLimit=128;'
     , replace = Math.random()
 
 api.log({ replace, from: 'browser', type: 'status', value: '⏳' })
@@ -289,7 +290,7 @@ async function spawn() {
       '--test-type', // Remove warning banner from --disable-web-security usage
       config.test ? '' : '--restore-last-session',
       '--user-data-dir=' + userDataDir(config.project),
-      '--remote-debugging-port=' + config.chromePort
+      '--remote-debugging-port=0'
     ].filter(x => x), {
       detached: true
     })
@@ -316,6 +317,13 @@ async function spawn() {
     chrome.stderr.setEncoding('utf8')
     chrome.stderr.on('data', x => {
       config.debug && console.error('Chrome stderr: ' + x)
+      if (root)
+        return
+      const [_, port] = x.match(/DevTools listening on .+:([0-9]+)\//) || []
+      if (!port)
+        return
+      
+      root = 'http://127.0.0.1:' + port
       resolve(chrome)
     })
     

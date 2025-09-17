@@ -22,7 +22,6 @@ const env        = process.env
     , origin     = new URL(url).origin
     , devPort    = env.SIN_DEV_PORT = env.SIN_DEV_PORT || await getDevPort()
     , nodePort   = env.SIN_NODE_PORT = env.SIN_NODE_PORT || await reservePort()
-    , chromePort = env.SIN_CHROME_PORT = env.SIN_CHROME_PORT || await getChromePort()
 
 export { resolve }
 
@@ -31,8 +30,7 @@ export default Object.assign(config, {
   url,
   origin,
   devPort,
-  nodePort,
-  chromePort
+  nodePort
 })
 
 function getUrl() {
@@ -46,18 +44,6 @@ async function getDevPort() {
   const portPath = path.join(project, '.sin-dev-port')
   try {
     fs.accessSync(path.join(project, 'SingletonSocket'))
-    return parseInt(fs.readFileSync(portPath, 'utf8'))
-  } catch (error) {
-    const port = await reservePort()
-    fs.writeFileSync(portPath, '' + port)
-    return port
-  }
-}
-
-async function getChromePort() {
-  const portPath = path.join(project, '.sin-chrome-port')
-  try {
-    await fs.accessSync(path.join(project, 'SingletonSocket'))
     return parseInt(fs.readFileSync(portPath, 'utf8'))
   } catch (error) {
     const port = await reservePort()
