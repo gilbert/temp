@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import { isMainThread, parentPort } from 'node:worker_threads'
 
+import exit from 'sin/exit'
 import Server from 'sin/server'
 import '../favicon.js'
 
@@ -13,8 +14,9 @@ import { tryPromise } from '../../src/shared.js'
 import config, { resolve } from '../config.js'
 import Acme from '../acme/core.js'
 
-
 let sslListener
+exit.wait('https', () => sslListener?.unlisten())
+
 const { server, mount, src, modified } = await resolve(config.entry)
 const router = Server()
 
@@ -62,10 +64,12 @@ async function listenHttp() {
         ? r.statusEnd(301, { Location: 'https://' + target.split(':')[0] + r.url + (r.rawQuery ? '?' + r.rawQuery : '') })
         : r.statusEnd(404)
     })
-    await redirect.listen(config.httpPort, config.address)
+    const { unlisten } = await redirect.listen(config.httpPort, config.address)
+    exit.wait('http redirect', unlisten)
     console.log('HTTP Redirecting to HTTPS on', config.httpPort) // eslint-disable-line
   } else {
-    await router.listen(config.httpPort, config.address)
+    const { unlisten } = await router.listen(config.httpPort, config.address)
+    exit.wait('http', unlisten)
     console.log('HTTP Listening on', config.httpPort) // eslint-disable-line
   }
 }
