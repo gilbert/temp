@@ -249,7 +249,7 @@ function init(options, https) {
           server.listen({
             host,
             port,
-            reusePort: true,
+            reusePort: process.platform === 'linux',
             ...options,
             ...listenOptions
           },
