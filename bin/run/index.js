@@ -26,7 +26,7 @@ if (config._.length === 0) {
     const cmd = pkg.scripts[x]
     if (!cmd)
       throw new Error('No script found for: ' + x)
-  
+
     const bins = [Path.join(config.globalDir, 'node_modules', '.bin')]
     let dir = config.cwd
     let prev
@@ -38,7 +38,7 @@ if (config._.length === 0) {
       prev = dir
       dir = Path.dirname(dir)
     }
-    
+
     'SIGINT SIGTERM SIGHUP SIGBREAK'.split(' ').forEach(x => process.on(x, noop))
     process.exitCode = cp.spawnSync(cmd, [], {
       stdio: 'inherit',
@@ -48,10 +48,10 @@ if (config._.length === 0) {
         PATH: bins.join(':') + ':' + process.env.PATH
       }
     }).status
-    
+
     if (process.exitCode !== 0)
       break
-    
+
     'SIGINT SIGTERM SIGHUP SIGBREAK'.split(' ').forEach(x => process.off(x, noop))
   }
 }

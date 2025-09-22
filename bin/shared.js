@@ -103,7 +103,7 @@ export function modify(x, file, {
       ? sucraseTS(sucrase, x, debug, tsx, tsconfigRaw, file)
       : esbuildTS(x, debug, tsx, tsconfigRaw, file)
   }
-  
+
   return nojail ? x : jail(x)
 }
 

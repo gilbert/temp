@@ -17,7 +17,7 @@ t`ssr`(
     t`as string`(() => [
       '<!--h--><div style="color:red"></div>',
       toHtml(s('', { style: 'color:red' }))
-    ])  
+    ])
   ),
   t`css-vars`(
     t`as object`(() => [
@@ -63,7 +63,6 @@ t`ssr`(
     t`as object`(() => [
       '<!--h--><div class="a"></div>',
       toHtml(s('', { class: { a: true, b: false } }))
-    ]),
+    ])
   )
 )
-      

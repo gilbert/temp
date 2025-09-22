@@ -148,7 +148,7 @@ export default class Request {
   onAborted(fn) {
     if (this.ended)
       return
-    
+
     if (this[$.aborted])
       return fn && this[$.aborted].push(fn)
 
@@ -243,11 +243,11 @@ export default class Request {
 
         if (ok)
           return callback()
-        
+
         r.onWritable((offset) => {
           if (r[$.length] === null)
             return (callback(), true)
-          
+
           const ok = r.tryEnd(chunk.subarray(offset - lastOffset), r[$.length])[0]
           ok && callback()
           return ok
@@ -438,7 +438,7 @@ export default class Request {
   onWritable(fn) {
     if ($.onWritable in this)
       return this[$.onWritable] = fn
-    
+
     this[$.onWritable] = fn
     return this[$.res].onWritable(x => {
       this[$.corked] = true

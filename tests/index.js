@@ -198,7 +198,7 @@ t`Rendering`(
     return [2, redraws]
   }),
 
-  t`Redraw does not leak`(async () => {
+  t`Redraw does not leak`(async() => {
     let redraws = 0
     s.mount(() => redraws++)
     s.redraw()
@@ -523,7 +523,7 @@ t`Routing`(
     }
   }),
 
-  t`Prevent redraw when clicking anchor`(async () => {
+  t`Prevent redraw when clicking anchor`(async() => {
     let redraws = 0
     s.mount(() => {
       return () => {
@@ -540,7 +540,7 @@ t`Routing`(
     t.is(redrawsSnapshot, redraws)
   }),
 
-  t`Prevent redraw when calling s.route`(async () => {
+  t`Prevent redraw when calling s.route`(async() => {
     let redraws = 0
     s.mount(() => redraws++)
     const anchor = document.querySelector('button')
