@@ -105,7 +105,7 @@ async function fromArgs() {
       live              : false,
       nochrome          : false,
       noscript          : false,
-      nojail            : false,
+      nojail            : (x, xs) => !xs.develop || x,
       bundleNodeModules : false,
       showDeprecated    : false,
       ignoreScripts     : false,
