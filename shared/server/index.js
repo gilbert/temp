@@ -163,7 +163,7 @@ export default function Server({
         }
 
         function unlisten() {
-          handle && backend.us_listen_socket_close(handle)
+          return handle && backend.us_listen_socket_close(handle)
         }
 
         function wrap(res, req) {

@@ -198,7 +198,11 @@ export default {
   },
   App(options) { return init(options, false) },
   us_socket_local_port(handle) { return handle.address().port },
-  us_listen_socket_close(handle) { handle.close() },
+  async us_listen_socket_close(handle) {
+    return new Promise((resolve, reject) => {
+      handle.close(error => error ? reject(error) : resolve())
+    })
+  },
   getParts
 }
 
