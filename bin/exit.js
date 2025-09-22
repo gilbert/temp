@@ -11,7 +11,7 @@ let exitResolve = null
 
 const exited = new Promise(r => exitResolve = r)
 
-export default exit 
+export default exit
 
 function exit(signal = 'SIGTERM', x = signal) {
   process.emit(signal, x)
@@ -23,7 +23,7 @@ Object.defineProperties(exit, {
   exited  : { get() { return exited } },
   exiting : { get() { return exiting } },
   event   : { get() { return exitEvent } },
-  signal  : { get() { return exitSignal } },
+  signal  : { get() { return exitSignal } }
 })
 
 exit.wait = function wait(name, timeout, fn) {
@@ -32,21 +32,21 @@ exit.wait = function wait(name, timeout, fn) {
     timeout,
     fn
   }
-  
+
   if (!fn) {
     x.fn = timeout
     x.timeout = null
   }
-  
+
   if (typeof x.name !== 'string')
     throw new Error('First argument to exit.wait must be a name for the job')
-  
+
   if (typeof x.fn !== 'function')
     throw new Error('Second argument to exit.wait must be a function')
-    
+
   if (x.timeout !== null && typeof x.timeout !== 'number')
     throw new Error('Second argument to exit.wait must be a function')
-  
+
   if (handlers.size === 0) {
     for (const event of events) {
       const fn = handle(name, timeout, event)
@@ -54,7 +54,7 @@ exit.wait = function wait(name, timeout, fn) {
       process.on(event, fn)
     }
   }
-  
+
   handlers.add(x)
   exiting && runHandler(x)
   return () => removeHandler(x)
@@ -74,21 +74,21 @@ function handle(name, timeout, event) {
     exitEvent = event
     exitSignal = signal
     if (process.listenerCount('SIGHUP') > 1)
-      return 
-    
+      return
+
     if (event === 'uncaughtException' || event === 'unhandledRejection')
       console.error(signal)
-    
+
     exiting = true
-    
+
     for (const x of handlers) {
       removeHandler(x)
       runHandler(x)
     }
-    
+
     if (running.size && event !== 'exit') {
       await Promise.race([
-        Promise.allSettled([...running].map(x => 
+        Promise.allSettled([...running].map(x =>
           Promise.race([
             x.result,
             new Promise(r => x.timeout === null || setTimeout(r, x.timeout).unref())
@@ -97,14 +97,14 @@ function handle(name, timeout, event) {
         new Promise(r => exit.timeout === null || setTimeout(r, exit.timeout).unref())
       ])
     }
-    
+
     for (const x of running)
       console.error('Exit job \'' + x.name + '\' timed out')
-      
+
     for (const [name, error] of errors)
       console.error('Exit job "' + name + '" errored with', error)
-    
-      process.exitCode || (process.exitCode = 
+
+      process.exitCode || (process.exitCode =
         event === 'uncaughtException'  ? 1
       : event === 'unhandledRejection' ? 1
       : event === 'SIGINT'             ? 130
@@ -112,10 +112,10 @@ function handle(name, timeout, event) {
       : event === 'SIGTSTP'            ? 131
       : event === 'SIGHUP'             ? 129
       : event === 'SIGABRT'            ? 134
-      : errors.size || running.size    ? 1 
+      : errors.size || running.size    ? 1
       : 0
     )
-    
+
     exitResolve()
     if (exit.timeout === null) {
       setTimeout(waiting, 1000, 1000).unref()
@@ -124,7 +124,7 @@ function handle(name, timeout, event) {
           setTimeout(waiting, timeout, timeout * 2).unref()
           return console.error('Exiting - waiting for unknown handlers to finish')
         }
-        
+
         console.error('Exited while waiting for unknown handlers to finish')
         process.exit()
       }
@@ -144,14 +144,14 @@ function runHandler(x) {
     if (x.result && typeof x.result.then === 'function') {
       running.add(x)
       x.result.then(
-        () => running.delete(x), 
+        () => running.delete(x),
         error => {
           errors.add([x.name, error])
           running.delete(x)
         }
       )
     }
-  } catch(error) {
+  } catch (error) {
     errors.add([x.name, error])
-  } 
+  }
 }

@@ -99,10 +99,10 @@ function getObject(x) {
 function isObjectEmpty(obj) {
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
-      return false;
+      return false
     }
   }
-  return true;
+  return true
 }
 
 async function build(r) {

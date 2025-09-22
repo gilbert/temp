@@ -319,14 +319,15 @@ async function spawn() {
       config.debug && console.error('Chrome stderr: ' + x)
       if (root)
         return
+
       const [_, port] = x.match(/DevTools listening on .+:([0-9]+)\//) || []
       if (!port)
         return
-      
+
       root = 'http://127.0.0.1:' + port
       resolve(chrome)
     })
-    
+
     chrome.stdout.setEncoding('utf8')
     chrome.stdout.on('data', x => {
       config.debug && console.error('Chrome stdout: ' + x)

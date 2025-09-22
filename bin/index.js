@@ -1,7 +1,6 @@
 #! /usr/bin/env node
 
-import URL, { pathToFileURL } from 'node:url'
-import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import process from 'node:process'
 import cp from 'node:child_process'
 

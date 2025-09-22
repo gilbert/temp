@@ -445,7 +445,7 @@ async function writeLock() {
     await rm('node_modules')
     return
   }
-  
+
   if (equalDependencies(oldLock.dependencies, packageJson.dependencies) && removes.length === 0 && installs.size === 0)
     return
 
