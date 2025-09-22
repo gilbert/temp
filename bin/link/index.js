@@ -1,55 +1,46 @@
-import Path from 'node:path'
+import path from 'node:path'
 import fs from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 
 import config from '../config.js'
-import { safeId } from '../shared.js'
 
 const p = console.log // eslint-disable-line
-const sinx = process.platform === 'win32' && Path.join(import.meta.dirname, '..', 'install', 'sinx.exe')
 
 if (config._.length) {
-  const pkg = JSON.parse(await fs.readFile('package.json'))
   for (const name of config._) {
-    const target = Path.join(config.linkDir, name)
+    const target = path.join(config.linkDir, name)
     if (!existsSync(target))
       throw new Error(name + ' not found - did you link it?')
-    const path = Path.join('node_modules', '.sin', safeId({ name: name, version: 'link:' + name }), 'node_modules', name)
-    await symlink(target, path)
-    await symlink(Path.join(name[0] === '@' ? '..' : '', path.slice(13)), Path.join('node_modules', name))
-    p('🔥 Linked ' + name)
-    name in (pkg.devDependencies || {})
-      ? pkg.devDependencies[name] = 'link:' + name
-      : name in (pkg.optionalDependencies || {})
-      ? pkg.optionalDependencies[name] = 'link:' + name
-      : name in (pkg.peerDependencies || {})
-      ? pkg.peerDependencies[name] = 'link:' + name
-      : name in (pkg.dependencies || {})
-      ? pkg.dependencies[name] = 'link:' + name
-      : pkg.dependencies = sort({ ...pkg.dependencies || {}, [name]: 'link:' + name })
-    await fs.writeFile('package.json', JSON.stringify(pkg, null, 2))
   }
+
+  config.install = true
+  config.link = false
+
+  config._ = config._.map(x => 'link:' + x)
+  await import('../install/index.js')
 } else {
   const pkg = JSON.parse(await fs.readFile('package.json'))
   await fs.mkdir(config.linkDir, { recursive: true })
-  await symlink(config.cwd, Path.join(config.linkDir, pkg.name))
+  await symlink(config.cwd, path.join(config.linkDir, pkg.name))
 
   await Promise.all(Object.entries(
     typeof pkg.bin === 'string'
     ? { [pkg.name.split('/').pop()]: pkg.bin }
     : pkg.bin || {}
   ).map(async([name, file]) => {
-    const target = Path.join(config.cwd, file)
-    const path = Path.join(config.binDir, name)
+    const target = path.join(config.cwd, file)
+    const link = path.join(config.binDir, name)
+    const sinx = process.platform === 'win32' && path.join(import.meta.dirname, '..', 'install', 'sinx.exe')
+
     if (sinx) {
       await fs.mkdir(config.binDir, { recursive: true })
-      await fs.writeFile(path, 'node "' + target + '"')
-      await fs.copyFile(sinx, Path.join(config.binDir, name + '.exe')).catch(err => {
+      await fs.writeFile(link, 'node "' + target + '"')
+      await fs.copyFile(sinx, path.join(config.binDir, name + '.exe')).catch(err => {
         if (name !== 'sin' || err.code !== 'EBUSY')
           throw err
       })
     } else {
-      await symlink(target, path)
+      await symlink(target, link)
       await fs.chmod(target, 0o766)
     }
   }))
@@ -57,16 +48,12 @@ if (config._.length) {
   p('🔥 Linked as ' + pkg.name)
 }
 
-async function symlink(target, path) {
+async function symlink(target, link) {
   try {
-    await fs.mkdir(Path.dirname(path), { recursive: true })
-    await fs.symlink(target, path, 'junction')
+    await fs.mkdir(path.dirname(link), { recursive: true })
+    await fs.symlink(target, link, 'junction')
   } catch (_) {
-    await fs.rm(path, { recursive: true })
-    await fs.symlink(target, path, 'junction')
+    await fs.rm(link, { recursive: true })
+    await fs.symlink(target, link, 'junction')
   }
-}
-
-function sort(x) {
-  return Object.fromEntries(Object.entries(x).sort(([a], [b]) => a > b ? 1 : a < b ? -1 : 0))
 }
