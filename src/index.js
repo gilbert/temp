@@ -4,7 +4,7 @@ import live from './live.js'
 import window from './window.js'
 import router from './router.js'
 import query from './query.js'
-import { unit, parse, aliasCache, formatValue, styleElement } from './style.js'
+import { unit, load, parse, aliasCache, formatValue, styleElement } from './style.js'
 import {
   scrollRestore,
   isObservable,
@@ -106,6 +106,7 @@ s.css = (...x) => parse(x, null, 0, true)
 s.css.alias = alias
 s.css.reset = reset
 s.css.unit = unit
+s.css.load = load
 s.style = styleElement
 s.animate = animate
 s.http = http

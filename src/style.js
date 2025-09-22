@@ -11,10 +11,25 @@ const prefix = 's'
     , unitsCache = new Map()
     , propCache = {}
     , unitCache = {}
+    , loadCache = new Map()
 
 export const aliasCache = {}
 export const styleElement = x => style || (style = x || doc.querySelector('style.sin') || doc.createElement('style'))
 export const cssRules = () => style ? style.sheet.cssRules : []
+
+export function load(href) {
+  if (loadCache.has(href))
+    return loadCache.get(href)
+
+  const x = Object.assign(document.createElement('link'), { rel: 'stylesheet', href })
+  document.head.appendChild(x)
+  const promise = new Promise((resolve, reject) => {
+    x.onload = () => resolve(x)
+    x.onerror = reject
+  })
+  loadCache.set(href, promise)
+  return promise
+}
 
 export const unit = (k, fn) => typeof fn === 'function'
   ? unitsCache.set(k.charCodeAt(0), fn)
