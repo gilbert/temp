@@ -22,7 +22,9 @@ export async function load(url, context, nextLoad) {
 
   if (result.source && (result.format === 'module' || context.format === 'commonjs' || context.format === 'module')) {
     try {
-      result.source = modify(result.source, url, config)
+      result.source = (process.env.NODE_ENV === 'production' || result.source.indexOf('import.meta.dev') === -1 ? '' : 'import.meta.dev=true;')
+        + (result.source.indexOf('import.meta.env') === -1 ? '' : 'import.meta.env=process.env;')
+        + modify(result.source, url, config)
     } catch (e) {
       ts && (result.source = '')
       console.error(e.message) // eslint-disable-line
