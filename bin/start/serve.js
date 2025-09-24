@@ -95,8 +95,10 @@ function render(r) {
   return tryPromise(
     ssr(
       mount,
-      {},
-      { modified, location: (r.protocol || 'http') + '://' + (r.headers.host || ('localhost' + config.port)) + r.url }
+      { ...r.attrs },
+      { modified, location: (r.protocol || 'http') + '://' + (r.headers.host || ('localhost' + config.port)) + r.url, ...r.context },
+      r.attrs,
+      r.context
     ),
     x => {
       r.end(
