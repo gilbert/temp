@@ -28,7 +28,7 @@ export default async function(x = {}) {
     define: {
       ...esbuild.define,
       ...Object.entries(config.unsafeEnv || {}).reduce(
-        (acc, [key, value]) => (acc['import.meta.env.' + key] = value, acc),
+        (acc, [key, value]) => (acc['import.meta.env.' + key] = JSON.stringify(value), acc),
         {}
       )
     },
