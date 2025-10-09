@@ -16,6 +16,18 @@ const [runtime, bin, ...argv] = process.argv
 let config
 try {
   config = { runtime, bin, ...(await fromArgs()) }
+  const pkg = config.pkgs?.[0]?.json
+  if (pkg) {
+    for (const env in (pkg.env || {})) {
+      const value = pkg.env[env]
+      if (typeof value !== 'string')
+        throw new Error('Package.json env values must be strings')
+      
+      env in process.env === false && (process.env[env] = value)
+      if (!process.env[env])
+        throw new Error('package.json requires env value: ' + env + ' - it is not set')
+    }
+  }
 } catch (e) {
   if (process.argv.includes('-d') || process.argv.includes('--debug'))
     throw e
