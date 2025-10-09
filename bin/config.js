@@ -42,7 +42,7 @@ async function fromArgs() {
   }
 
   return args(argv, {
-    env: 'SIN',
+    envPrefix: 'SIN',
     commands: {
       $         : 'help',
       acme      : { $: 'create', create: 1, list: 1, renew: 1, delete: 1 },

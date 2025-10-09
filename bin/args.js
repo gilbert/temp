@@ -9,10 +9,10 @@ export default async function(x, options) {
   const extras = process.argv.indexOf('--')
   let argv = extras > -1 ? x.slice(0, extras - 2) : x
 
-  let { commands, parameters, flags, alias, env } = options
+  let { commands, parameters, flags, alias, envPrefix } = options
 
   const toKebab = x => '--' + x.replace(/([A-Z])/g, '-$1').toLowerCase()
-      , toEnv = x => env ? (typeof env === 'string' ? env + '_' : '') + x.replace(/-/g, '_').replace(/([A-Z])/g, '_$1').toUpperCase() : undefined
+      , toEnv = x => envPrefix ? (typeof envPrefix === 'string' ? envPrefix + '_' : '') + x.replace(/-/g, '_').replace(/([A-Z])/g, '_$1').toUpperCase() : undefined
       , saila = Object.entries(alias).reduce((acc, [k, v]) => (acc[v] = k, acc), {})
       , result = { $: [], _: [], __: x.slice(argv.length) }
 
