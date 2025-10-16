@@ -137,10 +137,8 @@ async function fromArgs() {
     },
     alias: {
       development: 'develop',
-      production: 'start',
       uninstall: 'remove',
       rm: 'remove',
-      prod: 'start',
       ci: 'install',
       init: 'create',
       '-g': '--global',
