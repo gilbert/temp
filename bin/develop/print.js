@@ -15,7 +15,7 @@ api.browser.hotload.observe(() => std({ from: 'browser', replace: 'browserhot', 
 
 api.log.observe(std)
 
-if (false && process.stdin.isTTY) {
+if (process.stdin.isTTY) {
   exit.wait('stdin', () => process.stdin.pause())
   process.stdin.setRawMode(true)
   process.stdin.resume()
