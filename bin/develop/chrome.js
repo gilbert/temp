@@ -291,10 +291,8 @@ async function spawn() {
       config.test ? '' : '--restore-last-session',
       '--user-data-dir=' + userDataDir(config.project),
       '--remote-debugging-port=0'
-    ].filter(x => x), {
-      detached: true
-    })
-        
+    ].filter(x => x))
+
     exit.wait('chrome', async() => {
       let ok
       try {
