@@ -249,7 +249,7 @@ async function connect(tab, url) {
 
 async function tabClosed(tab) {
   tabs.delete(tab.webSocketDebuggerUrl)
-  if (tabs.size === 0 && (await getTabs(config.origin)).length === 0)
+  if (tabs.size === 0 && (await getTabs(config.origin, 20).catch(() => [])).length === 0)
     closed()
 }
 
