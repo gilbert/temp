@@ -413,7 +413,7 @@ function updates(parent, next, context, before, last = parent.lastChild) {
   const first = getNext(before, parent.firstChild)
   keys && (first[$keys] = keys) // could be unnecessary since set in keyed and nonKeyed (do tests)
 
-  return Ret(first, after && getPrevious(after) || parent.lastChild)
+  return Fragment(first, after && getPrevious(after) || parent.lastChild)
 }
 
 function getNext(x, fallback) {
@@ -566,8 +566,8 @@ function update(dom, view, context, parent, stack, create, component) {
 
 function updateNode(dom, view, context) {
   return dom && context.hydrating
-    ? Ret(dom)
-    : Ret(view)
+    ? Fragment(dom)
+    : Fragment(view)
 }
 
 function updateView(dom, view, context, parent, stack, create) {
@@ -597,7 +597,7 @@ function updateLive(dom, view, context, parent) {
   }
 }
 
-function Ret(dom, first = dom, last = first) {
+function Fragment(dom, first = dom, last = first) {
   return { dom, first, last }
 }
 
@@ -643,14 +643,14 @@ function updateArray(dom, view, context, parent, create, component) {
 
     const nextLast = getPrevious(after, parent.lastChild)
     last !== nextLast && markArray(comment.first, nextLast)
-    return Ret(comment.dom, comment.first, nextLast)
+    return Fragment(comment.dom, comment.first, nextLast)
   }
 
   parent = new DocumentFragment()
   parent.appendChild(comment.dom)
   updates(parent, view, context, comment.first, last)
   markArray(comment.first, parent.lastChild)
-  return Ret(parent, comment.first, parent.lastChild)
+  return Fragment(parent, comment.first, parent.lastChild)
 }
 
 function updateValue(
@@ -676,7 +676,7 @@ function updateValue(
   if (!nodeChange && dom.data !== '' + view)
     dom.data = view
 
-  return Ret(dom)
+  return Fragment(dom)
 }
 
 function updateElement(
@@ -713,7 +713,7 @@ function updateElement(
   context.NS = previousNS
   hasOwn.call(view, 'key') && (dom[$key] = view.key)
 
-  return Ret(dom)
+  return Fragment(dom)
 }
 
 function removeChildren(dom, parent) {
@@ -885,7 +885,7 @@ function hydrate(dom) {
   while (last && (last.nodeType !== 8 || last.data !== id))
     last = getNext(last)
 
-  const x = Ret(getNext(dom), getNext(dom), getPrevious(last))
+  const x = Fragment(getNext(dom), getNext(dom), getPrevious(last))
   hasOwn.call(last, $arrayStart) && markArray(last[$arrayStart], getPrevious(last))
   hasOwn.call(dom, $component) && (x.first[$component] = dom[$component])
   if (hasOwn.call(dom, $keys)) {
@@ -905,7 +905,7 @@ function bounds(dom) {
   let last = getNext(dom)
   while (last && (last.nodeType !== 8 || last.data !== id))
     last = getNext(last)
-  return Ret(dom, dom, last)
+  return Fragment(dom, dom, last)
 }
 
 function updateComponent(
