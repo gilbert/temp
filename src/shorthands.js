@@ -54,5 +54,6 @@ export default {
   va: 'vertical-align',
   ws: 'white-space',
   w: 'width',
-  zi: 'z-index'
+  zi: 'z-index',
+  z: 'zoom'
 }

@@ -765,6 +765,7 @@ The most popular CSS properties can be references by its initials. A few popular
 | ws           | white-space           |
 | w            | width                 |
 | zi           | z-index               |
+| z            | zoom                  |
 
 
 </details>
