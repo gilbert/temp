@@ -118,7 +118,6 @@ Sintax provides some basic on-going IDE support for sin, including Syntax highli
   - [isAttrs](#isattrs-sisattrsvalue)
   - [on](#on-sontarget-event-handler-options)
   - [event](#event-seventdom-event-handler-options)
-  - [with](#with-swithvalue-callback)
   - [animate](#animate-sanimate)
   - [p](#p)
 - [Trust](#trust-strust)
@@ -643,20 +642,22 @@ ol, ul, li {
 
 ## Units
 
-Sin will automatically add `px` as a unit when omitted, unless the relevant css property takes a unitless value.
+Sin supports all standard CSS units (px, em, rem, %, vw, vh, etc.) when explicitly defined, but also provides implicit unit handling for convenience. Pixel units are favored for implicit usage and Sin will automatically append `px` to numeric values where appropriate, unless the relevant css property takes a unitless value.
 
 ```js
 s`span
   font-size 16
   width 200
   height 600
-`()
+`
 ```
 
+> [!NOTE]
+> Implicit units will not be applied to properties that accept unitless values, such as `line-height`, `opacity`, `z-index`, etc and variable definitions require explicit units to be applied.
 
 ## Variables `$variable`
 
-Sin provides a convenient way to access and define CSS variabes. The `$` prefix keywords will render vars.
+Sin provides support for CSS variables with the `$` prefix syntax. Variables can be defined globally using `s.css` or locally within components. They can be referenced throughout your styles, allowing for consistent theming and easy updates.
 
 ```css
 s.css`
@@ -667,10 +668,10 @@ s.css`
 `
 ```
 
-We can reference, overwrite and even create variables on the component (element) level:
+We can reference, overwrite and even create variables on the component (element) level, like so:
 
 ```js
-s`
+const styling = s`
   $pink hotpink
   $size 200
 `(
@@ -678,8 +679,33 @@ s`
     bc $white
     c $pink
     w $size
-  `('Paragraph has 200px width, font color hotpink and background white!')
- )
+  `(
+    'Paragraph has 200px width, font color hotpink and background white!'
+  )
+)
+
+// Overriding variables at callsite
+styling`
+  $pink deeppink
+  $size 300
+`
+```
+
+## Interpolation `${...}`
+
+You can interpolate JavaScript values directly into your CSS using `${...}` syntax. This allows you to dynamically set styles based on variables, functions, or any other JavaScript expression. You can access the current component dom within the interpolation via function callback.
+
+```js
+// Interpolating Values
+s`
+  w ${ window.innerWidth / 2}
+  h ${ window.innerHeight / 2}
+`
+
+// Acessing Component DOM
+s`
+  max-height ${ dom => dom.scrollHeight }
+`
 ```
 
 ## Alias `s.css.alias({...})`
@@ -957,23 +983,6 @@ reload('n') // -> Trigger
 fetch('/api', { signal: reload.signal }) // -> Integration with AbortController APIs
 ```
 
-## with `s.with(value, callback)`
-
-The `s.with` helper is a small but powerful conditional transformation utility. It allows you to safely apply a function to a value only if it is defined, If the value is `undefined` or resolved to a falsy, it is passed through untouched, ensuring that no error occurs.
-
-```js
-// Transform only if defined
-s.with(42, n => n * 2)            // -> 84
-s.with(undefined, n => n * 2)     // -> undefined
-
-// Conditional attributes
-const color = null
-
-s`div`(
-  s.with(color, c => ({ style: `color:${c}` }))
-)
-```
-
 ## animate `s.animate(dom)`
 
 The `s.animate` helper gives you a minimal way to trigger entry/exit transitions on DOM nodes. It works by setting an animate attribute on the element, letting you define transitions in CSS, and then automatically cleaning up after the animation frame has advanced.
@@ -1028,16 +1037,16 @@ Sin includes robust TypeScript definitions that fully support its flexible, dyna
 > [!NOTE]
 > Sin's type definitions build on a customized variation of `lib.dom.d.ts`, tailored specifically for Sin's patterns. They offer precise type narrowing for attributes and elements, complete with JSDoc annotations that include descriptive explanations and direct links to MDN documentation for deeper reference.
 
-### Omitted Function Methods
+## Omitted Function Methods
 
-Sin applies function augmentation, which causes IntelliSense completions to include native function methods such as `apply`, `call`, `caller`, `arguments`, `name`, `length`, and `prototype` properties which introduce unwanted clutter and noise in auto-complete suggestions. To address this, wherever function augmentation applies in Sin, native methods are assigned a `never` type and annotated with a `@deprecated` JSDoc tag.
+Sin applies function augmentation, which causes IntelliSense completions to include native function methods such as `apply`, `call`, `caller`, `arguments`, `name`, `length`, and `prototype` properties which introduce unwanted clutter and noise in auto-complete suggestions. To address this, wherever function augmentation applies in Sin, native methods are assigned a `never` type and annotated with a `@deprecated` JSDoc tag, indicating they should not be used in Sin's context and tricking IntelliSense to deprioritize them in suggestions.
 
-There is no direct way to exclude these methods as its a limitation TypeScript itself. Although this is a cheap-hack tactic, it ensures that these non-applicable methods will appear last in IntelliSense suggestions and prevents them from polluting auto-completion results.
+There is no direct way to exclude these methods as its a limitation of TypeScript itself. Although this is a cheap-hack tactic, it ensures that these non-applicable methods will appear last in IntelliSense suggestions and prevents them from polluting auto-completion results.
 
 > [!NOTE]
 > If you are using VSCode, you can set the `editor.suggest.showDeprecated` option to `false`, to fully hide these native methods. If you are using **Zed**, no equivalent setting exists to suppress deprecated suggestions.
 
-### Leveraging Generics
+## Leveraging Generics
 
 For TypeScript users, Sin offers generic typing to specify attributes (`attrs`), child elements (`children`), and component-level context (`context`) when invoking the `s` function. All generics are optional, allowing you to add type hints progressively without disrupting your workflow.
 
@@ -1053,7 +1062,7 @@ s<attrs, children, context>({}, ({},[],{}) => [])  // Generics for Async Compone
 
 > This approach ensures type safety across component definitions, making it easier to catch errors early while preserving Sin's concise syntax.
 
-### Declaration Merging
+## Declaration Merging
 
 Sin supports global interface merging for `s.is.*` properties and component `context`. This lets you extend the framework with project-specific types, providing seamless access to custom references throughout your codebase. Simply extend the relevant interfaces in a `.d.ts` file (or directly in `.ts` files for TypeScript projects):
 
@@ -1070,35 +1079,27 @@ declare global {
 }
 ```
 
-> Once declared, these extensions become available globally, enhancing type consistency and developer experience in larger applications.
+Once declared, these extensions become available globally, enhancing type consistency and developer experience in larger applications. You can now access `s.is.foo`, `s.is.bar`, `context.baz`, and `context.qux` with full type safety in your Sin components.
 
-### DOM Global
+```ts
+// IS Completions
+s.is.foo;  // -> boolean
+s.is.bar;  // -> boolean
+
+// Context Completions
+s({}, [], { baz, qux }) => {
+  p(s.is.foo);  // -> boolean
+  p(s.is.bar);  // -> boolean
+  p(baz);       // -> string
+  p(qux.a);     // -> boolean
+}
+```
+
+## DOM Global
 
 The global `DOM` type serves as an alternative to `HTMLElement` and represents virtual DOM elements. It provides an interface that inherits all attributes of a DOM element, enabling its use whenever you need to access, reference or interface with all attibute element properties.
 
-
-### Type Utilities
-
-If you prefer annotation-style typing or need reusable helpers, Sin exposes a suite of type utilities under the `s.*` namespace. These can be applied in various scenarios to enforce stricter typing for components, events, and more:
-
-```ts
-s.Component<HTMLElement>                              // Styled Component Utility
-s.Component<HTMLElement, Attrs, Children, Context>    // Merges Element attributes with Attrs Utility
-s.Component<Attrs, Children, Context>                 // Stateless and Stateful Utility
-s.Context<Attrs>                                      // Merges Component Context
-s.View<Attrs>                                         // Merges attrs in Component View
-s.Event<HTMLElement, Event, Attrs>                    // Sin Event Listener
-s.Nodes                                               // Sin Component Nodes
-s.Node                                                // Sin Component Node
-s.Child                                               // Sin Component Child
-s.Children                                            // Sin Component Children
-s.Daft                                                // Sin Component DAFT
-s.Primitive                                           // Sin Component Primitives
-```
-
-> These utilities streamline complex type scenarios, such as event handling or context merging, while integrating smoothly with Sin's core APIs.
-
-### Annotation Typing
+## Annotation Typing
 
 For developers who prefer explicit type annotations, Sin provides the `s.Component<>` utility for component typing. This utility automatically detects component signatures and infers the appropriate types for attributes, children, and context, providing type safety without sacrificing Sin's concise syntax. Whether you're working with styled, stateless, or stateful components, `s.Component<>` simplifies the process of defining types directly on your component instances.
 
@@ -1116,6 +1117,49 @@ const b: s.Component<HTMLButtonElement> = s`button`({
 ```
 
 > This approach allows you to explicitly declare component types, making your code more self-documenting and easier to maintain, especially in larger TypeScript projects where type clarity is critical.
+
+
+### Type Utilities
+
+If you prefer annotation-style typing or need reusable helpers, Sin exposes a suite of type utilities under the `s.*` namespace. These can be applied in various scenarios to enforce stricter typing for components, events, and more:
+
+```ts
+s.DOM                                                 // Extended HTMLElement
+s.Component<HTMLElement>                              // Styled Component Utility
+s.Component<HTMLElement, Attrs, Children, Context>    // Merges Element attributes with Attrs Utility
+s.Component<Attrs, Children, Context>                 // Stateless and Stateful Utility
+s.Context<Attrs>                                      // Merges Component Context
+s.View<Attrs>                                         // Merges attrs in Component View
+s.Event<HTMLElement, Event, Attrs>                    // Sin Event Listener
+s.Nodes                                               // Sin Component Nodes
+s.Node                                                // Sin Component Node
+s.Child                                               // Sin Component Child
+s.Children                                            // Sin Component Children
+s.Daft                                                // Sin Component DAFT
+s.Primitive                                           // Sin Component Primitives
+```
+
+The `s.Component` utility is an intelligent type constructor that adapts based on the provided generics. When only the `HTMLElement` type is specified, it infers a styled component. When `Attrs`, `Children`, and `Context` are provided, it infers a stateless or stateful component accordingly. Majority of use-cases can be covered using this single utility, as it will perform narrowing and merging based on the generics you provide, understanding primitive types, DAFT signatures, and more.
+
+> These utilities streamline complex type scenarios, such as event handling or context merging, while integrating smoothly with Sin's core APIs.
+
+### Attrs Sorting in IntelliSense
+
+When using the `s.Component<>` type utility, HTMLElement merging with custom `Attrs` will not sort custom attrs before HTMLElement attributes. This is due to TypeScript's handling of intersection types, which does not guarantee order preservation. As a result, native HTMLElement attributes may appear before or after custom attributes in auto-complete lists. You can mitigate this by defining custom `Attrs` as non-optional properties:
+
+```ts
+s.Component<HTMLElement, { foo?: string }>   // -> 'foo' will not appear first
+s.Component<HTMLElement, { foo: string }>    // -> 'foo' will appear first
+```
+
+This approach helps ensure that your custom attributes are prioritized in IntelliSense suggestions, however it will result in the loss of optional typing for those attributes and the TypeScript compiler will complain if they are not provided. You can also exlude HTMLElement merging entirely to retain sorting:
+
+```ts
+s.Component<{ foo?: string }>                 // -> 'foo' will appear first
+```
+
+This would result in losing HTMLElement attribute typings, but guarantees that your custom attributes are prioritized in IntelliSense suggestions. Whichever approach you choose, be aware of this limitation when working with `s.Component<>` in TypeScript.
+
 
 # CLI
 
