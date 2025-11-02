@@ -195,7 +195,7 @@ export function parse([xs, ...args], parent, nesting = 0, root = false) {
     x = xs[j + 1]
     if (j < args.length) {
       const before = xs[j].slice(valueStart)
-      if (cssVars && valueStart >= 0) {
+      if (!root && cssVars && valueStart >= 0) {
         temp = prefix + Math.abs(hash).toString(31)
         vars[varName = '--' + temp + j] = { property: prop, fns: fn.slice(-1), unit: getUnit(prop, last(fn)), index: j, transform: cssVarAlpha !== -1 && getOpacityArg }
         value += before + 'var(' + varName + ')' + (cssVarAlpha === -1 ? '' : (cssVarAlpha = -1, ')'))
@@ -210,7 +210,7 @@ export function parse([xs, ...args], parent, nesting = 0, root = false) {
         for (let i = 0; i < x.length; i++)
           hash = Math.imul(31, hash) + x.charCodeAt(i) | 0
         cacheable = false
-        valueStart = cssVars ? -1 : 0
+        valueStart = valueStart >= 0 ? 0 : cssVars ? -1 : 0
       }
     }
   }
