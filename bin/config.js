@@ -18,14 +18,14 @@ try {
   config = { runtime, bin, ...(await fromArgs()) }
   const pkg = config.pkgs?.[0]?.json
   if (pkg) {
-    for (const env in (pkg.env || {})) {
-      const value = pkg.env[env]
-      if (typeof value !== 'string')
-        throw new Error('Package.json env values must be strings')
+    for (const name in (pkg.env || {})) {
+      const value = pkg.env[name]
+      if (value !== null && typeof value !== 'string')
+        throw new Error('Package.json env values must be strings or null (optional)')
       
-      env in process.env === false && (process.env[env] = value)
-      if (!process.env[env])
-        throw new Error('package.json requires env value: ' + env + ' - it is not set')
+      name in process.env === false && value && (process.env[name] = value)
+      if (!process.env[name] && !config.develop && value !== null)
+        throw new Error('package.json requires env value: ' + name + ' - it is not set')
     }
   }
 } catch (e) {
