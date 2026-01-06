@@ -599,11 +599,11 @@ type Doc = {
      * @default ''
      * @example
      *
-     * s.mount(({}, [], { doc }) => doc.head([
+     * s.mount(({}, [], { doc }) => {
      *
-     *  s`title`('Welcome Sinners!')
-     *
-     * ]))
+     *  // Set the document title
+     *  doc.title('Welcome Sinners!')
+     * })
      */
     title: Live<string>;
     /**
@@ -973,6 +973,18 @@ type Context<T = {}> = T & context & {
     readonly location: Pick<globalThis.Window, 'location'>;
     /**
      * Document Methods
+     *
+     * @example
+     * s(({},[], { doc }) => {
+     *
+     *  doc.head(
+     *    s`title`('Welcome Sinner!'),
+     *    s`script`({ src: '/xxx.js' })
+     *  )
+     *
+     *  return () => []
+     *
+     * })
      */
     readonly doc: Doc;
     /**
@@ -988,7 +1000,7 @@ type Context<T = {}> = T & context & {
      *
      * section.onremove() => console.log('Forgiven')
      */
-    readonly onremove: (cb: () => void) => void;
+    readonly onremove: (callback: () => void) => void;
     /**
      * Exclude component from global redraws. Expects a `boolean` parameter!
      *
@@ -1009,7 +1021,7 @@ type Context<T = {}> = T & context & {
      *
      * s(({}, [], { refresh }) => refresh())
      */
-    readonly refresh: () => void;
+    readonly refresh: S.Event<void>;
     /**
      * Reloads the component, similar to updating `key` reference.
      *
@@ -1019,7 +1031,7 @@ type Context<T = {}> = T & context & {
      *
      * s(({}, [], { reload }) => reload())
      */
-    readonly reload: () => void;
+    readonly reload: S.Event<void>;
     /**
      * Synchronous Redraw on the component level
      *
@@ -1027,7 +1039,7 @@ type Context<T = {}> = T & context & {
      *
      * s(({}, [], { redraw }) => redraw())
      */
-    readonly redraw: () => Promise<void>;
+    readonly redraw: S.Event<void>;
 };
 
 type ARIARole = StringUnion<"alert" | "alertdialog" | "application" | "article" | "banner" | "button" | "cell" | "checkbox" | "columnheader" | "combobox" | "complementary" | "contentinfo" | "definition" | "dialog" | "directory" | "document" | "figure" | "form" | "grid" | "gridcell" | "group" | "heading" | "img" | "link" | "list" | "listbox" | "listitem" | "main" | "mark" | "math" | "menu" | "menubar" | "menuitem" | "menuitemcheckbox" | "menuitemradio" | "navigation" | "note" | "option" | "presentation" | "progressbar" | "radio" | "radiogroup" | "region" | "row" | "rowgroup" | "rowheader" | "scrollbar" | "search" | "searchbox" | "separator" | "slider" | "spinbutton" | "status" | "suggestion" | "switch" | "tab" | "table" | "tablist" | "tabpanel" | "term" | "textbox" | "timer" | "toolbar" | "tooltip" | "tree" | "treegrid" | "treeitem">;
@@ -5988,6 +6000,10 @@ declare namespace S {
         (...children: C extends [] ? Views[] : C extends any[] ? C : [C]): View<A>;
     };
 }
+/**
+ * Sin Event
+ */
+type SinEvent<T> = S.Event<T>;
 
 type Components = typeof sin;
 type SinAttrs<T> = T extends HTMLLinkElement ? LinkAttributes<HTMLLinkElement> : T extends HTMLStyleElement ? StyleAttributes<HTMLStyleElement> : T extends HTMLQuoteElement ? QuoteAttributes<HTMLQuoteElement> : T extends HTMLOListElement ? OListAttributes<HTMLOListElement> : T extends HTMLLIElement ? LIAttributes<HTMLLIElement> : T extends HTMLAnchorElement ? AnchorAttributes<HTMLAnchorElement> : T extends HTMLTimeElement ? TimeAttributes<HTMLTimeElement> : T extends HTMLModElement ? ModAttributes<HTMLModElement> : T extends HTMLImageElement ? ImageAttributes<HTMLImageElement> : T extends HTMLIFrameElement ? IFrameAttributes<HTMLIFrameElement> : T extends HTMLEmbedElement ? EmbedAttributes<HTMLEmbedElement> : T extends HTMLObjectElement ? ObjectAttributes<HTMLObjectElement> : T extends HTMLVideoElement ? VideoAttributes<HTMLVideoElement> : T extends HTMLAudioElement ? AudioAttributes<HTMLAudioElement> : T extends HTMLSourceElement ? SourceAttributes<HTMLSourceElement> : T extends HTMLTrackElement ? TrackAttributes<HTMLTrackElement> : T extends HTMLMapElement ? MapAttributes<HTMLMapElement> : T extends HTMLAreaElement ? AreaAttributes<HTMLAreaElement> : T extends HTMLTableElement ? TableAttributes<HTMLTableElement> : T extends HTMLTableColElement ? TableColAttributes<HTMLTableColElement> : T extends HTMLTableCellElement ? TableCellAttributes<HTMLTableCellElement> : T extends HTMLFormElement ? FormAttributes<HTMLFormElement> : T extends HTMLLabelElement ? LabelAttributes<HTMLLabelElement> : T extends HTMLInputElement ? InputAttributes<HTMLInputElement> : T extends HTMLButtonElement ? ButtonAttributes<HTMLButtonElement> : T extends HTMLSelectElement ? SelectAttributes<HTMLSelectElement> : T extends HTMLOptGroupElement ? OptGroupAttributes<HTMLOptGroupElement> : T extends HTMLOptionElement ? OptionAttributes<HTMLOptionElement> : T extends HTMLTextAreaElement ? TextAreaAttributes<HTMLTextAreaElement> : T extends HTMLOutputElement ? OutputAttributes<HTMLOutputElement> : T extends HTMLProgressElement ? ProgressAttributes<HTMLProgressElement> : T extends HTMLMeterElement ? MeterAttributes<HTMLMeterElement> : T extends HTMLFieldSetElement ? FieldSetAttributes<HTMLFieldSetElement> : T extends HTMLDetailsElement ? DetailsAttributes<HTMLDetailsElement> : T extends HTMLDialogElement ? DialogAttributes<HTMLDialogElement> : T extends HTMLScriptElement ? ScriptAttributes<HTMLScriptElement> : T extends HTMLCanvasElement ? CanvasAttributes<HTMLCanvasElement> : T extends HTMLDataElement ? DataAttributes<HTMLDataElement> : T extends DOM ? HTMLAttributes<DOM> : HTMLAttributes<HTMLElement>;
@@ -6638,9 +6654,20 @@ declare global {
          */
         export const error: Component;
         /**
+         * The internal sin View class. Can be used to with `instanceof` to determine Sin Components
+         *
+         * @example
+         * const component = s(() => s`h1`('Sinner!'))
+         *
+         * if(component instanceof s.View) {
+         *    // component is a sin view
+         * }
+         */
+        export const View: View;
+        /**
          * Exposed Types
          */
-        export type { DOM, Daft, Primitive, Children, Component, Child, Nodes, Node, View, Context };
+        export type { DOM, Daft, Primitive, Children, Component, Child, Nodes, Node, Context, Live, Http, SinEvent as Event };
     }
     /**
      * Sin `context`
