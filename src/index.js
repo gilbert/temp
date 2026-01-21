@@ -265,7 +265,12 @@ function mount(dom, view, attrs = {}, context = {}) {
   hasOwn.call(context, 'error') || (context.error = s.error)
 
   if (s.is.server)
-    return { view, attrs, context }
+    return {
+      view,
+      attrs,
+      context,
+      unmount: noop
+    }
 
   dom[stackTrace] = new Error().stack
   s.scroll && scrollRestoration(context)
@@ -286,6 +291,13 @@ function mount(dom, view, attrs = {}, context = {}) {
   const m = { view, attrs, context }
   mounts.set(dom, m)
   draw(m, dom)
+
+  return {
+    view,
+    attrs,
+    context,
+    unmount: () => mounts.delete(dom)
+  }
 }
 
 function scrollRestoration(context) {
