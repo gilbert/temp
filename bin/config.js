@@ -109,7 +109,8 @@ async function fromArgs() {
       workers     : x => x ? x === 'cpus' ? os.cpus().length : parseInt(x) : 1,
       tsconfig    : (x, xs) => xs.cwd + '/tsconfig.json',
       tsconfigRaw : getTSConfigRaw,
-      coverage    : (x, xs) => (xs.nojail = true, x || false)
+      coverage    : (x, xs) => (xs.nojail = true, x || false),
+      logFile     : null
     },
     flags: {
       version           : false,

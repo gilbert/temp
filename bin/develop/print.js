@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import Url from 'node:url'
 import process from 'node:process'
 
@@ -6,6 +7,17 @@ import p from './log.js'
 import config from './config.js'
 import api from './api.js'
 import c from '../color.js'
+
+let logFile = config.logFile
+  ? fs.createWriteStream(config.logFile, { flags: 'w' })
+  : null
+
+if (logFile) {
+  api.node.restart.observe(() => {
+    logFile.end()
+    logFile = fs.createWriteStream(config.logFile, { flags: 'w' })
+  })
+}
 
 let lines = 1
   , indent = 0
@@ -99,6 +111,11 @@ function std(x) {
     : write
 
   p(out)
+
+  if (logFile) {
+    const plain = out.replace(/\x1b\[[0-9;]*m/g, '')
+    logFile.write(plain + '\n')
+  }
 
   lines = out.split('\n').reduce(
     (acc, x) => acc + Math.ceil(rawLength(x) / process.stdout.columns),
