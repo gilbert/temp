@@ -114,6 +114,29 @@ function pkgLookup(name, version, pathname, pkgPath, urlPath, force) {
 function resolveExports(x, subPath) {
   return firstString(x, 'exports', subPath, 'browser', 'import', 'default')
       || firstString(x, 'exports', subPath, 'import', 'default')
+      || resolveWildcardExport(x.exports, subPath)
+}
+
+function resolveWildcardExport(exports, subPath) {
+  if (!exports || typeof exports !== 'object')
+    return
+
+  for (const key of Object.keys(exports)) {
+    const starIdx = key.indexOf('*')
+    if (starIdx === -1)
+      continue
+
+    const prefix = key.slice(0, starIdx)
+    const suffix = key.slice(starIdx + 1)
+
+    if (subPath.startsWith(prefix) && subPath.endsWith(suffix) && subPath.length >= prefix.length + suffix.length) {
+      const matched = subPath.slice(prefix.length, suffix.length ? -suffix.length : undefined)
+      const target = firstString(exports, key, 'browser', 'import', 'default')
+                  || firstString(exports, key, 'import', 'default')
+      if (target)
+        return target.replaceAll('*', matched)
+    }
+  }
 }
 
 function resolveLegacy(pkg, urlPath) {
